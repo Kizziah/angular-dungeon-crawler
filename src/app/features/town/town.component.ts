@@ -33,6 +33,7 @@ export class TownComponent {
       case 'd': this.router.navigate(['/dungeon']);       break;
       case 'o': this.leaveToOverworld();                  break;
       case 'g': this.router.navigate(['/guild']);         break;
+      case 'm': this.router.navigate(['/worldmap']);      break;
     }
   }
 

@@ -62,6 +62,7 @@ export class OverworldComponent implements OnInit, OnDestroy {
       case 'ArrowLeft':  case 'a': case 'A': dx = -1; break;
       case 'ArrowRight': case 'd': case 'D': dx =  1; break;
       case 'Escape': this.router.navigate(['/guild']); return;
+      case 'm': case 'M': this.router.navigate(['/worldmap']); return;
       default: return;
     }
 

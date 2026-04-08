@@ -1,0 +1,65 @@
+.worldmap-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #000;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+}
+
+.worldmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 12px;
+  background: #111;
+  border-bottom: 1px solid #444;
+  flex-shrink: 0;
+
+  .title { color: #ffcc00; font-size: 14px; font-weight: bold; }
+  .hint  { color: #666; font-size: 11px; }
+}
+
+.worldmap-wrap {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4px;
+}
+
+.worldmap-grid {
+  display: inline-block;
+  line-height: 1;
+}
+
+.map-row {
+  display: block;
+  white-space: nowrap;
+}
+
+.map-cell {
+  display: inline-block;
+  width: 6px;
+  height: 9px;
+  font-size: 7px;
+  line-height: 9px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.worldmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 4px 12px;
+  background: #0a0a0a;
+  border-top: 1px solid #333;
+  flex-shrink: 0;
+
+  .leg-item {
+    font-size: 10px;
+    color: #888;
+  }
+}

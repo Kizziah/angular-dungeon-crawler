@@ -4,6 +4,7 @@ export const routes: Routes = [
   { path: '', redirectTo: '/guild', pathMatch: 'full' },
   { path: 'guild', loadComponent: () => import('./features/guild/guild.component').then(m => m.GuildComponent) },
   { path: 'overworld', loadComponent: () => import('./features/overworld/overworld.component').then(m => m.OverworldComponent) },
+  { path: 'worldmap', loadComponent: () => import('./features/worldmap/worldmap.component').then(m => m.WorldMapComponent) },
   { path: 'create-character', loadComponent: () => import('./features/character-creation/character-creation.component').then(m => m.CharacterCreationComponent) },
   { path: 'town', loadComponent: () => import('./features/town/town.component').then(m => m.TownComponent) },
   { path: 'town/inn', loadComponent: () => import('./features/town/inn.component').then(m => m.InnComponent) },
