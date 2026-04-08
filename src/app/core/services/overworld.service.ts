@@ -116,7 +116,7 @@ const NAMED_LOCATIONS: { x: number; y: number; type: 'town' | 'city' | 'castle';
   { x: TOWN_X,  y: TOWN_Y,  type: 'town',   name: 'Dejenol' },
   { x: 90,  y: 27, type: 'castle', name: 'Winterfell' },
   { x: 90,  y: 14, type: 'castle', name: 'Castle Black' },
-  { x: 115, y: 26, type: 'town',   name: 'White Harbor' },
+  { x: 115, y: 26, type: 'city',   name: 'White Harbor' },
   { x: 80,  y: 36, type: 'castle', name: 'Moat Cailin' },
   { x: 78,  y: 46, type: 'castle', name: 'Riverrun' },
   { x: 90,  y: 52, type: 'castle', name: 'Harrenhal' },
