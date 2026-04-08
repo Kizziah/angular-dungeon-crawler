@@ -1,0 +1,25 @@
+<div class="overworld-screen">
+  <div class="overworld-header">
+    <span class="title">⚔️  MORDOR — OVERWORLD</span>
+    <span class="coords" *ngIf="state">
+      {{ state.playerX }}, {{ state.playerY }}
+    </span>
+  </div>
+
+  <div class="overworld-viewport" *ngIf="viewport()">
+    <div class="tile-row" *ngFor="let row of viewport()!.cells; let vy = index">
+      <span
+        class="tile"
+        *ngFor="let cell of row; let vx = index"
+        [ngStyle]="cellStyle(cell, vx, vy)"
+      >{{ cellChar(cell, vx, vy) }}</span>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span class="status-msg" *ngIf="statusMsg()">{{ statusMsg() }}</span>
+    <span class="controls" *ngIf="!statusMsg()">
+      [↑↓←→/WASD] Move &nbsp;|&nbsp; [Esc] Guild &nbsp;|&nbsp; Walk to <span class="town-hint">#</span> Town or <span class="dungeon-hint">&gt;</span> Dungeon
+    </span>
+  </div>
+</div>

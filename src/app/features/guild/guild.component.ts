@@ -47,7 +47,7 @@ export class GuildComponent {
       alert('Add at least one character to the party first!');
       return;
     }
-    this.router.navigate(['/town']);
+    this.router.navigate(['/overworld']);
   }
 
   enterDungeon(): void {
@@ -55,7 +55,15 @@ export class GuildComponent {
       alert('Add at least one character to the party first!');
       return;
     }
-    this.router.navigate(['/dungeon']);
+    this.router.navigate(['/overworld']);
+  }
+
+  goToOverworld(): void {
+    if (this.partyCount === 0) {
+      alert('Add at least one character to the party first!');
+      return;
+    }
+    this.router.navigate(['/overworld']);
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -64,8 +72,9 @@ export class GuildComponent {
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     switch (e.key.toLowerCase()) {
       case 'n': this.createCharacter();  break;
-      case 't': this.goToTown();         break;
-      case 'd': this.enterDungeon();     break;
+      case 't': this.goToOverworld();    break;
+      case 'd': this.goToOverworld();    break;
+      case 'o': this.goToOverworld();    break;
     }
   }
 

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 export interface AppSaveState {
   guild: any;
   dungeonState: any;
+  overworldState?: any;
   timestamp: number;
   version: string;
 }

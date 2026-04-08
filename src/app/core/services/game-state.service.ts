@@ -2,6 +2,7 @@ import { Injectable, signal, computed, effect } from '@angular/core';
 import { GuildState } from '../models/guild.model';
 import { DungeonState } from '../models/dungeon.model';
 import { CombatState } from '../models/combat.model';
+import { OverworldState } from '../models/overworld.model';
 import { SaveService } from './save.service';
 
 const DEFAULT_GUILD: GuildState = {
@@ -17,8 +18,9 @@ export class GameStateService {
   guild = signal<GuildState>({ ...DEFAULT_GUILD, founded: Date.now() });
   dungeonState = signal<DungeonState | null>(null);
   combatState = signal<CombatState | null>(null);
+  overworldState = signal<OverworldState | null>(null);
   currentSaveSlot = signal<number>(0);
-  gamePhase = signal<'title' | 'guild' | 'town' | 'dungeon' | 'combat'>('guild');
+  gamePhase = signal<'title' | 'guild' | 'overworld' | 'town' | 'dungeon' | 'combat'>('guild');
 
   activeParty = computed(() => this.guild().characters.filter(c => c.inParty));
 
@@ -30,6 +32,7 @@ export class GameStateService {
     if (autosave) {
       this.guild.set(autosave.guild || { ...DEFAULT_GUILD, founded: Date.now() });
       this.dungeonState.set(autosave.dungeonState || null);
+      this.overworldState.set(autosave.overworldState || null);
     }
 
     // Enable auto-save after initial load
@@ -42,6 +45,7 @@ export class GameStateService {
       const state = {
         guild: this.guild(),
         dungeonState: this.dungeonState(),
+        overworldState: this.overworldState(),
         timestamp: Date.now(),
         version: '1.0.0'
       };
@@ -56,6 +60,7 @@ export class GameStateService {
     if (!save) return false;
     this.guild.set(save.guild || { ...DEFAULT_GUILD, founded: Date.now() });
     this.dungeonState.set(save.dungeonState || null);
+    this.overworldState.set(save.overworldState || null);
     this.currentSaveSlot.set(slot);
     return true;
   }
@@ -64,6 +69,7 @@ export class GameStateService {
     this.saveService.save(slot, {
       guild: this.guild(),
       dungeonState: this.dungeonState(),
+      overworldState: this.overworldState(),
       timestamp: Date.now(),
       version: '1.0.0'
     });
@@ -74,6 +80,7 @@ export class GameStateService {
     this.guild.set({ ...DEFAULT_GUILD, founded: Date.now() });
     this.dungeonState.set(null);
     this.combatState.set(null);
+    this.overworldState.set(null);
   }
 
   updateGuild(updater: (g: GuildState) => GuildState): void {
