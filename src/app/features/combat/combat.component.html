@@ -1,0 +1,101 @@
+<div class="combat-screen" *ngIf="combatState">
+  <div class="combat-header">
+    <span class="dos-red">⚔ COMBAT ⚔</span>
+    <span class="dos-dim">Round {{ combatState.round }}</span>
+    <span *ngIf="combatState.phase === 'victory'" class="dos-amber">VICTORY!</span>
+    <span *ngIf="combatState.phase === 'defeat'" class="dos-red">DEFEAT!</span>
+  </div>
+
+  <div class="combat-layout">
+    <!-- Enemies -->
+    <div class="enemies-panel">
+      <div class="panel-title dos-red">ENEMIES:</div>
+      <div
+        *ngFor="let enemy of combatState.enemies; let i = index"
+        class="enemy-row"
+        [class.selected]="selectedEnemyIndex === i"
+        [class.dead]="enemy.status === 'dead'"
+        (click)="selectEnemy(i)"
+      >
+        <app-monster-sprite
+          [monsterId]="enemy.definitionId"
+          [color]="enemy.status === 'dead' ? '#444444' : enemy.color"
+          [size]="48"
+        ></app-monster-sprite>
+        <div class="enemy-info">
+          <span class="enemy-name" [style.color]="enemy.status === 'dead' ? '#444' : enemy.color">
+            {{ enemy.name }}
+            <span class="dead-tag" *ngIf="enemy.status === 'dead'"> [DEAD]</span>
+          </span>
+          <div class="hp-bar-wrap" *ngIf="enemy.status === 'alive'">
+            <div class="hp-fill"
+              [style.width]="getHpPercent(enemy) + '%'"
+              [style.background]="getHpColor(getHpPercent(enemy))"
+            ></div>
+          </div>
+          <span class="hp-text dos-dim" *ngIf="enemy.status === 'alive'">
+            {{ enemy.currentHp }}/{{ enemy.maxHp }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Party -->
+    <div class="party-panel">
+      <div class="panel-title dos-green">PARTY:</div>
+      <div
+        *ngFor="let char of combatState.party; let i = index"
+        class="party-combat-row"
+        [class.active]="combatState.currentActorIndex === i && combatState.phase === 'player-input'"
+        [class.dead]="char.currentHp <= 0 || char.status === 'Dead'"
+      >
+        <span class="dos-amber">{{ char.name }}</span>
+        <span class="dos-dim"> Lv.{{ char.level }}</span>
+        <span [style.color]="getHpColor(getHpPercent(char))">
+          {{ char.currentHp }}/{{ char.maxHp }}HP
+        </span>
+        <span class="dos-cyan" *ngIf="char.maxMp > 0"> {{ char.currentMp }}MP</span>
+        <span class="status-badge" *ngIf="char.status !== 'Healthy'" [style.color]="'#ff4444'">
+          {{ char.status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions panel -->
+    <div class="actions-panel">
+      <app-action-menu
+        *ngIf="combatState.phase === 'player-input'"
+        [currentActor]="getCurrentActor()?.name || ''"
+        [spells]="getCurrentActorSpells()"
+        (actionChosen)="onActionChosen($event)"
+      ></app-action-menu>
+
+      <div *ngIf="combatState.phase === 'victory'" class="result-panel victory">
+        <div class="dos-amber">⭐ VICTORY! ⭐</div>
+        <div>XP Gained: <span class="dos-amber">{{ combatState.xpGained }}</span></div>
+        <div>Gold Gained: <span class="dos-amber">{{ combatState.goldGained }}</span></div>
+        <div *ngFor="let item of combatState.loot" class="loot-item">
+          Found: <span class="dos-green">{{ item.unidentifiedName }}</span>
+        </div>
+        <button (click)="continueAfterCombat()">Continue Exploring</button>
+      </div>
+
+      <div *ngIf="combatState.phase === 'defeat'" class="result-panel defeat">
+        <div class="dos-red">💀 DEFEATED! 💀</div>
+        <div class="dos-dim">Your party has been slain.</div>
+        <button (click)="continueAfterCombat()">Return</button>
+      </div>
+
+      <div *ngIf="combatState.phase === 'fled'" class="result-panel fled">
+        <div class="dos-amber">🏃 FLED!</div>
+        <div class="dos-dim">You escaped from battle.</div>
+        <button (click)="continueAfterCombat()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="log-panel">
+    <div class="panel-title dos-dim">COMBAT LOG:</div>
+    <app-combat-log [messages]="combatState.log"></app-combat-log>
+  </div>
+</div>

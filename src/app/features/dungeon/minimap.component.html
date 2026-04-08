@@ -1,0 +1,10 @@
+<div class="minimap">
+  <div *ngFor="let row of getMapGrid()" class="map-row">
+    <span
+      *ngFor="let cell of row"
+      class="map-cell"
+      [style.background]="getCellColor(cell)"
+      [class.party-dot]="cell.isParty"
+    ></span>
+  </div>
+</div>

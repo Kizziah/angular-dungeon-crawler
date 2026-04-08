@@ -1,0 +1,49 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--dos-bg);
+  font-family: var(--dos-font);
+
+  .title-bar {
+    background: var(--dos-green);
+    color: var(--dos-bg);
+    padding: 3px 10px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-weight: bold;
+    font-size: 13px;
+    flex-shrink: 0;
+
+    .title-text {
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .location {
+      color: #003300;
+    }
+
+    .party-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: #004400;
+    }
+  }
+
+  .app-content {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .status-bar {
+    background: #001100;
+    border-top: 1px solid var(--dos-border);
+    padding: 2px 10px;
+    display: flex;
+    gap: 20px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+}

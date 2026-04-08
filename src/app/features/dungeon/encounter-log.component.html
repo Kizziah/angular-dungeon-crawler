@@ -1,0 +1,6 @@
+<div class="encounter-log" #logContainer>
+  <div *ngFor="let msg of messages; let i = index" class="log-entry" [class.latest]="i === messages.length - 1">
+    {{ msg }}
+  </div>
+  <div *ngIf="messages.length === 0" class="dos-dim log-empty">No events yet.</div>
+</div>

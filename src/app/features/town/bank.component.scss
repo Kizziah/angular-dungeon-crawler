@@ -1,0 +1,25 @@
+.bank-screen {
+  padding: 16px;
+  .banker { margin: 10px 0; font-style: italic; }
+  .balance-display {
+    border: 1px solid var(--dos-border); padding: 12px;
+    margin: 12px 0;
+    .balance-row { display: flex; gap: 12px; font-size: 15px; margin-bottom: 4px; }
+  }
+  .bank-msg {
+    margin: 8px 0; padding: 6px 10px;
+    border: 1px solid var(--dos-amber);
+  }
+  .transaction-panel {
+    display: flex; gap: 24px; margin: 12px 0;
+    .trans-section {
+      flex: 1;
+      .trans-title { margin-bottom: 8px; }
+      .trans-row {
+        display: flex; gap: 8px; align-items: center;
+        input { width: 120px; }
+      }
+    }
+  }
+  .back-btn { margin-top: 16px; }
+}

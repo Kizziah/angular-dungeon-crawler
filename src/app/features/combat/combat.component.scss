@@ -1,0 +1,119 @@
+.combat-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 10px;
+  gap: 10px;
+
+  .combat-header {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    border-bottom: 1px solid var(--dos-border);
+    padding-bottom: 6px;
+    font-size: 16px;
+  }
+
+  .combat-layout {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .enemies-panel {
+    flex: 1;
+    border: 1px solid var(--dos-red);
+    padding: 8px;
+    overflow-y: auto;
+
+    .enemy-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 4px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 68, 68, 0.15);
+
+      &.selected {
+        background: rgba(255, 68, 68, 0.12);
+        border-left: 2px solid var(--dos-red);
+      }
+      &.dead { opacity: 0.4; }
+
+      app-monster-sprite { flex-shrink: 0; }
+
+      .enemy-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .enemy-name { font-size: 13px; }
+      .hp-bar-wrap {
+        width: 100%; height: 6px; background: #220000;
+        border: 1px solid #440000;
+        .hp-fill { height: 100%; transition: width 0.3s; }
+      }
+      .hp-text { font-size: 11px; }
+    }
+  }
+
+  .party-panel {
+    flex: 1;
+    border: 1px solid var(--dos-green);
+    padding: 8px;
+    overflow-y: auto;
+
+    .party-combat-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 4px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(51, 255, 51, 0.15);
+
+      &.active {
+        background: rgba(51, 255, 51, 0.1);
+        border-left: 2px solid var(--dos-amber);
+      }
+      &.dead { opacity: 0.4; }
+
+      .status-badge { font-size: 11px; margin-left: auto; }
+    }
+  }
+
+  .actions-panel {
+    min-width: 200px;
+
+    .result-panel {
+      border: 2px solid;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 14px;
+
+      &.victory { border-color: var(--dos-amber); }
+      &.defeat { border-color: var(--dos-red); }
+      &.fled { border-color: var(--dos-amber); }
+
+      .loot-item { font-size: 12px; }
+      button { margin-top: 8px; }
+    }
+  }
+
+  .log-panel {
+    .panel-title { margin-bottom: 4px; }
+  }
+}

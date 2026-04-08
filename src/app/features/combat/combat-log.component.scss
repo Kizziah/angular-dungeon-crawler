@@ -1,0 +1,16 @@
+.combat-log {
+  background: #000;
+  border: 1px solid var(--dos-border);
+  padding: 6px 8px;
+  height: 150px;
+  overflow-y: auto;
+  font-size: 12px;
+
+  .log-line {
+    color: var(--dos-green-dim);
+    padding: 1px 0;
+    line-height: 1.4;
+
+    &.latest { color: var(--dos-green); }
+  }
+}

@@ -1,0 +1,60 @@
+<div class="town-screen">
+  <div class="town-header">
+    <div class="dos-amber">╔══════════════════════════════╗</div>
+    <div class="dos-amber">║   TOWN OF DEJENOL            ║</div>
+    <div class="dos-amber">╚══════════════════════════════╝</div>
+    <div class="town-gold">Guild Gold: <span class="dos-amber">{{ guild().gold }}</span> gp</div>
+  </div>
+
+  <div class="town-layout">
+    <div class="town-menu-panel">
+      <div class="panel-title dos-amber">Where do you want to go?</div>
+      <div class="town-menu">
+        <button class="town-btn" (click)="navigate('/town/inn')">
+          <span class="btn-icon">🏠</span>
+          <span>[I] Inn - Rest &amp; Recover</span>
+        </button>
+        <button class="town-btn" (click)="navigate('/town/shop')">
+          <span class="btn-icon">🛒</span>
+          <span>[S] Shop - Buy &amp; Sell Items</span>
+        </button>
+        <button class="town-btn" (click)="navigate('/town/temple')">
+          <span class="btn-icon">⛪</span>
+          <span>[T] Temple - Healing &amp; Resurrection</span>
+        </button>
+        <button class="town-btn" (click)="navigate('/town/training')">
+          <span class="btn-icon">⚔</span>
+          <span>[R] Training Hall - Level Up</span>
+        </button>
+        <button class="town-btn" (click)="navigate('/town/bank')">
+          <span class="btn-icon">🏦</span>
+          <span>[B] Bank - Deposit/Withdraw</span>
+        </button>
+        <div class="divider">─────────────────────</div>
+        <button class="town-btn town-btn-dungeon" (click)="enterDungeon()">
+          <span>[D] Enter Dungeon</span>
+        </button>
+        <button class="town-btn town-btn-back" (click)="returnToGuild()">
+          <span>[G] Return to Guild</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="party-status-panel">
+      <div class="panel-title dos-amber">Party Status:</div>
+      <div *ngFor="let char of party()" class="party-char">
+        <div class="char-row-1">
+          <span class="dos-amber">{{ char.name }}</span>
+          <span class="dos-dim"> Lv.{{ char.level }} {{ char.class }}</span>
+        </div>
+        <div class="char-row-2">
+          <span [style.color]="char.currentHp < char.maxHp * 0.3 ? '#ff4444' : '#33ff33'">
+            HP:{{ char.currentHp }}/{{ char.maxHp }}
+          </span>
+          <span class="dos-cyan" *ngIf="char.maxMp > 0"> MP:{{ char.currentMp }}/{{ char.maxMp }}</span>
+          <span class="dos-dim status">{{ char.status }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

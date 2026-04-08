@@ -1,0 +1,36 @@
+.inn-screen {
+  padding: 16px;
+
+  .innkeeper { margin: 12px 0; font-style: italic; }
+
+  .inn-status {
+    border: 1px solid var(--dos-border);
+    padding: 10px;
+    margin: 12px 0;
+
+    .char-rest-row {
+      display: flex;
+      gap: 8px;
+      padding: 4px 0;
+      align-items: center;
+      font-size: 13px;
+
+      .hp-low { color: var(--dos-amber); }
+      .rest-icon { margin-left: auto; }
+    }
+  }
+
+  .inn-cost { margin: 10px 0; font-size: 13px; }
+
+  .inn-message {
+    margin: 10px 0;
+    padding: 8px;
+    border: 1px solid var(--dos-amber);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+}

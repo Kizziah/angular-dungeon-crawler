@@ -1,0 +1,35 @@
+<div class="training-screen">
+  <div class="dos-amber">╔══ TRAINING HALL ══╗</div>
+  <div class="dos-dim trainer">"Train hard and grow stronger, adventurer!"</div>
+  <div class="training-gold">Guild Gold: <span class="dos-amber">{{ guild().gold }}</span> gp</div>
+
+  <div *ngIf="message" class="training-msg dos-amber">{{ message }}</div>
+
+  <div class="char-list">
+    <div *ngFor="let char of getAllChars()" class="char-train-row">
+      <div class="char-info">
+        <span class="dos-amber">{{ char.name }}</span>
+        <span class="dos-dim"> Lv.{{ char.level }} {{ char.class }}</span>
+      </div>
+      <div class="xp-info">
+        <span class="dos-dim">XP: </span>
+        <span>{{ char.experience }}/{{ char.experienceToNext }}</span>
+        <div class="xp-bar">
+          <div class="xp-fill" [style.width]="getXpProgress(char) + '%'"></div>
+        </div>
+      </div>
+      <div class="train-action">
+        <button
+          (click)="levelUp(char)"
+          [disabled]="!canLevelUp(char) || guild().gold < getLevelCost(char)"
+          [class.ready]="canLevelUp(char)"
+        >
+          Level Up ({{ getLevelCost(char) }} gp)
+          <span *ngIf="canLevelUp(char)" class="dos-amber"> ★</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button (click)="back()" class="back-btn">◄ Back to Town</button>
+</div>

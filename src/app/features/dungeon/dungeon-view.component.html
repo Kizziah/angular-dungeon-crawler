@@ -1,0 +1,10 @@
+<div class="dungeon-view">
+  <div *ngFor="let row of getViewGrid()" class="view-row">
+    <span
+      *ngFor="let cell of row"
+      class="view-cell"
+      [style.color]="getCellColor(cell.cell, cell.isParty)"
+      [class.party-cell]="cell.isParty"
+    >{{ getCellChar(cell.cell, cell.isParty) }}</span>
+  </div>
+</div>

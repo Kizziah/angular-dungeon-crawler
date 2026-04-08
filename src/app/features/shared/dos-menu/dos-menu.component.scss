@@ -1,0 +1,39 @@
+.dos-menu {
+  .menu-title {
+    color: var(--dos-amber);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--dos-border);
+    padding-bottom: 4px;
+  }
+
+  .menu-item {
+    padding: 3px 6px;
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+
+    .key {
+      color: var(--dos-amber);
+      min-width: 32px;
+    }
+
+    .label {
+      color: var(--dos-green);
+    }
+
+    &.selected {
+      background: var(--dos-green);
+      .key, .label { color: var(--dos-bg); }
+    }
+
+    &.disabled {
+      .key, .label { color: var(--dos-green-dim); }
+      cursor: not-allowed;
+    }
+
+    &:hover:not(.disabled):not(.selected) {
+      background: var(--dos-green-dim);
+      .key, .label { color: var(--dos-bg); }
+    }
+  }
+}

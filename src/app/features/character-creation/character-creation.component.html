@@ -1,0 +1,137 @@
+<div class="creation-screen">
+  <div class="creation-header">
+    <div class="dos-amber">╔══ CHARACTER CREATION ══╗</div>
+    <div class="step-indicator">
+      Step: <span class="dos-amber">{{ step() | uppercase }}</span>
+    </div>
+  </div>
+
+  <!-- STEP: Name -->
+  <div *ngIf="step() === 'name'" class="step-panel">
+    <div class="step-title">Enter your adventurer's name:</div>
+    <div class="name-input-row">
+      <span class="dos-amber">Name: </span>
+      <input
+        type="text"
+        [(ngModel)]="nameModel"
+        (ngModelChange)="name.set($event)"
+        [value]="name()"
+        maxlength="20"
+        placeholder="Enter name..."
+        autofocus
+      />
+    </div>
+    <div class="dos-dim" *ngIf="name().length > 0 && !isNameValid()">
+      Name must be 2-20 characters.
+    </div>
+    <div class="btn-row">
+      <button (click)="prevStep()">◄ Back</button>
+      <button (click)="nextStep()" [disabled]="!isNameValid()">Next ►</button>
+    </div>
+  </div>
+
+  <!-- STEP: Race -->
+  <div *ngIf="step() === 'race'" class="step-panel">
+    <div class="step-title">Choose your race:</div>
+    <div class="option-list">
+      <div
+        *ngFor="let r of races"
+        class="option-item"
+        [class.selected]="selectedRace() === r.name"
+        (click)="selectRace(r.name)"
+      >
+        <div class="option-name">{{ r.name }}</div>
+        <div class="option-desc dos-dim">{{ r.description }}</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button (click)="prevStep()">◄ Back</button>
+      <button (click)="nextStep()">Next ►</button>
+    </div>
+  </div>
+
+  <!-- STEP: Class -->
+  <div *ngIf="step() === 'class'" class="step-panel">
+    <div class="step-title">Choose your class:</div>
+    <div class="option-list">
+      <div
+        *ngFor="let c of availableClasses()"
+        class="option-item"
+        [class.selected]="selectedClass() === c.name"
+        (click)="selectClass(c.name)"
+      >
+        <div class="option-name">{{ c.name }} <span class="dos-dim">({{ c.hitDie }})</span></div>
+        <div class="option-desc dos-dim">{{ c.description }}</div>
+        <div class="option-abilities dos-cyan" *ngIf="selectedClass() === c.name">
+          Abilities: {{ c.abilities.join(', ') }}
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button (click)="prevStep()">◄ Back</button>
+      <button (click)="nextStep()">Next ►</button>
+    </div>
+  </div>
+
+  <!-- STEP: Alignment -->
+  <div *ngIf="step() === 'alignment'" class="step-panel">
+    <div class="step-title">Choose your alignment:</div>
+    <div class="option-list">
+      <div
+        *ngFor="let a of availableAlignments()"
+        class="option-item align-opt"
+        [class.selected]="selectedAlignment() === a"
+        (click)="selectedAlignment.set(a)"
+      >
+        <div class="option-name" [class.dos-amber]="a==='Good'" [class.dos-white]="a==='Neutral'" [class.dos-red]="a==='Evil'">
+          {{ a }}
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button (click)="prevStep()">◄ Back</button>
+      <button (click)="nextStep()">Roll Stats ►</button>
+    </div>
+  </div>
+
+  <!-- STEP: Stats -->
+  <div *ngIf="step() === 'stats'" class="step-panel">
+    <div class="step-title">Your rolled stats: ({{ 5 - rerollCount() }} rerolls left)</div>
+    <div class="stats-grid" *ngIf="rolledStats()">
+      <div *ngFor="let key of statKeys()" class="stat-row">
+        <span class="stat-label dos-dim">{{ statLabel(key) }}:</span>
+        <span class="stat-val" [style.color]="statColor(rolledStats()![key])">{{ rolledStats()![key] }}</span>
+        <span class="stat-bar">
+          <span class="bar-fill" [style.width]="(rolledStats()![key] / 20 * 100) + '%'"
+                [style.background]="statColor(rolledStats()![key])"></span>
+        </span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button (click)="reroll()" [disabled]="rerollCount() >= 5">🎲 Reroll</button>
+      <button (click)="prevStep()">◄ Back</button>
+      <button (click)="nextStep()">Accept ►</button>
+    </div>
+  </div>
+
+  <!-- STEP: Confirm -->
+  <div *ngIf="step() === 'confirm'" class="step-panel">
+    <div class="step-title">Confirm character:</div>
+    <div class="confirm-summary">
+      <div class="summary-row"><span class="dos-dim">Name:</span> <span class="dos-amber">{{ name() }}</span></div>
+      <div class="summary-row"><span class="dos-dim">Race:</span> <span>{{ selectedRace() }}</span></div>
+      <div class="summary-row"><span class="dos-dim">Class:</span> <span>{{ selectedClass() }}</span></div>
+      <div class="summary-row"><span class="dos-dim">Alignment:</span> <span>{{ selectedAlignment() }}</span></div>
+      <div class="summary-stats" *ngIf="rolledStats()">
+        <div *ngFor="let key of statKeys()" class="stat-row">
+          <span class="dos-dim">{{ statLabel(key) }}:</span>
+          <span [style.color]="statColor(rolledStats()![key])">{{ rolledStats()![key] }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button (click)="prevStep()">◄ Back</button>
+      <button (click)="confirmCreate()" class="btn-confirm">✓ Create!</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<div class="guild-screen">
+  <div class="guild-header">
+    <div class="guild-title">╔══════════════════════════════════════════╗</div>
+    <div class="guild-title">║   MORDOR: THE DEPTHS OF DEJENOL          ║</div>
+    <div class="guild-title">║   {{ guild().name }}                      ║</div>
+    <div class="guild-title">╚══════════════════════════════════════════╝</div>
+    <div class="guild-gold">Guild Gold: <span class="dos-amber">{{ guildGold }}</span> gp</div>
+  </div>
+
+  <div class="guild-layout">
+    <!-- Character roster -->
+    <div class="roster-panel">
+      <div class="panel-title">╔══ ADVENTURERS ({{ characters.length }}) ══╗</div>
+      <div class="char-list" *ngIf="characters.length > 0; else noChars">
+        <app-character-card
+          *ngFor="let char of characters"
+          [character]="char"
+          (addToParty)="addToParty($event)"
+          (removeFromParty)="removeFromParty($event)"
+          (viewInventory)="viewInventory($event)"
+        ></app-character-card>
+      </div>
+      <ng-template #noChars>
+        <div class="no-chars">
+          <div>No adventurers in guild.</div>
+          <div class="dos-dim">Create your first character!</div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Actions panel -->
+    <div class="actions-panel">
+      <div class="panel-title">╔══ GUILD MENU ══╗</div>
+      <div class="menu-list">
+        <button (click)="createCharacter()" class="menu-btn">
+          [N] New Adventurer
+        </button>
+        <button (click)="goToTown()" class="menu-btn" [disabled]="partyCount === 0">
+          [T] Go to Town
+        </button>
+        <button (click)="enterDungeon()" class="menu-btn" [disabled]="partyCount === 0">
+          [D] Enter Dungeon
+        </button>
+      </div>
+
+      <div class="party-panel">
+        <div class="panel-title">╔══ PARTY ({{ partyCount }}/6) ══╗</div>
+        <div *ngIf="partyCount > 0; else noParty">
+          <div *ngFor="let char of activeParty()" class="party-member">
+            <span class="dos-cyan">►</span>
+            <span class="dos-amber">{{ char.name }}</span>
+            <span class="dos-dim"> Lv.{{ char.level }} {{ char.class }}</span>
+            <span class="hp-info" [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
+              {{ char.currentHp }}/{{ char.maxHp }}HP
+            </span>
+          </div>
+        </div>
+        <ng-template #noParty>
+          <div class="dos-dim">No party members.</div>
+          <div class="dos-dim">Click +Party to add characters.</div>
+        </ng-template>
+      </div>
+
+      <div class="tips-panel">
+        <div class="panel-title">╔══ TIPS ══╗</div>
+        <div class="dos-dim tip">↑↓ Navigate lists</div>
+        <div class="dos-dim tip">ENTER Select</div>
+        <div class="dos-dim tip">ESC Cancel</div>
+      </div>
+    </div>
+  </div>
+</div>

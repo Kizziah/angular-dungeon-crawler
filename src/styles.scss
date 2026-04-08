@@ -1,1 +1,101 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global DOS Theme for Mordor */
+:root {
+  --dos-bg: #000000;
+  --dos-green: #33ff33;
+  --dos-green-dim: #00aa00;
+  --dos-amber: #ffaa00;
+  --dos-amber-dim: #aa6600;
+  --dos-white: #cccccc;
+  --dos-red: #ff4444;
+  --dos-blue: #4488ff;
+  --dos-cyan: #00ffff;
+  --dos-magenta: #ff44ff;
+  --dos-border: #00aa00;
+  --dos-highlight: #ffff00;
+  --dos-font: 'Courier New', Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--dos-bg);
+  color: var(--dos-green);
+  font-family: var(--dos-font);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+a {
+  color: var(--dos-amber);
+  text-decoration: none;
+  &:hover { color: var(--dos-highlight); }
+}
+
+button, .dos-btn {
+  background: var(--dos-bg);
+  color: var(--dos-green);
+  border: 1px solid var(--dos-border);
+  font-family: var(--dos-font);
+  font-size: 13px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.1s;
+
+  &:hover, &.active {
+    background: var(--dos-green);
+    color: var(--dos-bg);
+  }
+
+  &:disabled {
+    color: var(--dos-green-dim);
+    border-color: var(--dos-green-dim);
+    cursor: not-allowed;
+    &:hover { background: var(--dos-bg); color: var(--dos-green-dim); }
+  }
+}
+
+input, select, textarea {
+  background: var(--dos-bg);
+  color: var(--dos-green);
+  border: 1px solid var(--dos-border);
+  font-family: var(--dos-font);
+  font-size: 13px;
+  padding: 4px 8px;
+  outline: none;
+
+  &:focus {
+    border-color: var(--dos-amber);
+    color: var(--dos-amber);
+  }
+}
+
+.dos-amber { color: var(--dos-amber); }
+.dos-red { color: var(--dos-red); }
+.dos-green { color: var(--dos-green); }
+.dos-cyan { color: var(--dos-cyan); }
+.dos-white { color: var(--dos-white); }
+.dos-highlight { color: var(--dos-highlight); }
+.dos-dim { color: var(--dos-green-dim); }
+
+.hp-bar {
+  display: inline-block;
+  height: 8px;
+  background: var(--dos-red);
+  border: 1px solid #880000;
+  &.full { background: var(--dos-green); }
+  &.low { background: var(--dos-amber); }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--dos-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dos-border);
+}

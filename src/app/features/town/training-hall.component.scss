@@ -1,0 +1,35 @@
+.training-screen {
+  padding: 16px;
+  .trainer { margin: 10px 0; font-style: italic; }
+  .training-gold { margin-bottom: 12px; font-size: 13px; }
+  .training-msg {
+    margin: 8px 0; padding: 6px 10px;
+    border: 1px solid var(--dos-amber);
+  }
+  .char-list {
+    border: 1px solid var(--dos-border);
+    margin-bottom: 12px;
+    .char-train-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-bottom: 1px solid rgba(0,170,0,0.2);
+      .char-info { min-width: 200px; font-size: 13px; }
+      .xp-info {
+        flex: 1; font-size: 12px;
+        .xp-bar {
+          height: 4px; background: #111;
+          border: 1px solid var(--dos-border);
+          margin-top: 4px;
+          .xp-fill { height: 100%; background: var(--dos-cyan); transition: width 0.3s; }
+        }
+      }
+      .train-action {
+        button { font-size: 12px; padding: 4px 10px; }
+        button.ready { border-color: var(--dos-amber); color: var(--dos-amber); }
+      }
+    }
+  }
+  .back-btn { margin-top: 8px; }
+}

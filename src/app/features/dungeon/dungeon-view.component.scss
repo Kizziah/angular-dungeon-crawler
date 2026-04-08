@@ -1,0 +1,26 @@
+.dungeon-view {
+  background: #000;
+  font-family: var(--dos-font);
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  border: 1px solid var(--dos-border);
+  padding: 4px;
+  display: inline-block;
+
+  .view-row {
+    display: flex;
+  }
+
+  .view-cell {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+    user-select: none;
+  }
+
+  .party-cell {
+    font-weight: bold;
+    text-shadow: 0 0 8px #ffff00;
+  }
+}

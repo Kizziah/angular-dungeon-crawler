@@ -1,0 +1,43 @@
+.dos-window {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  font-family: var(--dos-font);
+  color: var(--dos-green);
+
+  .win-header, .win-sep, .win-footer {
+    display: flex;
+    align-items: center;
+    color: var(--dos-border);
+    white-space: nowrap;
+
+    .corner-tl, .corner-tr {
+      flex-shrink: 0;
+    }
+
+    .h-line {
+      flex: 1;
+      overflow: hidden;
+      min-width: 0;
+    }
+  }
+
+  .win-title-row {
+    display: flex;
+    align-items: center;
+    color: var(--dos-border);
+    .v-line { flex-shrink: 0; }
+    .title {
+      flex: 1;
+      color: var(--dos-amber);
+      font-weight: bold;
+      text-align: center;
+    }
+  }
+
+  .win-body {
+    padding: 8px;
+    flex: 1;
+    overflow: auto;
+  }
+}

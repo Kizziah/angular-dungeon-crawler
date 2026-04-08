@@ -1,0 +1,57 @@
+<div class="temple-screen">
+  <div class="dos-amber">╔══ TEMPLE OF LIGHT ══╗</div>
+  <div class="dos-dim priest">"Let the light of the gods shine upon you!"</div>
+  <div class="temple-gold">Guild Gold: <span class="dos-amber">{{ guild().gold }}</span> gp</div>
+
+  <div *ngIf="message" class="temple-msg dos-amber">{{ message }}</div>
+
+  <div class="char-list">
+    <div *ngFor="let char of getAllChars()" class="char-temple-row">
+      <div class="char-info">
+        <span class="dos-amber">{{ char.name }}</span>
+        <span class="dos-dim"> {{ char.race }} {{ char.class }} Lv.{{ char.level }}</span>
+        <span class="char-status" [style.color]="char.status === 'Healthy' ? '#33ff33' : '#ff4444'">
+          {{ char.status }}
+        </span>
+      </div>
+      <div class="char-actions">
+        <button
+          *ngIf="char.status === 'Dead' || char.status === 'Ashes'"
+          (click)="resurrect(char)"
+          [disabled]="guild().gold < getResurrectCost(char)"
+          class="btn-resurrect"
+        >
+          Resurrect ({{ getResurrectCost(char) }} gp)
+        </button>
+        <button
+          *ngIf="char.status === 'Poisoned' || char.status === 'Paralyzed' || char.status === 'Stoned'"
+          (click)="cureStatus(char)"
+          [disabled]="guild().gold < getCureCost(char)"
+          class="btn-cure"
+        >
+          Cure {{ char.status }} ({{ getCureCost(char) }} gp)
+        </button>
+        <span *ngIf="char.status === 'Healthy'" class="dos-dim">Healthy ✓</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="identify-section">
+    <div class="section-title dos-amber">Identify Item (100 gp):</div>
+    <div *ngFor="let char of getAllChars()" class="char-items">
+      <div *ngIf="char.inventory.length > 0" class="char-name dos-dim">{{ char.name }}:</div>
+      <div *ngFor="let item of char.inventory" class="item-row-id">
+        <span *ngIf="!item.identified" class="item-unknown">{{ item.unidentifiedName }}</span>
+        <span *ngIf="item.identified" class="item-known dos-dim">{{ item.name }} ✓</span>
+        <button
+          *ngIf="!item.identified"
+          (click)="identifyItem(char, item)"
+          [disabled]="guild().gold < 100"
+          class="btn-id"
+        >ID</button>
+      </div>
+    </div>
+  </div>
+
+  <button (click)="back()" class="back-btn">◄ Back to Town</button>
+</div>

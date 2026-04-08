@@ -1,0 +1,16 @@
+<div class="action-menu">
+  <div class="actor-label dos-amber">{{ currentActor }}'s Turn</div>
+  <div class="actions" *ngIf="!showSpells">
+    <button (click)="attack()" class="action-btn attack">[A] Attack</button>
+    <button (click)="toggleSpells()" class="action-btn spell" *ngIf="spells.length > 0">[S] Spell</button>
+    <button (click)="defend()" class="action-btn defend">[D] Defend</button>
+    <button (click)="flee()" class="action-btn flee">[F] Flee</button>
+  </div>
+  <div class="spell-list" *ngIf="showSpells">
+    <div class="spell-title dos-dim">Choose Spell:</div>
+    <button *ngFor="let spell of spells; let i = index" (click)="castSpell(spell)" class="spell-btn">
+      [{{ i + 1 }}] {{ spell }}
+    </button>
+    <button (click)="toggleSpells()" class="back-btn">[B] Back</button>
+  </div>
+</div>

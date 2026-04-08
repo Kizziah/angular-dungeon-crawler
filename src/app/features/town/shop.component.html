@@ -1,0 +1,68 @@
+<div class="shop-screen">
+  <div class="dos-amber">╔══ ARMORY &amp; SUPPLIES ══╗</div>
+  <div class="shop-gold">Guild Gold: <span class="dos-amber">{{ guild().gold }}</span> gp</div>
+
+  <div class="char-selector">
+    <span class="dos-dim">Character: </span>
+    <button
+      *ngFor="let char of party()"
+      (click)="selectChar(char)"
+      [class.active]="selectedChar?.id === char.id"
+    >{{ char.name }}</button>
+  </div>
+
+  <div class="tabs">
+    <button [class.active]="tab === 'buy'" (click)="tab = 'buy'">Buy</button>
+    <button [class.active]="tab === 'sell'" (click)="tab = 'sell'">Sell</button>
+  </div>
+
+  <div *ngIf="message" class="shop-msg dos-amber">{{ message }}</div>
+
+  <!-- BUY TAB -->
+  <div *ngIf="tab === 'buy'" class="shop-layout">
+    <div class="item-list-panel">
+      <div class="panel-title dos-dim">Shop Inventory:</div>
+      <div class="item-list">
+        <div
+          *ngFor="let item of shopInventory"
+          class="item-row"
+          [class.selected]="selectedShopItem?.id === item.id"
+          (click)="selectShopItem(item)"
+        >
+          <span class="item-icon">{{ getItemTypeIcon(item.type) }}</span>
+          <span class="item-name">{{ item.name }}</span>
+          <span class="item-price dos-amber">{{ item.value }} gp</span>
+        </div>
+      </div>
+    </div>
+    <div class="item-detail-panel" *ngIf="selectedShopItem">
+      <div class="detail-name dos-amber">{{ selectedShopItem.name }}</div>
+      <div class="detail-type dos-dim">Type: {{ selectedShopItem.type }}</div>
+      <div *ngIf="selectedShopItem.stats.damage">Damage: {{ selectedShopItem.stats.damage }}</div>
+      <div *ngIf="selectedShopItem.stats.attack && selectedShopItem.stats.attack !== 0">Attack: +{{ selectedShopItem.stats.attack }}</div>
+      <div *ngIf="selectedShopItem.stats.defense">Defense: +{{ selectedShopItem.stats.defense }}</div>
+      <div class="detail-price dos-amber">Price: {{ selectedShopItem.value }} gp</div>
+      <button (click)="buy()" [disabled]="guild().gold < (selectedShopItem.value || 0)">
+        Buy {{ selectedShopItem.name }}
+      </button>
+    </div>
+  </div>
+
+  <!-- SELL TAB -->
+  <div *ngIf="tab === 'sell'" class="sell-layout">
+    <div class="panel-title dos-dim">Your Inventory ({{ selectedChar?.name }}):</div>
+    <div class="item-list" *ngIf="getCharInventory().length > 0; else noItems">
+      <div *ngFor="let item of getCharInventory()" class="item-row sell-row">
+        <span class="item-icon">{{ getItemTypeIcon(item.type) }}</span>
+        <span class="item-name">{{ item.identified ? item.name : item.unidentifiedName }}</span>
+        <span class="item-price dos-dim">{{ item.value / 2 | number:'1.0-0' }} gp</span>
+        <button (click)="sell(item)" class="sell-btn">Sell</button>
+      </div>
+    </div>
+    <ng-template #noItems>
+      <div class="dos-dim">No items to sell.</div>
+    </ng-template>
+  </div>
+
+  <button (click)="back()" class="back-btn">◄ Back to Town</button>
+</div>

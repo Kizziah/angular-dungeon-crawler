@@ -1,0 +1,13 @@
+<div class="dos-menu">
+  <div *ngIf="title" class="menu-title">{{ title }}</div>
+  <div
+    *ngFor="let item of items; let i = index"
+    class="menu-item"
+    [class.selected]="i === selectedIndex"
+    [class.disabled]="item.disabled"
+    (click)="selectItem(item)"
+  >
+    <span class="key">[{{ item.key }}]</span>
+    <span class="label">{{ item.label }}</span>
+  </div>
+</div>

@@ -1,0 +1,102 @@
+.dungeon-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 8px;
+  outline: none;
+
+  .dungeon-header {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--dos-border);
+    padding-bottom: 6px;
+  }
+
+  .dungeon-layout {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .main-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .view-label { font-size: 12px; }
+
+    .controls-hint {
+      font-size: 11px;
+      margin-top: 8px;
+    }
+  }
+
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+    min-height: 0;
+
+    app-combat {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel-title { font-size: 12px; margin-bottom: 4px; }
+  }
+
+  .party-section {
+    border: 1px solid var(--dos-border);
+    padding: 6px 8px;
+
+    .party-char-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      padding: 2px 0;
+
+      .hp-danger { color: var(--dos-red); }
+    }
+  }
+
+  .log-section {
+    flex: 1;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .modal-box {
+    background: var(--dos-bg);
+    border: 2px solid var(--dos-amber);
+    padding: 20px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .chest-items {
+      .chest-item { padding: 4px; color: var(--dos-green); font-size: 13px; }
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+    }
+  }
+}

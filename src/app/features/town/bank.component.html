@@ -1,0 +1,53 @@
+<div class="bank-screen">
+  <div class="dos-amber">╔══ DEJENOL SAVINGS BANK ══╗</div>
+  <div class="dos-dim banker">"Your gold is safe with us... probably."</div>
+
+  <div class="balance-display">
+    <div class="balance-row">
+      <span class="dos-dim">On Hand:</span>
+      <span class="dos-amber">{{ guild().gold }}</span> gp
+    </div>
+    <div class="balance-row">
+      <span class="dos-dim">In Bank:</span>
+      <span class="dos-amber">{{ guild().bankGold }}</span> gp
+    </div>
+  </div>
+
+  <div *ngIf="message" class="bank-msg dos-amber">{{ message }}</div>
+
+  <div class="transaction-panel">
+    <div class="trans-section">
+      <div class="trans-title dos-amber">Deposit:</div>
+      <div class="trans-row">
+        <input
+          type="number"
+          [value]="depositAmount()"
+          (input)="depositAmount.set(+$any($event.target).value)"
+          min="0"
+          [max]="guild().gold"
+          placeholder="Amount"
+        />
+        <button (click)="deposit()" [disabled]="depositAmount() <= 0">Deposit</button>
+        <button (click)="depositAmount.set(guild().gold)">All</button>
+      </div>
+    </div>
+
+    <div class="trans-section">
+      <div class="trans-title dos-amber">Withdraw:</div>
+      <div class="trans-row">
+        <input
+          type="number"
+          [value]="withdrawAmount()"
+          (input)="withdrawAmount.set(+$any($event.target).value)"
+          min="0"
+          [max]="guild().bankGold"
+          placeholder="Amount"
+        />
+        <button (click)="withdraw()" [disabled]="withdrawAmount() <= 0">Withdraw</button>
+        <button (click)="withdrawAmount.set(guild().bankGold)">All</button>
+      </div>
+    </div>
+  </div>
+
+  <button (click)="back()" class="back-btn">◄ Back to Town</button>
+</div>

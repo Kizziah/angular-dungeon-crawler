@@ -1,0 +1,104 @@
+.guild-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 8px;
+  background: var(--dos-bg);
+
+  .guild-header {
+    margin-bottom: 12px;
+
+    .guild-title {
+      color: var(--dos-amber);
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    .guild-gold {
+      margin-top: 6px;
+      font-size: 13px;
+    }
+  }
+
+  .guild-layout {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .roster-panel {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .char-list {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .no-chars {
+      padding: 20px;
+      text-align: center;
+      color: var(--dos-green-dim);
+    }
+  }
+
+  .actions-panel {
+    flex: 1;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .panel-title {
+    color: var(--dos-border);
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .menu-btn {
+      text-align: left;
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+  }
+
+  .party-panel {
+    border: 1px solid var(--dos-border);
+    padding: 8px;
+
+    .party-member {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 2px 0;
+      font-size: 12px;
+
+      .hp-info {
+        margin-left: auto;
+        color: var(--dos-green);
+        font-size: 11px;
+
+        &.hp-danger { color: var(--dos-red); }
+      }
+    }
+  }
+
+  .tips-panel {
+    border: 1px solid var(--dos-border);
+    padding: 8px;
+
+    .tip {
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+}

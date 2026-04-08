@@ -1,0 +1,44 @@
+.action-menu {
+  border: 1px solid var(--dos-border);
+  padding: 10px;
+
+  .actor-label {
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .action-btn {
+      text-align: left;
+      padding: 5px 10px;
+
+      &.attack { border-color: var(--dos-red); color: var(--dos-red); }
+      &.spell { border-color: var(--dos-cyan); color: var(--dos-cyan); }
+      &.defend { border-color: var(--dos-green); }
+      &.flee { border-color: var(--dos-amber); color: var(--dos-amber); }
+    }
+  }
+
+  .spell-list {
+    .spell-title { margin-bottom: 6px; }
+    .spell-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 4px 8px;
+      margin-bottom: 3px;
+      border-color: var(--dos-cyan);
+      color: var(--dos-cyan);
+    }
+    .back-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      margin-top: 6px;
+    }
+  }
+}

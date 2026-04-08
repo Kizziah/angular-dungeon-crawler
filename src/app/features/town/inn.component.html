@@ -1,0 +1,31 @@
+<div class="inn-screen">
+  <div class="dos-amber">╔══ THE SLEEPING DRAGON INN ══╗</div>
+  <div class="dos-dim innkeeper">"Welcome, weary adventurers! Rest your bones!"</div>
+
+  <div class="inn-status">
+    <div class="party-list">
+      <div *ngFor="let char of party()" class="char-rest-row">
+        <span class="dos-amber">{{ char.name }}</span>
+        <span class="dos-dim"> HP: </span>
+        <span [class.hp-low]="char.currentHp < char.maxHp">{{ char.currentHp }}/{{ char.maxHp }}</span>
+        <span class="dos-dim"> MP: </span>
+        <span class="dos-cyan">{{ char.currentMp }}/{{ char.maxMp }}</span>
+        <span class="rest-icon" *ngIf="char.currentHp < char.maxHp">💤</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="inn-cost">
+    Rest cost: <span class="dos-amber">{{ getCost() }}</span> gp
+    (Guild gold: <span class="dos-amber">{{ guild().gold }}</span> gp)
+  </div>
+
+  <div *ngIf="message" class="inn-message dos-amber">{{ message }}</div>
+
+  <div class="btn-row">
+    <button (click)="rest()" [disabled]="guild().gold < getCost()">
+      💤 Rest ({{ getCost() }} gp)
+    </button>
+    <button (click)="back()">◄ Back to Town</button>
+  </div>
+</div>

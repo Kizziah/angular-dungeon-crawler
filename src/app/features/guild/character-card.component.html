@@ -1,0 +1,26 @@
+<div class="char-card" [class.selected]="selected" [class.in-party]="character.inParty">
+  <div class="char-header">
+    <span class="char-name">{{ character.name }}</span>
+    <span class="char-status" [style.color]="getStatusColor()">{{ character.status }}</span>
+  </div>
+  <div class="char-info">
+    <span>Lv.{{ character.level }} {{ character.race }} {{ character.class }}</span>
+    <span class="char-align">{{ character.alignment }}</span>
+  </div>
+  <div class="char-hp">
+    <span class="hp-label">HP:</span>
+    <div class="hp-bar-container">
+      <div class="hp-bar-fill" [class]="getHpClass()" [style.width]="getHpPercent() + '%'"></div>
+    </div>
+    <span class="hp-nums">{{ character.currentHp }}/{{ character.maxHp }}</span>
+  </div>
+  <div class="char-mp" *ngIf="character.maxMp > 0">
+    <span class="mp-label">MP:</span>
+    <span class="mp-nums">{{ character.currentMp }}/{{ character.maxMp }}</span>
+  </div>
+  <div class="char-actions">
+    <button *ngIf="!character.inParty" (click)="addToParty.emit(character)" class="btn-add">+Party</button>
+    <button *ngIf="character.inParty" (click)="removeFromParty.emit(character)" class="btn-remove">-Party</button>
+    <button (click)="viewInventory.emit(character)" class="btn-inv">Inv</button>
+  </div>
+</div>

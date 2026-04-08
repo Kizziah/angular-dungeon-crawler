@@ -1,0 +1,25 @@
+<div class="dos-window" [style.width]="width" [style.height]="height">
+  <div class="win-header">
+    <span class="corner-tl">╔</span>
+    <span class="h-line">{{ getLine(title.length + 2) }}</span>
+    <span class="corner-tr">╗</span>
+  </div>
+  <div class="win-title-row">
+    <span class="v-line">║</span>
+    <span class="title"> {{title}} </span>
+    <span class="v-line">║</span>
+  </div>
+  <div class="win-sep">
+    <span class="corner-tl">╠</span>
+    <span class="h-line">{{ getLine(title.length + 2) }}</span>
+    <span class="corner-tr">╣</span>
+  </div>
+  <div class="win-body">
+    <ng-content></ng-content>
+  </div>
+  <div class="win-footer">
+    <span class="corner-tl">╚</span>
+    <span class="h-line">{{ getLine(title.length + 2) }}</span>
+    <span class="corner-tr">╝</span>
+  </div>
+</div>

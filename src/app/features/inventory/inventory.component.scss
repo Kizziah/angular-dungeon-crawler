@@ -1,0 +1,121 @@
+.inventory-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 12px;
+  gap: 10px;
+
+  .inv-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 15px;
+    border-bottom: 1px solid var(--dos-border);
+    padding-bottom: 6px;
+
+    .status { margin-left: auto; font-size: 12px; }
+  }
+
+  .inv-msg {
+    padding: 5px 10px;
+    border: 1px solid var(--dos-amber);
+    font-size: 13px;
+  }
+
+  .inv-layout {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .stats-panel {
+    width: 180px;
+    flex-shrink: 0;
+
+    .stat-grid { margin-bottom: 12px; }
+    .stat-row {
+      display: flex;
+      gap: 8px;
+      padding: 2px 0;
+      font-size: 12px;
+      .stat-lbl { width: 36px; }
+      .stat-val { font-weight: bold; }
+    }
+
+    .spells-section {
+      margin-top: 12px;
+      .spell-entry { font-size: 12px; padding: 2px 0; }
+    }
+  }
+
+  .equip-panel {
+    width: 220px;
+    border: 1px solid var(--dos-border);
+    padding: 8px;
+    flex-shrink: 0;
+
+    .equip-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(0,170,0,0.15);
+
+      .slot-lbl { width: 52px; flex-shrink: 0; }
+      .equip-item { flex: 1; font-size: 11px; }
+      .equip-empty { flex: 1; }
+      .unequip-btn { font-size: 10px; padding: 1px 5px; border-color: var(--dos-amber); color: var(--dos-amber); }
+    }
+  }
+
+  .bag-panel {
+    flex: 1;
+    border: 1px solid var(--dos-border);
+    padding: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .bag-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .bag-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(0,170,0,0.15);
+
+      &.cursed { .item-name { color: var(--dos-red); } }
+
+      .item-name { flex: 1; }
+      .item-type { color: var(--dos-green-dim); font-size: 11px; min-width: 70px; }
+      .item-actions {
+        display: flex;
+        gap: 4px;
+        .btn-equip { font-size: 10px; padding: 2px 6px; border-color: var(--dos-cyan); color: var(--dos-cyan); }
+        .btn-drop { font-size: 10px; padding: 2px 6px; border-color: var(--dos-red); color: var(--dos-red); }
+      }
+    }
+  }
+
+  .back-btn { flex-shrink: 0; }
+}
+
+.not-found {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

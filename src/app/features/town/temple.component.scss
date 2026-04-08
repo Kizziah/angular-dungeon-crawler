@@ -1,0 +1,39 @@
+.temple-screen {
+  padding: 16px;
+  .priest { margin: 10px 0; font-style: italic; }
+  .temple-gold { margin-bottom: 12px; font-size: 13px; }
+  .temple-msg {
+    margin: 8px 0;
+    padding: 6px 10px;
+    border: 1px solid var(--dos-amber);
+  }
+  .char-list {
+    border: 1px solid var(--dos-border);
+    margin-bottom: 12px;
+    .char-temple-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(0,170,0,0.2);
+      font-size: 13px;
+      .char-info { display: flex; gap: 8px; align-items: center; }
+      .char-status { font-weight: bold; }
+      .char-actions {
+        display: flex; gap: 6px;
+        .btn-resurrect { border-color: #ffaa00; color: #ffaa00; font-size: 12px; }
+        .btn-cure { border-color: var(--dos-cyan); color: var(--dos-cyan); font-size: 12px; }
+      }
+    }
+  }
+  .identify-section {
+    .section-title { margin-bottom: 8px; }
+    .char-name { margin-top: 8px; font-size: 12px; }
+    .item-row-id {
+      display: flex; align-items: center; gap: 10px; padding: 3px 6px; font-size: 12px;
+      .item-unknown { color: var(--dos-amber); }
+      .btn-id { padding: 2px 6px; font-size: 11px; }
+    }
+  }
+  .back-btn { margin-top: 14px; }
+}

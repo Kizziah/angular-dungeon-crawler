@@ -1,0 +1,5 @@
+<div class="combat-log" #logEl>
+  <div *ngFor="let msg of messages; let i = index" class="log-line" [class.latest]="i === messages.length - 1">
+    {{ msg }}
+  </div>
+</div>

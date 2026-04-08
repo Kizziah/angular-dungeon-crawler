@@ -1,0 +1,115 @@
+.char-card {
+  border: 1px solid var(--dos-border);
+  padding: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color 0.1s;
+
+  &:hover {
+    border-color: var(--dos-amber);
+  }
+
+  &.selected {
+    border-color: var(--dos-highlight);
+  }
+
+  &.in-party {
+    border-color: var(--dos-cyan);
+    &::before {
+      content: '► ';
+      color: var(--dos-cyan);
+    }
+  }
+
+  .char-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+
+    .char-name {
+      color: var(--dos-amber);
+      font-weight: bold;
+    }
+  }
+
+  .char-info {
+    display: flex;
+    justify-content: space-between;
+    color: var(--dos-white);
+    font-size: 12px;
+    margin-bottom: 4px;
+
+    .char-align {
+      color: var(--dos-green-dim);
+    }
+  }
+
+  .char-hp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+
+    .hp-label, .mp-label {
+      color: var(--dos-green-dim);
+      width: 24px;
+      font-size: 12px;
+    }
+
+    .hp-bar-container {
+      flex: 1;
+      height: 6px;
+      background: #220000;
+      border: 1px solid #440000;
+    }
+
+    .hp-bar-fill {
+      height: 100%;
+      transition: width 0.3s;
+
+      &.hp-full { background: var(--dos-green); }
+      &.hp-med { background: var(--dos-amber); }
+      &.hp-low { background: var(--dos-red); }
+    }
+
+    .hp-nums, .mp-nums {
+      font-size: 11px;
+      color: var(--dos-white);
+      min-width: 50px;
+      text-align: right;
+    }
+  }
+
+  .char-mp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+
+    .mp-label {
+      color: var(--dos-green-dim);
+      width: 24px;
+      font-size: 12px;
+    }
+
+    .mp-nums {
+      color: var(--dos-cyan);
+      font-size: 11px;
+    }
+  }
+
+  .char-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+
+    button {
+      font-size: 11px;
+      padding: 2px 8px;
+
+      &.btn-add { border-color: var(--dos-cyan); color: var(--dos-cyan); }
+      &.btn-remove { border-color: var(--dos-red); color: var(--dos-red); }
+      &.btn-inv { border-color: var(--dos-amber); color: var(--dos-amber); }
+    }
+  }
+}

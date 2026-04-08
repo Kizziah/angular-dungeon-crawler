@@ -1,0 +1,95 @@
+<div class="dungeon-screen" tabindex="0">
+  <div class="dungeon-header">
+    <span class="dos-amber">MORDOR - Floor {{ getCurrentFloorLevel() }}</span>
+    <span class="dos-dim">
+      Pos: {{ getCurrentPosition().x }},{{ getCurrentPosition().y }}
+      Dir: {{ getCurrentDirection() }}
+    </span>
+    <span class="dos-dim">Party: {{ party.length }} members</span>
+  </div>
+
+  <div class="dungeon-layout">
+    <!-- Main view -->
+    <div class="main-panel">
+      <div class="view-label dos-dim">DUNGEON VIEW:</div>
+      <app-dungeon-view
+        *ngIf="getCurrentFloor() && dungeonState"
+        [floor]="getCurrentFloor()!"
+        [position]="getCurrentPosition()"
+        [direction]="getCurrentDirection()"
+      ></app-dungeon-view>
+
+      <div class="controls-hint dos-dim">
+        WASD / Arrow Keys to move | [I] Inventory | ESC to exit
+        <span *ngIf="getCurrentTileType() === 'stairs-down'" class="dos-amber"> | [&gt;] Descend stairs</span>
+        <span *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="dos-amber"> | [&lt;] Ascend stairs</span>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="right-panel">
+      <!-- Minimap (hidden during combat) -->
+      <div class="minimap-section" *ngIf="!inCombat">
+        <div class="panel-title dos-dim">MAP (Floor {{ getCurrentFloorLevel() }}):</div>
+        <app-minimap
+          *ngIf="getCurrentFloor() && dungeonState"
+          [floor]="getCurrentFloor()!"
+          [position]="getCurrentPosition()"
+        ></app-minimap>
+      </div>
+
+      <!-- Combat (replaces party/log while in combat) -->
+      <ng-container *ngIf="inCombat; else explorePanel">
+        <app-combat (done)="onCombatDone()"></app-combat>
+      </ng-container>
+
+      <ng-template #explorePanel>
+        <!-- Party status -->
+        <div class="party-section">
+          <div class="panel-title dos-dim">PARTY:</div>
+          <div *ngFor="let char of party" class="party-char-row">
+            <span class="dos-amber">{{ char.name }}</span>
+            <span class="dos-dim"> Lv.{{ char.level }}</span>
+            <span [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
+              {{ char.currentHp }}/{{ char.maxHp }}HP
+            </span>
+          </div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-section">
+          <div class="panel-title dos-dim">EVENT LOG:</div>
+          <app-encounter-log [messages]="eventLog"></app-encounter-log>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Chest modal -->
+  <div *ngIf="showChest" class="modal-overlay">
+    <div class="modal-box">
+      <div class="dos-amber">📦 CHEST FOUND!</div>
+      <div class="chest-items">
+        <div *ngFor="let item of pendingChest" class="chest-item">
+          <span>{{ item.unidentifiedName }}</span>
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button (click)="collectChest()">Take All</button>
+        <button (click)="leaveChest()">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exit modal -->
+  <div *ngIf="showConfirmExit" class="modal-overlay">
+    <div class="modal-box">
+      <div class="dos-amber">Exit to Town?</div>
+      <div class="dos-dim">You will be teleported back to town.</div>
+      <div class="modal-btns">
+        <button (click)="confirmExit()">Yes, Exit</button>
+        <button (click)="cancelExit()">No, Continue</button>
+      </div>
+    </div>
+  </div>
+</div>

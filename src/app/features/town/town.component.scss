@@ -1,0 +1,70 @@
+.town-screen {
+  padding: 16px;
+  height: 100vh;
+
+  .town-header {
+    margin-bottom: 16px;
+    .town-gold { margin-top: 6px; font-size: 13px; }
+  }
+
+  .town-layout {
+    display: flex;
+    gap: 20px;
+  }
+
+  .town-menu-panel {
+    flex: 1;
+
+    .panel-title { margin-bottom: 10px; }
+
+    .town-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .town-btn {
+      text-align: left;
+      padding: 8px 14px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-color: var(--dos-border);
+
+      .btn-icon { font-size: 16px; }
+
+      &:hover { background: var(--dos-green); color: var(--dos-bg); }
+      &.town-btn-dungeon { border-color: var(--dos-amber); color: var(--dos-amber); }
+      &.town-btn-back { border-color: var(--dos-green-dim); color: var(--dos-green-dim); }
+    }
+
+    .divider {
+      color: var(--dos-border);
+      margin: 6px 0;
+    }
+  }
+
+  .party-status-panel {
+    width: 260px;
+    .panel-title { margin-bottom: 8px; }
+
+    .party-char {
+      border: 1px solid var(--dos-border);
+      padding: 6px 8px;
+      margin-bottom: 4px;
+
+      .char-row-1, .char-row-2 {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 12px;
+      }
+
+      .status {
+        margin-left: auto;
+        font-size: 11px;
+      }
+    }
+  }
+}

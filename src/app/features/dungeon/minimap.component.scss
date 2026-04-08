@@ -1,0 +1,21 @@
+.minimap {
+  border: 1px solid var(--dos-border);
+  background: #000;
+  display: inline-block;
+
+  .map-row {
+    display: flex;
+    height: 4px;
+  }
+
+  .map-cell {
+    width: 4px;
+    height: 4px;
+    flex-shrink: 0;
+
+    &.party-dot {
+      background: #ffff00 !important;
+      box-shadow: 0 0 3px #ffff00;
+    }
+  }
+}

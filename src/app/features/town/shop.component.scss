@@ -1,0 +1,99 @@
+.shop-screen {
+  padding: 16px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .shop-gold { font-size: 13px; }
+
+  .char-selector {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    button { padding: 3px 10px; font-size: 12px; }
+    button.active { background: var(--dos-green); color: var(--dos-bg); }
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    button { padding: 4px 16px; }
+    button.active { background: var(--dos-green); color: var(--dos-bg); }
+  }
+
+  .shop-msg {
+    padding: 6px 10px;
+    border: 1px solid var(--dos-amber);
+  }
+
+  .shop-layout {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .item-list-panel {
+    flex: 2;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item-list {
+    overflow-y: auto;
+    flex: 1;
+    border: 1px solid var(--dos-border);
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(0, 170, 0, 0.2);
+
+    &:hover { background: rgba(51, 255, 51, 0.08); }
+    &.selected { background: rgba(51, 255, 51, 0.15); border-left: 2px solid var(--dos-amber); }
+
+    .item-icon { width: 20px; text-align: center; }
+    .item-name { flex: 1; }
+    .item-price { min-width: 60px; text-align: right; }
+  }
+
+  .item-detail-panel {
+    flex: 1;
+    border: 1px solid var(--dos-border);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+
+    .detail-name { font-size: 15px; font-weight: bold; }
+    button { margin-top: auto; }
+  }
+
+  .sell-layout {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .item-list { flex: 1; }
+    .sell-row {
+      .sell-btn {
+        margin-left: auto;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-color: var(--dos-amber);
+        color: var(--dos-amber);
+      }
+    }
+  }
+
+  .back-btn { margin-top: 8px; }
+}
