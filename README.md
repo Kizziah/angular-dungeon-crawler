@@ -1,59 +1,79 @@
-# Mordor
+# Mordor — The Depths of Dejenol
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.19.
+> A retro DOS-style dungeon crawler RPG built with Angular. Explore procedurally generated dungeons, fight monsters, manage your party, and delve ever deeper into the depths.
 
-## Development server
+---
 
-To start a local development server, run:
+## Screenshots
+
+### 🏰 Town of Dejenol
+![Town](public/screenshots/town.png)
+
+### ⚔️ Combat — Fighting a Kobold
+![Combat Kobold](public/screenshots/combat-kobold.png)
+
+### 💀 Combat — Three Skeletons (Round 1)
+![Combat Skeletons](public/screenshots/combat-skeletons.png)
+
+### ⚡ Combat — Round 2 with Combat Log
+![Combat Round 2](public/screenshots/combat-round2.png)
+
+### 🏆 Victory Screen with Loot
+![Victory](public/screenshots/combat-victory2.png)
+
+### 🏦 Dejenol Savings Bank
+![Bank](public/screenshots/bank.png)
+
+---
+
+## Features
+
+- **Procedurally generated dungeons** — Rooms, corridors, doors, traps, and chests on every floor
+- **Turn-based combat** — Attack, defend, cast spells, or flee; enemies counter-attack each round
+- **Party system** — Build and manage a guild of adventurers across multiple classes and races
+- **Town of Dejenol** — Inn, Shop, Temple, Training Hall, Bank, and Library
+- **Monster Library** — Look up lore and stats on creatures found in the upper floors
+- **Minimap exploration** — Fog-of-war map that reveals as you explore
+- **Keyboard-driven** — Full keyboard shortcuts across every screen
+- **DOS aesthetic** — Green-on-black terminal UI inspired by the original Mordor (1995)
+
+## Keyboard Shortcuts
+
+| Screen | Key | Action |
+|--------|-----|--------|
+| Town | `I` | Inn |
+| Town | `S` | Shop |
+| Town | `T` | Temple |
+| Town | `R` | Training Hall |
+| Town | `B` | Bank |
+| Town | `L` | Library |
+| Town | `D` | Enter Dungeon |
+| Dungeon | `WASD` / Arrows | Move |
+| Dungeon | `>` or `.` | Descend stairs |
+| Dungeon | `<` or `,` | Ascend stairs |
+| Dungeon | `I` | Open Inventory |
+| Combat | `A` | Attack |
+| Combat | `D` | Defend |
+| Combat | `F` | Flee |
+| Combat | `S` | Spells |
+| Anywhere | `Esc` | Back / Cancel |
+
+---
+
+## Getting Started
 
 ```bash
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Then open [http://localhost:4200](http://localhost:4200).
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Build
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Output goes to `dist/mordor/`.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
