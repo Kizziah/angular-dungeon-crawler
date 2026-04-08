@@ -78,7 +78,11 @@ export class OverworldComponent implements OnInit, OnDestroy {
 
     switch (event.type) {
       case 'blocked':
-        this.setStatus(s.inShip ? '⛵ You cannot sail there.' : '🌊 The way is blocked.');
+        if (event.tile === 'river') {
+          this.setStatus('🌊 The river blocks your path — find a bridge to cross.');
+        } else {
+          this.setStatus(s.inShip ? '⛵ You cannot sail there.' : '🌊 The way is blocked.');
+        }
         break;
       case 'boarded':
         this.setStatus('⛵ You board the ship! Sail the seas — step onto land to disembark.');

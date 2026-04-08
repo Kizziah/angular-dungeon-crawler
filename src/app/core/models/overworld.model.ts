@@ -11,7 +11,9 @@ export type OverworldTileType =
   | 'city'
   | 'castle'
   | 'dungeon'
-  | 'ship';
+  | 'ship'
+  | 'river'
+  | 'bridge';
 
 export interface OverworldCell {
   type: OverworldTileType;
@@ -52,13 +54,15 @@ export const TILE_RENDER: Record<OverworldTileType, { char: string; color: strin
   castle:   { char: '◆', color: '#aaccff', bg: '#080a1a' },
   dungeon:  { char: '>', color: '#ff4444', bg: '#1a0000' },
   ship:     { char: 'S', color: '#00ddff', bg: '#0a1a55' },
+  river:    { char: '≈', color: '#4488ff', bg: '#001133' },
+  bridge:   { char: '═', color: '#aa8844', bg: '#002244' },
 };
 
 /** Tiles that trigger a random encounter */
 export const ENCOUNTER_TILES = new Set<OverworldTileType>(['plains', 'forest', 'swamp']);
 
 /** Tiles the player cannot walk on without a ship */
-export const IMPASSABLE_TILES = new Set<OverworldTileType>(['ocean']);
+export const IMPASSABLE_TILES = new Set<OverworldTileType>(['ocean', 'river']);
 
 /** Tiles passable only while in a ship */
 export const SHIP_TILES = new Set<OverworldTileType>(['ocean', 'ship']);
