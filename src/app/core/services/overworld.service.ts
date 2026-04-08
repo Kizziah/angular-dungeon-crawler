@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   OverworldCell, OverworldState, OverworldEvent,
-  OverworldTileType, ENCOUNTER_TILES, IMPASSABLE_TILES
+  OverworldTileType, ENCOUNTER_TILES, IMPASSABLE_TILES, SHIP_TILES
 } from '../models/overworld.model';
 
 // ─── Map Legend ──────────────────────────────────────────────────────────────
@@ -91,6 +91,12 @@ const CHAR_MAP: Record<string, OverworldTileType> = {
   '=': 'road',
 };
 
+// Ships moored on the coast — placed as 'ship' tiles in ocean cells adjacent to land
+const SHIP_POSITIONS: [number, number][] = [
+  [13, 8],   // northwest coast, near the forest region
+  [20, 20],  // southwest coast
+];
+
 const ENCOUNTER_CHANCE = 0.12;
 
 @Injectable({ providedIn: 'root' })
@@ -105,9 +111,12 @@ export class OverworldService {
       for (let x = 0; x < 80; x++) {
         const ch = line[x] ?? '~';
         let type: OverworldTileType = CHAR_MAP[ch] ?? 'ocean';
-        // Overwrite town / dungeon positions
+        // Overwrite special positions
         if (x === TOWN_X && y === TOWN_Y) type = 'town';
         if (x === DUNGEON_X && y === DUNGEON_Y) type = 'dungeon';
+        for (const [sx, sy] of SHIP_POSITIONS) {
+          if (x === sx && y === sy) type = 'ship';
+        }
         row.push({ type, visited: false, passable: !IMPASSABLE_TILES.has(type) });
       }
       rows.push(row);
@@ -117,7 +126,14 @@ export class OverworldService {
 
   initOverworld(): OverworldState {
     const map = this.buildMap();
-    const state: OverworldState = { map, playerX: OVERWORLD_START_X, playerY: OVERWORLD_START_Y };
+    const state: OverworldState = {
+      map,
+      playerX: OVERWORLD_START_X,
+      playerY: OVERWORLD_START_Y,
+      inShip: false,
+      shipX: null,
+      shipY: null
+    };
     this.revealAround(state, OVERWORLD_START_X, OVERWORLD_START_Y);
     return state;
   }
@@ -132,26 +148,61 @@ export class OverworldService {
     }
 
     const cell = state.map[ny][nx];
-    if (!cell.passable) {
-      return { type: 'blocked' };
+    const targetType = cell.type;
+
+    // Passability check
+    if (state.inShip) {
+      // In ship: can only move on ocean/ship tiles and land to disembark
+      if (IMPASSABLE_TILES.has(targetType) && targetType !== 'ocean') {
+        return { type: 'blocked' };
+      }
+    } else {
+      // On foot: can't cross ocean, but can board a ship
+      if (IMPASSABLE_TILES.has(targetType) && targetType !== 'ship') {
+        return { type: 'blocked' };
+      }
     }
 
-    // Move
+    // Move player
     state.playerX = nx;
     state.playerY = ny;
     this.revealAround(state, nx, ny);
     cell.visited = true;
 
-    // Special tiles
-    if (cell.type === 'town')    return { type: 'enter-town', tile: cell.type };
-    if (cell.type === 'dungeon') return { type: 'enter-dungeon', tile: cell.type };
-
-    // Random encounter on dangerous terrain
-    if (ENCOUNTER_TILES.has(cell.type) && Math.random() < ENCOUNTER_CHANCE) {
-      return { type: 'encounter', tile: cell.type };
+    // Board ship
+    if (!state.inShip && targetType === 'ship') {
+      state.inShip = true;
+      cell.type = 'ocean'; // ship moves with player — clear the moored tile
+      cell.passable = true;
+      return { type: 'boarded', tile: 'ship' };
     }
 
-    return { type: 'move', tile: cell.type };
+    // Disembark — player stepped onto land while in ship
+    if (state.inShip && !SHIP_TILES.has(targetType)) {
+      state.inShip = false;
+      // Place the ship back in the last ocean tile (behind them)
+      const prevX = nx - dx;
+      const prevY = ny - dy;
+      if (prevX >= 0 && prevX < 80 && prevY >= 0 && prevY < 50) {
+        state.map[prevY][prevX].type = 'ship';
+        state.shipX = prevX;
+        state.shipY = prevY;
+      }
+      return { type: 'disembarked', tile: targetType };
+    }
+
+    // Special tiles (on foot)
+    if (!state.inShip) {
+      if (targetType === 'town')    return { type: 'enter-town',    tile: targetType };
+      if (targetType === 'dungeon') return { type: 'enter-dungeon', tile: targetType };
+
+      // Random encounter on dangerous terrain
+      if (ENCOUNTER_TILES.has(targetType) && Math.random() < ENCOUNTER_CHANCE) {
+        return { type: 'encounter', tile: targetType };
+      }
+    }
+
+    return { type: 'move', tile: targetType };
   }
 
   private revealAround(state: OverworldState, cx: number, cy: number, radius = 3): void {

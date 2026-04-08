@@ -19,7 +19,12 @@
   <div class="status-bar">
     <span class="status-msg" *ngIf="statusMsg()">{{ statusMsg() }}</span>
     <span class="controls" *ngIf="!statusMsg()">
-      [↑↓←→/WASD] Move &nbsp;|&nbsp; [Esc] Guild &nbsp;|&nbsp; Walk to <span class="town-hint">#</span> Town or <span class="dungeon-hint">&gt;</span> Dungeon
+      <ng-container *ngIf="inShip(); else landControls">
+        ⛵ <span class="ship-hint">SAILING</span> &nbsp;|&nbsp; [↑↓←→/WASD] Sail &nbsp;|&nbsp; Step onto land to disembark &nbsp;|&nbsp; [Esc] Guild
+      </ng-container>
+      <ng-template #landControls>
+        [↑↓←→/WASD] Move &nbsp;|&nbsp; [Esc] Guild &nbsp;|&nbsp; Walk to <span class="town-hint">#</span> Town &nbsp;|&nbsp; <span class="ship-hint">S</span> Ship
+      </ng-template>
     </span>
   </div>
 </div>

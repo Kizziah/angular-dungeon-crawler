@@ -29,6 +29,8 @@ export class OverworldComponent implements OnInit, OnDestroy {
 
   get state() { return this.gameState.overworldState(); }
 
+  inShip = computed(() => this.gameState.overworldState()?.inShip ?? false);
+
   viewport = computed(() => {
     const s = this.gameState.overworldState();
     if (!s) return null;
@@ -39,7 +41,6 @@ export class OverworldComponent implements OnInit, OnDestroy {
   playerVPY = computed(() => Math.floor(VP_H / 2));
 
   ngOnInit(): void {
-    // Always reinitialize to ensure valid map coordinates
     const newState = this.overworldService.initOverworld();
     this.gameState.overworldState.set(newState);
     this.setStatus('⚔️  You step onto the overworld. Use arrows or WASD to move.');
@@ -73,12 +74,17 @@ export class OverworldComponent implements OnInit, OnDestroy {
     if (!s) return;
 
     const event = this.overworldService.movePlayer(s, dx, dy);
-    // Trigger Angular change detection by re-setting the state
     this.gameState.overworldState.set({ ...s });
 
     switch (event.type) {
       case 'blocked':
-        this.setStatus('🌊 The way is blocked.');
+        this.setStatus(s.inShip ? '⛵ You cannot sail there.' : '🌊 The way is blocked.');
+        break;
+      case 'boarded':
+        this.setStatus('⛵ You board the ship! Sail the seas — step onto land to disembark.');
+        break;
+      case 'disembarked':
+        this.setStatus('🏖️  You disembark. Your ship waits in the water.');
         break;
       case 'enter-town':
         this.setStatus('🏰 Entering the Town of Dejenol...');
@@ -90,7 +96,6 @@ export class OverworldComponent implements OnInit, OnDestroy {
         break;
       case 'encounter':
         this.setStatus(`⚠️  A monster appears from the ${event.tile}!`);
-        // TODO: wire overworld encounter into combat system
         break;
       case 'move':
         this.clearStatus();
@@ -101,7 +106,7 @@ export class OverworldComponent implements OnInit, OnDestroy {
   private setStatus(msg: string): void {
     this.statusMsg.set(msg);
     if (this.statusTimeout) clearTimeout(this.statusTimeout);
-    this.statusTimeout = setTimeout(() => this.statusMsg.set(''), 3000);
+    this.statusTimeout = setTimeout(() => this.statusMsg.set(''), 4000);
   }
 
   private clearStatus(): void {
@@ -109,12 +114,15 @@ export class OverworldComponent implements OnInit, OnDestroy {
     this.statusMsg.set('');
   }
 
-  /** Returns the ocean cell sentinel for out-of-bounds padding */
   readonly OOB_CELL: OverworldCell = { type: 'ocean', visited: true, passable: false };
 
   cellStyle(cell: OverworldCell | null, vpX: number, vpY: number): Record<string, string> {
     const isPlayer = vpX === this.playerVPX() && vpY === this.playerVPY();
-    if (isPlayer) return { color: '#ffffff', 'background-color': '#333300' };
+    if (isPlayer) {
+      // Cyan tint when sailing
+      const bg = this.inShip() ? '#001a33' : '#333300';
+      return { color: '#ffffff', 'background-color': bg };
+    }
 
     const c = cell ?? this.OOB_CELL;
     if (!c.visited) return { color: '#000000', 'background-color': '#000000' };
@@ -123,7 +131,9 @@ export class OverworldComponent implements OnInit, OnDestroy {
   }
 
   cellChar(cell: OverworldCell | null, vpX: number, vpY: number): string {
-    if (vpX === this.playerVPX() && vpY === this.playerVPY()) return '@';
+    if (vpX === this.playerVPX() && vpY === this.playerVPY()) {
+      return this.inShip() ? '⛵' : '@';
+    }
     const c = cell ?? this.OOB_CELL;
     if (!c.visited) return ' ';
     return TILE_RENDER[c.type].char;

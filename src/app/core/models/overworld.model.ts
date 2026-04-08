@@ -8,7 +8,8 @@ export type OverworldTileType =
   | 'swamp'
   | 'road'
   | 'town'
-  | 'dungeon';
+  | 'dungeon'
+  | 'ship';
 
 export interface OverworldCell {
   type: OverworldTileType;
@@ -20,9 +21,12 @@ export interface OverworldState {
   map: OverworldCell[][];
   playerX: number;
   playerY: number;
+  inShip: boolean;
+  shipX: number | null;  // where the ship was left (if player disembarked)
+  shipY: number | null;
 }
 
-export type OverworldEventType = 'move' | 'encounter' | 'enter-town' | 'enter-dungeon' | 'blocked';
+export type OverworldEventType = 'move' | 'encounter' | 'enter-town' | 'enter-dungeon' | 'blocked' | 'boarded' | 'disembarked';
 
 export interface OverworldEvent {
   type: OverworldEventType;
@@ -41,10 +45,14 @@ export const TILE_RENDER: Record<OverworldTileType, { char: string; color: strin
   road:     { char: '░', color: '#aa8844', bg: '#0a0800' },
   town:     { char: '#', color: '#ffcc00', bg: '#1a1100' },
   dungeon:  { char: '>', color: '#ff4444', bg: '#1a0000' },
+  ship:     { char: 'S', color: '#00ddff', bg: '#0a1a55' },
 };
 
 /** Tiles that trigger a random encounter */
 export const ENCOUNTER_TILES = new Set<OverworldTileType>(['plains', 'forest', 'swamp']);
 
-/** Tiles the player cannot walk on */
+/** Tiles the player cannot walk on without a ship */
 export const IMPASSABLE_TILES = new Set<OverworldTileType>(['ocean']);
+
+/** Tiles passable only while in a ship */
+export const SHIP_TILES = new Set<OverworldTileType>(['ocean', 'ship']);
