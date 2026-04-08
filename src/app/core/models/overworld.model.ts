@@ -14,7 +14,8 @@ export type OverworldTileType =
   | 'ship'
   | 'river'
   | 'bridge'
-  | 'wall';
+  | 'wall'
+  | 'portal';
 
 export interface OverworldCell {
   type: OverworldTileType;
@@ -32,7 +33,7 @@ export interface OverworldState {
   shipY: number | null;
 }
 
-export type OverworldEventType = 'move' | 'encounter' | 'enter-town' | 'enter-city' | 'enter-castle' | 'enter-dungeon' | 'blocked' | 'boarded' | 'disembarked';
+export type OverworldEventType = 'move' | 'encounter' | 'enter-town' | 'enter-city' | 'enter-castle' | 'enter-dungeon' | 'blocked' | 'boarded' | 'disembarked' | 'enter-portal';
 
 export interface OverworldEvent {
   type: OverworldEventType;
@@ -58,6 +59,7 @@ export const TILE_RENDER: Record<OverworldTileType, { char: string; color: strin
   river:    { char: '≈', color: '#4488ff', bg: '#001133' },
   bridge:   { char: '═', color: '#aa8844', bg: '#002244' },
   wall:     { char: '▓', color: '#aaaaaa', bg: '#111111' },
+  portal:   { char: 'Ö', color: '#ff88ff', bg: '#220033' },
 };
 
 /** Tiles that trigger a random encounter */

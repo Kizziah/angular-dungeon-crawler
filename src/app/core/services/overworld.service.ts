@@ -61,7 +61,7 @@ const RAW_MAP: string[] = [
   '~~~~~~~~~.,,,,^^^^^^,,.~~~.ffffffffff.~~~~.,,,,,,,,,,,,,,,,,,,,,fffffffffbff,,,,,,,,r,,ffffffffffffffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~.,,,,^^^^^^,,.~~~.ffffffffff.~~~~.,,,,,,,,,,,,,,,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~.,,,,^^^^^^,,.~~~.ffffffffff.~~~~.,,,,,,,,,,,,,,,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
-  '~~~~~~~~~.,,,,,,,,,,,,.~~~............~~~~...............,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
+  '~~~~~~~~~.,,,p,,,,,,,,.~~~............~~~~...............,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~..............~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.,,,,,,frrrrrbrrrrrrrrrrrrrrrrrrrrrrrrrbrrrrrrrrrrrrrr,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.,,,,,,ffffffff,,,,,,,,,,,,,,,,,,,,,,,,,,,ffffff,,,^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.,,,,,,ffffffff,,,,,,,,,,,,,,,,,,,,,,,,,,,ffffff,,,^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
@@ -132,7 +132,7 @@ const NAMED_LOCATIONS: { x: number; y: number; type: 'town' | 'city' | 'castle';
 const CHAR_MAP: Record<string, OverworldTileType> = {
   '~': 'ocean', '.': 'coast', ',': 'plains', 'f': 'forest',
   '^': 'mountain', '*': 'snow', '%': 'swamp', '#': 'town',
-  '>': 'dungeon', '=': 'road', 'r': 'river', 'b': 'bridge', 'w': 'wall',
+  '>': 'dungeon', '=': 'road', 'r': 'river', 'b': 'bridge', 'w': 'wall', 'p': 'portal',
 };
 
 const ENCOUNTER_CHANCE = 0.12;
@@ -220,6 +220,7 @@ export class OverworldService {
       if (targetType === 'city')    return { type: 'enter-city',    tile: targetType, name: cell.name };
       if (targetType === 'castle')  return { type: 'enter-castle',  tile: targetType, name: cell.name };
       if (targetType === 'dungeon') return { type: 'enter-dungeon', tile: targetType };
+      if (targetType === 'portal')  return { type: 'enter-portal',  tile: targetType };
       if (ENCOUNTER_TILES.has(targetType) && Math.random() < ENCOUNTER_CHANCE)
         return { type: 'encounter', tile: targetType };
     }
