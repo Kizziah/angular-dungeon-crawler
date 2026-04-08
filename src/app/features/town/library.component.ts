@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MONSTERS } from '../../core/data/monsters.data';
 import { MonsterDef } from '../../core/models/monster.model';
+import { MonsterSpriteComponent } from '../combat/monster-sprite.component';
 
 @Component({
   selector: 'app-library',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MonsterSpriteComponent],
   templateUrl: './library.component.html',
   styleUrls: ['./library.component.scss']
 })

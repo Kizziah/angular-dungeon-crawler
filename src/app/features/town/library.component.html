@@ -14,7 +14,7 @@
         [class.selected]="selectedMonster === m"
         (click)="select(m)"
       >
-        <span class="monster-symbol">{{ m.symbol }}</span>
+        <app-monster-sprite [monsterId]="m.id" [color]="m.color" [size]="32"></app-monster-sprite>
         <span class="monster-name dos-green">{{ m.name }}</span>
         <span class="monster-floors dos-dim">Fl.{{ m.floorMin }}–{{ m.floorMax }}</span>
       </div>
@@ -24,7 +24,7 @@
     <div class="detail-panel">
       <ng-container *ngIf="selectedMonster; else noSelection">
         <div class="detail-header">
-          <span class="detail-symbol">{{ selectedMonster.symbol }}</span>
+          <app-monster-sprite [monsterId]="selectedMonster.id" [color]="selectedMonster.color" [size]="80"></app-monster-sprite>
           <span class="detail-name dos-amber">{{ selectedMonster.name }}</span>
         </div>
 
