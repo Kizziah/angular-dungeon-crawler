@@ -107,8 +107,8 @@ export const OVERWORLD_START_Y = 42;
 
 // Ships moored in ocean near coast
 const SHIP_POSITIONS: [number, number][] = [
-  [25, 42],  // east side of tiny island, in ocean
-  [53, 42],  // between Bear Island and Westeros mainland
+  [24, 42],  // adjacent to tiny island east coast (col 23 = coast)
+  [51, 42],  // adjacent to Bear Island east coast (col 50 = coast)
 ];
 
 const CHAR_MAP: Record<string, OverworldTileType> = {
