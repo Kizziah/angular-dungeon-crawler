@@ -87,8 +87,14 @@ export class OverworldComponent implements OnInit, OnDestroy {
         this.setStatus('🏖️  You disembark. Your ship waits in the water.');
         break;
       case 'enter-town':
-        this.setStatus('🏰 Entering the Town of Dejenol...');
+        this.setStatus(`🏘️  Entering ${event.name ?? 'the Town of Dejenol'}...`);
         setTimeout(() => this.router.navigate(['/town']), 400);
+        break;
+      case 'enter-city':
+        this.setStatus(`🏙️  You arrive at ${event.name ?? 'a city'}. (City not yet open.)`);
+        break;
+      case 'enter-castle':
+        this.setStatus(`🏰 You arrive at ${event.name ?? 'a castle'}. (Castle not yet open.)`);
         break;
       case 'enter-dungeon':
         this.setStatus('⚔️  You descend into the dungeon...');

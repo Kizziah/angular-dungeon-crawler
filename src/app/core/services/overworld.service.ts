@@ -111,6 +111,24 @@ const SHIP_POSITIONS: [number, number][] = [
   [51, 42],  // adjacent to Bear Island east coast (col 50 = coast)
 ];
 
+// Named settlements placed on the overworld
+const NAMED_LOCATIONS: { x: number; y: number; type: 'town' | 'city' | 'castle'; name: string }[] = [
+  { x: TOWN_X,  y: TOWN_Y,  type: 'town',   name: 'Dejenol' },
+  { x: 60,  y: 20, type: 'castle', name: 'Winterfell' },
+  { x: 80,  y: 17, type: 'castle', name: 'Castle Black' },
+  { x: 58,  y: 32, type: 'town',   name: 'White Harbor' },
+  { x: 90,  y: 43, type: 'castle', name: 'Moat Cailin' },
+  { x: 104, y: 50, type: 'castle', name: 'Riverrun' },
+  { x: 106, y: 52, type: 'castle', name: 'Harrenhal' },
+  { x: 126, y: 52, type: 'castle', name: 'The Eyrie' },
+  { x: 60,  y: 55, type: 'city',   name: 'Casterly Rock' },
+  { x: 120, y: 62, type: 'castle', name: 'Dragonstone' },
+  { x: 115, y: 60, type: 'city',   name: "King's Landing" },
+  { x: 101, y: 68, type: 'city',   name: 'Highgarden' },
+  { x: 130, y: 68, type: 'castle', name: "Storm's End" },
+  { x: 116, y: 76, type: 'city',   name: 'Sunspear' },
+];
+
 const CHAR_MAP: Record<string, OverworldTileType> = {
   '~': 'ocean', '.': 'coast', ',': 'plains', 'f': 'forest',
   '^': 'mountain', '*': 'snow', '%': 'swamp', '#': 'town',
@@ -130,7 +148,6 @@ export class OverworldService {
       for (let x = 0; x < MAP_W; x++) {
         const ch = line[x] ?? '~';
         let type: OverworldTileType = CHAR_MAP[ch] ?? 'ocean';
-        if (x === TOWN_X    && y === TOWN_Y)    type = 'town';
         if (x === DUNGEON_X && y === DUNGEON_Y) type = 'dungeon';
         for (const [sx, sy] of SHIP_POSITIONS) {
           if (x === sx && y === sy) type = 'ship';
@@ -138,6 +155,15 @@ export class OverworldService {
         row.push({ type, visited: true, passable: !IMPASSABLE_TILES.has(type) });
       }
       map.push(row);
+    }
+    // Apply named locations
+    for (const loc of NAMED_LOCATIONS) {
+      const cell = map[loc.y]?.[loc.x];
+      if (cell) {
+        cell.type = loc.type;
+        cell.name = loc.name;
+        cell.passable = true;
+      }
     }
     return map;
   }
@@ -190,7 +216,9 @@ export class OverworldService {
     }
 
     if (!state.inShip) {
-      if (targetType === 'town')    return { type: 'enter-town',    tile: targetType };
+      if (targetType === 'town')    return { type: 'enter-town',    tile: targetType, name: cell.name };
+      if (targetType === 'city')    return { type: 'enter-city',    tile: targetType, name: cell.name };
+      if (targetType === 'castle')  return { type: 'enter-castle',  tile: targetType, name: cell.name };
       if (targetType === 'dungeon') return { type: 'enter-dungeon', tile: targetType };
       if (ENCOUNTER_TILES.has(targetType) && Math.random() < ENCOUNTER_CHANCE)
         return { type: 'encounter', tile: targetType };

@@ -8,6 +8,8 @@ export type OverworldTileType =
   | 'swamp'
   | 'road'
   | 'town'
+  | 'city'
+  | 'castle'
   | 'dungeon'
   | 'ship';
 
@@ -15,6 +17,7 @@ export interface OverworldCell {
   type: OverworldTileType;
   visited: boolean;
   passable: boolean;
+  name?: string;
 }
 
 export interface OverworldState {
@@ -26,11 +29,12 @@ export interface OverworldState {
   shipY: number | null;
 }
 
-export type OverworldEventType = 'move' | 'encounter' | 'enter-town' | 'enter-dungeon' | 'blocked' | 'boarded' | 'disembarked';
+export type OverworldEventType = 'move' | 'encounter' | 'enter-town' | 'enter-city' | 'enter-castle' | 'enter-dungeon' | 'blocked' | 'boarded' | 'disembarked';
 
 export interface OverworldEvent {
   type: OverworldEventType;
   tile?: OverworldTileType;
+  name?: string;
 }
 
 /** Render info for each tile type */
@@ -44,6 +48,8 @@ export const TILE_RENDER: Record<OverworldTileType, { char: string; color: strin
   swamp:    { char: '%', color: '#557755', bg: '#0a1008' },
   road:     { char: '░', color: '#aa8844', bg: '#0a0800' },
   town:     { char: '#', color: '#ffcc00', bg: '#1a1100' },
+  city:     { char: 'Ω', color: '#ff9900', bg: '#1a0800' },
+  castle:   { char: '◆', color: '#aaccff', bg: '#080a1a' },
   dungeon:  { char: '>', color: '#ff4444', bg: '#1a0000' },
   ship:     { char: 'S', color: '#00ddff', bg: '#0a1a55' },
 };
