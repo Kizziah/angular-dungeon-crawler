@@ -28,7 +28,7 @@ const RAW_MAP: string[] = [
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.ffffffffffffffff***********fffffffffffffff*************fffffffffffffff*******fffffffffffffff*.~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.ffffffffffffffff***********fffffffffffffff*************fffffffffffffff*******fffffffffffffff*.~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.ffffffffffffffff***********fffffffffffffff*************fffffffffffffff*******fffffffffffffff*.~~~~~~~~~~~~~~~~~~~~~~~',
-  '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
+  '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.fffffff^^^^^^^^^ffffffffffffffffffffffffffffffffffffffffffffffffffff.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.fffffff^^^^^^^^^ffffffffffffffffffffffffffffffffffffffffffffffffffff.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.fffffff^^^^^^^^^ffffffffffffffffffffffffffffffffffffffffffffffffffff.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
@@ -132,7 +132,7 @@ const NAMED_LOCATIONS: { x: number; y: number; type: 'town' | 'city' | 'castle';
 const CHAR_MAP: Record<string, OverworldTileType> = {
   '~': 'ocean', '.': 'coast', ',': 'plains', 'f': 'forest',
   '^': 'mountain', '*': 'snow', '%': 'swamp', '#': 'town',
-  '>': 'dungeon', '=': 'road', 'r': 'river', 'b': 'bridge',
+  '>': 'dungeon', '=': 'road', 'r': 'river', 'b': 'bridge', 'w': 'wall',
 };
 
 const ENCOUNTER_CHANCE = 0.12;

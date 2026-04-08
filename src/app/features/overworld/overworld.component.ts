@@ -79,7 +79,11 @@ export class OverworldComponent implements OnInit, OnDestroy {
 
     switch (event.type) {
       case 'blocked':
-        if (event.tile === 'river') {
+        if (event.tile === 'wall') {
+          this.setStatus('🧱 The Wall stands before you — none may pass.');
+        } else if (event.tile === 'mountain') {
+          this.setStatus('⛰️  The mountains block your path.');
+        } else if (event.tile === 'river') {
           this.setStatus('🌊 The river blocks your path — find a bridge to cross.');
         } else {
           this.setStatus(s.inShip ? '⛵ You cannot sail there.' : '🌊 The way is blocked.');
