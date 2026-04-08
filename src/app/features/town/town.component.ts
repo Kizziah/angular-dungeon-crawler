@@ -29,6 +29,7 @@ export class TownComponent {
       case 't': this.router.navigate(['/town/temple']);   break;
       case 'r': this.router.navigate(['/town/training']); break;
       case 'b': this.router.navigate(['/town/bank']);     break;
+      case 'l': this.router.navigate(['/town/library']);  break;
       case 'd': this.router.navigate(['/dungeon']);       break;
       case 'g': this.router.navigate(['/guild']);         break;
     }

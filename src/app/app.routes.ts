@@ -10,6 +10,7 @@ export const routes: Routes = [
   { path: 'town/temple', loadComponent: () => import('./features/town/temple.component').then(m => m.TempleComponent) },
   { path: 'town/training', loadComponent: () => import('./features/town/training-hall.component').then(m => m.TrainingHallComponent) },
   { path: 'town/bank', loadComponent: () => import('./features/town/bank.component').then(m => m.BankComponent) },
+  { path: 'town/library', loadComponent: () => import('./features/town/library.component').then(m => m.LibraryComponent) },
   { path: 'dungeon', loadComponent: () => import('./features/dungeon/dungeon.component').then(m => m.DungeonComponent) },
   { path: 'combat', loadComponent: () => import('./features/combat/combat.component').then(m => m.CombatComponent) },
   { path: 'inventory/:id', loadComponent: () => import('./features/inventory/inventory.component').then(m => m.InventoryComponent) },
