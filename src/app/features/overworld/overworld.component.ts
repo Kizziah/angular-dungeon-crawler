@@ -125,7 +125,6 @@ export class OverworldComponent implements OnInit, OnDestroy {
     }
 
     const c = cell ?? this.OOB_CELL;
-    if (!c.visited) return { color: '#000000', 'background-color': '#000000' };
     const r = TILE_RENDER[c.type];
     return { color: r.color, 'background-color': r.bg ?? '#000000' };
   }
@@ -135,7 +134,6 @@ export class OverworldComponent implements OnInit, OnDestroy {
       return this.inShip() ? '⛵' : '@';
     }
     const c = cell ?? this.OOB_CELL;
-    if (!c.visited) return ' ';
     return TILE_RENDER[c.type].char;
   }
 }

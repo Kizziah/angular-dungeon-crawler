@@ -135,7 +135,7 @@ export class OverworldService {
         for (const [sx, sy] of SHIP_POSITIONS) {
           if (x === sx && y === sy) type = 'ship';
         }
-        row.push({ type, visited: false, passable: !IMPASSABLE_TILES.has(type) });
+        row.push({ type, visited: true, passable: !IMPASSABLE_TILES.has(type) });
       }
       map.push(row);
     }
