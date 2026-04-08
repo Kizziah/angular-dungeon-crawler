@@ -8,8 +8,9 @@ import {
 // ~ ocean   . coast   , plains   f forest   ^ mountain   * snow
 // % swamp   # town    > dungeon  = road
 //
-// Map is 80 cols × 50 rows.  Town of Dejenol is at approx (56, 14).
-// Dungeon entrance is at (59, 11).
+// Map is 80 cols × 50 rows.  Town of Dejenol is at (36, 14) in the mountains.
+// Dungeon entrance is at (40, 12) deep in the mountains.
+// Player starts at (34, 14), just west of the town gate.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const RAW_MAP: string[] = [
@@ -68,13 +69,13 @@ const RAW_MAP: string[] = [
 ];
 
 // Town + dungeon precise placements override raw map
-const TOWN_X = 56;
+const TOWN_X = 36;
 const TOWN_Y = 14;
-const DUNGEON_X = 59;
-const DUNGEON_Y = 11;
+const DUNGEON_X = 40;
+const DUNGEON_Y = 12;
 
-// Player start: just outside the town entrance (road leading to town)
-export const OVERWORLD_START_X = 54;
+// Player start: just outside the town gate (west side)
+export const OVERWORLD_START_X = 34;
 export const OVERWORLD_START_Y = 14;
 
 const CHAR_MAP: Record<string, OverworldTileType> = {

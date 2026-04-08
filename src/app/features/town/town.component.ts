@@ -31,6 +31,7 @@ export class TownComponent {
       case 'b': this.router.navigate(['/town/bank']);     break;
       case 'l': this.router.navigate(['/town/library']);  break;
       case 'd': this.router.navigate(['/dungeon']);       break;
+      case 'o': this.leaveToOverworld();                  break;
       case 'g': this.router.navigate(['/guild']);         break;
     }
   }
@@ -45,5 +46,9 @@ export class TownComponent {
 
   enterDungeon(): void {
     this.router.navigate(['/dungeon']);
+  }
+
+  leaveToOverworld(): void {
+    this.router.navigate(['/overworld']);
   }
 }

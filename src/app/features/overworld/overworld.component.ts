@@ -39,10 +39,9 @@ export class OverworldComponent implements OnInit, OnDestroy {
   playerVPY = computed(() => Math.floor(VP_H / 2));
 
   ngOnInit(): void {
-    if (!this.gameState.overworldState()) {
-      const newState = this.overworldService.initOverworld();
-      this.gameState.overworldState.set(newState);
-    }
+    // Always reinitialize to ensure valid map coordinates
+    const newState = this.overworldService.initOverworld();
+    this.gameState.overworldState.set(newState);
     this.setStatus('⚔️  You step onto the overworld. Use arrows or WASD to move.');
   }
 

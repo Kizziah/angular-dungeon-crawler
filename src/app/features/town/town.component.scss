@@ -36,6 +36,7 @@
 
       &:hover { background: var(--dos-green); color: var(--dos-bg); }
       &.town-btn-dungeon { border-color: var(--dos-amber); color: var(--dos-amber); }
+      &.town-btn-overworld { border-color: #44aaff; color: #44aaff; }
       &.town-btn-back { border-color: var(--dos-green-dim); color: var(--dos-green-dim); }
     }
 

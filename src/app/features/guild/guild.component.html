@@ -35,6 +35,12 @@
         <button (click)="createCharacter()" class="menu-btn">
           [N] New Adventurer
         </button>
+        <button (click)="goToTown()" class="menu-btn" [disabled]="partyCount === 0">
+          [T] Go to Town
+        </button>
+        <button (click)="enterDungeon()" class="menu-btn" [disabled]="partyCount === 0">
+          [D] Enter Dungeon
+        </button>
         <button (click)="goToOverworld()" class="menu-btn" [disabled]="partyCount === 0">
           [O] Enter World
         </button>
