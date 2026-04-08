@@ -6,6 +6,7 @@ export const routes: Routes = [
   { path: 'overworld', loadComponent: () => import('./features/overworld/overworld.component').then(m => m.OverworldComponent) },
   { path: 'worldmap', loadComponent: () => import('./features/worldmap/worldmap.component').then(m => m.WorldMapComponent) },
   { path: 'alefgard', loadComponent: () => import('./features/alefgard/alefgard.component').then(m => m.AlefgardComponent) },
+  { path: 'alefgard-map', loadComponent: () => import('./features/alefgard-map/alefgard-map.component').then(m => m.AlefgardMapComponent) },
   { path: 'create-character', loadComponent: () => import('./features/character-creation/character-creation.component').then(m => m.CharacterCreationComponent) },
   { path: 'town', loadComponent: () => import('./features/town/town.component').then(m => m.TownComponent) },
   { path: 'town/inn', loadComponent: () => import('./features/town/inn.component').then(m => m.InnComponent) },

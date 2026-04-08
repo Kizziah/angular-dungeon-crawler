@@ -58,6 +58,7 @@ export class AlefgardComponent implements OnInit, OnDestroy {
       case 'ArrowLeft':  case 'a': case 'A': dx = -1; break;
       case 'ArrowRight': case 'd': case 'D': dx =  1; break;
       case 'Escape': this.router.navigate(['/overworld']); return;
+      case 'm': case 'M': this.router.navigate(['/alefgard-map']); return;
       default: return;
     }
 

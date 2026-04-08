@@ -129,6 +129,11 @@ export class AlefgardService {
     if (portalCell) portalCell.passable = true;
   }
 
+  getFullMap(): OverworldCell[][] {
+    if (this.map.length === 0) this.buildMap();
+    return this.map;
+  }
+
   getViewport(state: OverworldState, vpW: number, vpH: number): (OverworldCell | null)[][] {
     const halfW = Math.floor(vpW / 2);
     const halfH = Math.floor(vpH / 2);

@@ -1,0 +1,30 @@
+<div class="alefgard-map-screen">
+  <div class="alefgard-map-header">
+    <span class="title">🗺️  WORLD MAP — ALEFGARD</span>
+    <span class="hint">[M / Esc] Close</span>
+  </div>
+
+  <div class="alefgard-map-wrap">
+    <div class="alefgard-map-grid" *ngIf="mapRows().length">
+      <div class="map-row" *ngFor="let row of mapRows(); let y = index; trackBy: trackByIndex">
+        <span
+          class="map-cell"
+          *ngFor="let cell of row; let x = index; trackBy: trackByIndex"
+          [ngStyle]="cellStyle(cell)"
+        >{{ cellChar(cell) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="alefgard-map-legend">
+    <span class="leg-item"><span style="color:#2255cc">~</span> Ocean</span>
+    <span class="leg-item"><span style="color:#44aa44">.</span> Plains</span>
+    <span class="leg-item"><span style="color:#226622">T</span> Forest</span>
+    <span class="leg-item"><span style="color:#888888">^</span> Mountain</span>
+    <span class="leg-item"><span style="color:#557755">%</span> Swamp</span>
+    <span class="leg-item"><span style="color:#ffcc00">#</span> Town</span>
+    <span class="leg-item"><span style="color:#aaccff">◆</span> Castle</span>
+    <span class="leg-item"><span style="color:#ff4444">&gt;</span> Dungeon</span>
+    <span class="leg-item"><span style="color:#ff88ff">Ö</span> Portal</span>
+  </div>
+</div>

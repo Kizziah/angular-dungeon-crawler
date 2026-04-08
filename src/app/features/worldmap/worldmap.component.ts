@@ -15,7 +15,7 @@ const NAMED_LOCATIONS = [
   { x: 90,  y: 52, name: 'Harrenhal' },
   { x: 112, y: 44, name: 'The Eyrie' },
   { x: 58,  y: 46, name: 'Casterly Rock' },
-  { x: 108, y: 65, name: 'Dragonstone' },
+  { x: 100, y: 64, name: 'Dragonstone' },
   { x: 100, y: 60, name: "King's Landing" },
   { x: 68,  y: 66, name: 'Highgarden' },
   { x: 120, y: 66, name: "Storm's End" },
