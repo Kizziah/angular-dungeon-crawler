@@ -1,0 +1,178 @@
+.guild-hall-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 12px;
+  gap: 8px;
+
+  .hall-header {
+    border-bottom: 1px solid var(--dos-border);
+    padding-bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 15px;
+
+    .master { font-size: 12px; }
+  }
+
+  .flavor {
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  .hall-layout {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--dos-border);
+    padding-bottom: 4px;
+  }
+
+  // ── Classes panel ────────────────────────────────────────
+  .classes-panel {
+    width: 220px;
+    flex-shrink: 0;
+    border: 1px solid var(--dos-border);
+    padding: 8px;
+    overflow-y: auto;
+
+    .class-entry {
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+
+      &:last-child { border-bottom: none; }
+
+      .class-name { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+      .class-hit, .class-stat, .class-align { font-size: 11px; }
+      .class-desc { font-size: 11px; margin: 3px 0; font-style: italic; line-height: 1.4; }
+
+      .ability-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px;
+        margin-top: 4px;
+
+        .ability-chip {
+          border: 1px solid var(--dos-cyan, #00cccc);
+          padding: 1px 5px;
+          font-size: 10px;
+        }
+      }
+    }
+  }
+
+  // ── Party panel ──────────────────────────────────────────
+  .party-panel {
+    width: 180px;
+    flex-shrink: 0;
+    border: 1px solid var(--dos-border);
+    padding: 8px;
+    overflow-y: auto;
+
+    .party-row {
+      padding: 6px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 12px;
+
+      &:hover   { background: rgba(51,255,51,0.06); }
+      &.selected {
+        background: rgba(51,255,51,0.12);
+        border-left: 2px solid var(--dos-green);
+      }
+
+      .char-name { font-size: 13px; }
+      .char-info { opacity: 0.7; }
+      .char-gold { margin-top: 2px; font-size: 11px; }
+    }
+
+    .empty { font-size: 12px; opacity: 0.5; margin-top: 8px; }
+  }
+
+  // ── Change panel ─────────────────────────────────────────
+  .change-panel {
+    flex: 1;
+    border: 1px solid var(--dos-amber);
+    padding: 10px;
+    overflow-y: auto;
+
+    .sel-header {
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .cost-note {
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .change-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+
+      .change-btn {
+        background: transparent;
+        border: 1px solid var(--dos-border);
+        color: var(--dos-green);
+        font-family: inherit;
+        font-size: 13px;
+        padding: 6px 12px;
+        text-align: left;
+        cursor: pointer;
+
+        &:hover:not(:disabled):not(.current) {
+          background: rgba(51,255,51,0.1);
+          border-color: var(--dos-green);
+        }
+
+        &:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        &.current {
+          border-color: var(--dos-amber);
+          color: var(--dos-amber);
+          cursor: default;
+        }
+      }
+    }
+
+    .message {
+      margin-top: 12px;
+      padding: 8px;
+      border: 1px solid var(--dos-green);
+      font-size: 13px;
+    }
+
+    .empty {
+      height: 80%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      opacity: 0.5;
+      text-align: center;
+      line-height: 1.6;
+    }
+  }
+
+  .hall-footer {
+    border-top: 1px solid var(--dos-border);
+    padding-top: 8px;
+    flex-shrink: 0;
+  }
+}

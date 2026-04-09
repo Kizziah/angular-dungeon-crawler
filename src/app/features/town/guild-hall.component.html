@@ -1,0 +1,84 @@
+<div class="guild-hall-screen">
+
+  <div class="hall-header">
+    <div class="dos-amber">{{ guild.icon }} {{ guild.name | uppercase }}</div>
+    <div class="dos-dim master">{{ guild.master }}</div>
+  </div>
+
+  <div class="flavor dos-dim">"{{ guild.flavor }}"</div>
+
+  <div class="hall-layout">
+
+    <!-- Left: classes offered -->
+    <div class="classes-panel">
+      <div class="panel-title dos-amber">CLASSES OFFERED</div>
+      <div *ngFor="let cls of guildClasses" class="class-entry">
+        <div class="class-name dos-green">{{ cls.name }}</div>
+        <div class="class-hit  dos-dim">Hit Die: {{ cls.hitDie }}</div>
+        <div class="class-stat dos-dim">Primary: {{ cls.primaryStat | titlecase }}</div>
+        <div class="class-desc dos-dim">{{ cls.description }}</div>
+        <div class="class-align dos-dim">Alignments: {{ cls.allowedAlignments.join(' · ') }}</div>
+        <div class="ability-list">
+          <span *ngFor="let ab of cls.abilities" class="ability-chip dos-cyan">{{ ab }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle: party members -->
+    <div class="party-panel">
+      <div class="panel-title dos-amber">YOUR PARTY</div>
+      <div *ngFor="let char of party()" class="party-row"
+           [class.selected]="selectedChar?.id === char.id"
+           (click)="selectChar(char)">
+        <div class="char-name dos-amber">{{ char.name }}</div>
+        <div class="char-info dos-dim">Lv.{{ char.level }} {{ char.class }} · {{ char.alignment }}</div>
+        <div class="char-gold dos-amber">{{ char.gold }} gp</div>
+      </div>
+      <div *ngIf="party().length === 0" class="dos-dim empty">No party members.</div>
+    </div>
+
+    <!-- Right: change class -->
+    <div class="change-panel">
+      <div class="panel-title dos-amber">CLASS CHANGE</div>
+      <ng-container *ngIf="selectedChar; else noSel">
+        <div class="sel-header">
+          <span class="dos-amber">{{ selectedChar.name }}</span>
+          <span class="dos-dim"> Lv.{{ selectedChar.level }} {{ selectedChar.class }}</span>
+        </div>
+        <div class="dos-dim cost-note">
+          Cost: {{ selectedChar.level }} × {{ guild.classChangeCost }} gp = {{ changeCost(selectedChar) }} gp
+        </div>
+        <div class="dos-dim cost-note" *ngIf="selectedChar.level < guild.minLevelForChange">
+          ⚠ Must reach level {{ guild.minLevelForChange }} first.
+        </div>
+        <div class="dos-dim cost-note" *ngIf="selectedChar.level >= guild.minLevelForChange">
+          ⚠ Class change resets level to 1.
+        </div>
+
+        <div class="change-list">
+          <button *ngFor="let cls of guildClasses"
+                  class="change-btn"
+                  [class.current]="selectedChar.class === cls.name"
+                  [disabled]="!canChange(selectedChar, cls)"
+                  (click)="changeClass(selectedChar, cls)">
+            <span *ngIf="selectedChar.class === cls.name" class="dos-dim">✓ Current class</span>
+            <span *ngIf="selectedChar.class !== cls.name">
+              → {{ cls.name }}
+              <span class="dos-dim">({{ changeCost(selectedChar) }} gp)</span>
+            </span>
+          </button>
+        </div>
+
+        <div *ngIf="message" class="message dos-green">{{ message }}</div>
+      </ng-container>
+      <ng-template #noSel>
+        <div class="dos-dim empty">Select a party member<br>to change their class.</div>
+      </ng-template>
+    </div>
+
+  </div>
+
+  <div class="hall-footer">
+    <button (click)="back()">[ ESC ] Back to Town</button>
+  </div>
+</div>
