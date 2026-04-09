@@ -363,6 +363,26 @@ const DRAW_FNS: Record<string, SvgFn> = {
   },
 };
 
+DRAW_FNS['soldier'] = p => { const dk = shade(p,-50); const li = shade(p,60);
+  return `
+    <line x1="47" y1="4" x2="47" y2="48" stroke="#8b4513" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="47,4 43,12 51,12" fill="#aaaaaa"/>
+    <ellipse cx="24" cy="42" rx="12" ry="15" fill="${R}" stroke="#8b0000" stroke-width="2"/>
+    <circle cx="24" cy="42" r="3" fill="${Y}"/>
+    <rect x="26" y="28" width="16" height="18" fill="${li}" stroke="${dk}" stroke-width="1.5" rx="2"/>
+    <circle cx="34" cy="18" r="8" fill="#f1c27d" stroke="${K}" stroke-width="1.5"/>
+    <path d="M26,18 Q34,6 42,18 Z" fill="${p}" stroke="${dk}" stroke-width="1.5"/>
+    <rect x="30" y="8" width="8" height="6" fill="${R}"/>
+    <circle cx="31" cy="18" r="1.5" fill="${K}"/>
+    <circle cx="37" cy="18" r="1.5" fill="${K}"/>
+    <line x1="26" y1="31" x2="18" y2="42" stroke="#f1c27d" stroke-width="4" stroke-linecap="round"/>
+    <line x1="42" y1="31" x2="47" y2="40" stroke="#f1c27d" stroke-width="4" stroke-linecap="round"/>
+    <line x1="31" y1="46" x2="28" y2="58" stroke="${dk}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="37" y1="46" x2="40" y2="58" stroke="${dk}" stroke-width="3" stroke-linecap="round"/>
+    <rect x="24" y="58" width="7" height="3" fill="#654321" rx="1"/>
+    <rect x="37" y="58" width="7" height="3" fill="#654321" rx="1"/>`;
+};
+
 DRAW_FNS['default'] = p => { const dk = shade(p,-50);
   return `
     <ellipse cx="32" cy="32" rx="20" ry="26" fill="${p}" stroke="${K}" stroke-width="2"/>
@@ -370,6 +390,7 @@ DRAW_FNS['default'] = p => { const dk = shade(p,-50);
     <circle cx="39" cy="26" r="5" fill="${R}"/><circle cx="39" cy="26" r="2" fill="${K}"/>
     <path d="M24,40 Q32,46 40,40" stroke="${K}" stroke-width="2" fill="none"/>`;
 };
+
 
 // ── monster ID → archetype ────────────────────────────────────────────────────
 const SPRITE_KEY_MAP: Record<string, string> = {
@@ -397,6 +418,7 @@ const SPRITE_KEY_MAP: Record<string, string> = {
   'beholder-kin':'beholder',
   'elemental-fire':'elemental','djinn':'elemental',
   'werewolf':'werewolf',
+  'soldier':'soldier','guard':'soldier','town-guard':'soldier','royal-guard':'soldier',
 };
 
 // ── component ─────────────────────────────────────────────────────────────────

@@ -1,86 +1,121 @@
 <div class="library-screen">
+
   <div class="library-header">
-    <div class="dos-amber">📚 TOWN LIBRARY - MONSTER LORE</div>
-    <div class="dos-dim">Floors 1–5 · Click a creature to see details</div>
+    <div class="dos-amber">📚 TOWN LIBRARY</div>
+    <div class="tab-bar">
+      <button [class.active]="tab==='monsters'" (click)="tab='monsters'; selectedItem=null">⚔️ Bestiary ({{ allMonsters.length }})</button>
+      <button [class.active]="tab==='items'"    (click)="tab='items';    selectedMonster=null">🎒 Item Codex ({{ allItems.length }})</button>
+    </div>
   </div>
 
-  <div class="library-layout">
-    <!-- Monster list -->
-    <div class="monster-list">
-      <div class="panel-title dos-dim">KNOWN CREATURES:</div>
-      <div
-        *ngFor="let m of monsters"
-        class="monster-row"
-        [class.selected]="selectedMonster === m"
-        (click)="select(m)"
-      >
-        <app-monster-sprite [monsterId]="m.id" [color]="m.color" [size]="32"></app-monster-sprite>
-        <span class="monster-name dos-green">{{ m.name }}</span>
-        <span class="monster-floors dos-dim">Fl.{{ m.floorMin }}–{{ m.floorMax }}</span>
+  <!-- ── MONSTERS TAB ──────────────────────────────────────────────────────── -->
+  <ng-container *ngIf="tab==='monsters'">
+    <div class="filter-bar">
+      <span class="dos-dim">FILTER BY FLOOR:</span>
+      <select [(ngModel)]="monsterFilter" class="floor-select">
+        <option value="all">All Floors</option>
+        <option value="5">Floors 1–5</option>
+        <option value="10">Floors 1–10</option>
+        <option value="20">Floors 1–20</option>
+        <option value="40">Floors 1–40</option>
+      </select>
+      <span class="dos-dim count">({{ filteredMonsters.length }} creatures)</span>
+    </div>
+
+    <div class="library-layout">
+      <div class="entry-list">
+        <div class="panel-title dos-dim">KNOWN CREATURES</div>
+        <div *ngFor="let m of filteredMonsters" class="entry-row"
+             [class.selected]="selectedMonster === m" (click)="selectMonster(m)">
+          <app-monster-sprite [monsterId]="m.id" [color]="m.color" [size]="28"></app-monster-sprite>
+          <span class="entry-name dos-green">{{ m.name }}</span>
+          <span class="entry-sub dos-dim">Fl.{{ m.floorMin }}–{{ m.floorMax }}</span>
+        </div>
+      </div>
+
+      <div class="detail-panel">
+        <ng-container *ngIf="selectedMonster; else noMon">
+          <div class="detail-header">
+            <app-monster-sprite [monsterId]="selectedMonster.id" [color]="selectedMonster.color" [size]="80"></app-monster-sprite>
+            <span class="detail-name dos-amber">{{ selectedMonster.name }}</span>
+          </div>
+          <div class="detail-desc dos-dim">{{ selectedMonster.description }}</div>
+          <div class="stat-grid">
+            <div class="stat-row"><span class="stat-label dos-dim">HP:</span>    <span class="stat-val dos-green">{{ selectedMonster.hp }}</span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">AC:</span>    <span class="stat-val dos-green">{{ selectedMonster.ac }}</span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">Attack:</span><span class="stat-val dos-green">{{ selectedMonster.attack }}<span class="dos-dim" *ngIf="selectedMonster.attackCount>1"> ×{{ selectedMonster.attackCount }}</span></span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">Floors:</span><span class="stat-val dos-green">{{ selectedMonster.floorMin }}–{{ selectedMonster.floorMax }}</span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">XP:</span>    <span class="stat-val dos-amber">{{ selectedMonster.xpReward }}</span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">Gold:</span>  <span class="stat-val dos-amber">{{ selectedMonster.goldMin }}–{{ selectedMonster.goldMax }} gp</span></div>
+          </div>
+          <div *ngIf="selectedMonster.abilities.length > 0" class="abilities">
+            <div class="stat-label dos-dim">SPECIAL:</div>
+            <div class="ability-tags">
+              <span *ngFor="let ab of selectedMonster.abilities" class="ability-tag dos-red">⚠ {{ abilityLabel(ab) }}</span>
+            </div>
+          </div>
+          <div *ngIf="selectedMonster.abilities.length === 0" class="dos-dim no-abilities">No special abilities.</div>
+        </ng-container>
+        <ng-template #noMon>
+          <div class="no-selection dos-dim"><div>Select a creature</div><div>to read its entry.</div></div>
+        </ng-template>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── ITEMS TAB ─────────────────────────────────────────────────────────── -->
+  <ng-container *ngIf="tab==='items'">
+    <div class="filter-bar">
+      <span class="dos-dim">FILTER BY TYPE:</span>
+      <div class="type-tabs">
+        <button *ngFor="let t of itemTypes" [class.active]="itemTypeFilter===t"
+                (click)="itemTypeFilter=t; selectedItem=null">
+          <span *ngIf="t!=='all'">{{ itemIcon(t) }}</span>{{ t==='all' ? 'All' : t }}
+        </button>
       </div>
     </div>
 
-    <!-- Detail panel -->
-    <div class="detail-panel">
-      <ng-container *ngIf="selectedMonster; else noSelection">
-        <div class="detail-header">
-          <app-monster-sprite [monsterId]="selectedMonster.id" [color]="selectedMonster.color" [size]="80"></app-monster-sprite>
-          <span class="detail-name dos-amber">{{ selectedMonster.name }}</span>
+    <div class="library-layout">
+      <div class="entry-list">
+        <div class="panel-title dos-dim">ITEMS ({{ filteredItems.length }})</div>
+        <div *ngFor="let i of filteredItems" class="entry-row item-row"
+             [class.selected]="selectedItem===i" [class.cursed]="i.cursed" (click)="selectItem(i)">
+          <span class="item-icon">{{ itemIcon(i.type) }}</span>
+          <span class="entry-name" [class.dos-red]="i.cursed" [class.dos-green]="!i.cursed">{{ i.name }}</span>
+          <span class="entry-sub dos-amber">{{ i.value }}gp</span>
         </div>
+      </div>
 
-        <div class="detail-desc dos-dim">{{ selectedMonster.description }}</div>
-
-        <div class="stat-grid">
-          <div class="stat-row">
-            <span class="stat-label dos-dim">HP:</span>
-            <span class="stat-val dos-green">{{ selectedMonster.hp }}</span>
+      <div class="detail-panel">
+        <ng-container *ngIf="selectedItem; else noItem">
+          <div class="detail-header item-detail-header">
+            <span class="item-big-icon">{{ itemIcon(selectedItem.type) }}</span>
+            <div>
+              <div class="detail-name" [class.dos-amber]="!selectedItem.cursed" [class.dos-red]="selectedItem.cursed">
+                {{ selectedItem.name }}
+                <span *ngIf="selectedItem.cursed" class="curse-tag">CURSED</span>
+              </div>
+              <div class="dos-dim" style="font-size:12px">{{ selectedItem.type }}</div>
+            </div>
           </div>
-          <div class="stat-row">
-            <span class="stat-label dos-dim">AC:</span>
-            <span class="stat-val dos-green">{{ selectedMonster.ac }}</span>
+          <div class="detail-desc dos-dim">Unidentified as: <em>{{ selectedItem.unidentifiedName }}</em></div>
+          <div class="stat-grid">
+            <div class="stat-row stat-full"><span class="stat-label dos-dim">Stats:</span><span class="stat-val dos-green">{{ statSummary(selectedItem) }}</span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">Value:</span><span class="stat-val dos-amber">{{ selectedItem.value }} gp</span></div>
+            <div class="stat-row"><span class="stat-label dos-dim">Floors:</span><span class="stat-val dos-green">{{ selectedItem.floorMin }}–{{ selectedItem.floorMax }}</span></div>
+            <div class="stat-row" *ngIf="selectedItem.usable"><span class="stat-label dos-dim">Usable:</span><span class="stat-val dos-green">Yes</span></div>
           </div>
-          <div class="stat-row">
-            <span class="stat-label dos-dim">Attack:</span>
-            <span class="stat-val dos-green">
-              {{ selectedMonster.attack }}
-              <span class="dos-dim" *ngIf="selectedMonster.attackCount > 1"> ×{{ selectedMonster.attackCount }}</span>
-            </span>
+          <div *ngIf="selectedItem.effect" class="abilities">
+            <div class="stat-label dos-dim">EFFECT:</div>
+            <div class="dos-green" style="font-size:13px;margin-top:4px">{{ selectedItem.effect }}</div>
           </div>
-          <div class="stat-row">
-            <span class="stat-label dos-dim">Floors:</span>
-            <span class="stat-val dos-green">{{ selectedMonster.floorMin }}–{{ selectedMonster.floorMax }}</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label dos-dim">XP:</span>
-            <span class="stat-val dos-amber">{{ selectedMonster.xpReward }}</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label dos-dim">Gold:</span>
-            <span class="stat-val dos-amber">{{ selectedMonster.goldMin }}–{{ selectedMonster.goldMax }} gp</span>
-          </div>
-        </div>
-
-        <div *ngIf="selectedMonster.abilities.length > 0" class="abilities">
-          <div class="stat-label dos-dim">SPECIAL:</div>
-          <div class="ability-tags">
-            <span *ngFor="let ab of selectedMonster.abilities" class="ability-tag dos-red">
-              ⚠ {{ abilityLabel(ab) }}
-            </span>
-          </div>
-        </div>
-        <div *ngIf="selectedMonster.abilities.length === 0" class="dos-dim no-abilities">
-          No special abilities.
-        </div>
-      </ng-container>
-
-      <ng-template #noSelection>
-        <div class="no-selection dos-dim">
-          <div>Select a creature from the list</div>
-          <div>to read its entry.</div>
-        </div>
-      </ng-template>
+        </ng-container>
+        <ng-template #noItem>
+          <div class="no-selection dos-dim"><div>Select an item</div><div>to read its entry.</div></div>
+        </ng-template>
+      </div>
     </div>
-  </div>
+  </ng-container>
 
   <div class="library-footer">
     <button (click)="back()">[ ESC ] Back to Town</button>
