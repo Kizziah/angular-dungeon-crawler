@@ -76,6 +76,9 @@ export class WorldMapComponent implements OnInit {
     if (x === this.playerX() && y === this.playerY()) {
       return { color: '#ffffff', 'background-color': this.inShip() ? '#001a33' : '#333300' };
     }
+    if (!cell.visited) {
+      return { color: '#111111', 'background-color': '#000000' };
+    }
     const r = TILE_RENDER[cell.type];
     return { color: r.color, 'background-color': r.bg ?? '#000000' };
   }
@@ -84,6 +87,7 @@ export class WorldMapComponent implements OnInit {
     if (x === this.playerX() && y === this.playerY()) {
       return this.inShip() ? '⛵' : '@';
     }
+    if (!cell.visited) return ' ';
     return TILE_RENDER[cell.type].char;
   }
 
