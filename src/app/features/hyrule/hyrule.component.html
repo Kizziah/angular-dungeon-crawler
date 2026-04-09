@@ -1,0 +1,20 @@
+<div class="hyrule-view">
+  <div class="map-title">🗡️ Hyrule — The Overworld</div>
+
+  <div class="viewport" *ngIf="viewport() as vp">
+    <div class="vp-row" *ngFor="let row of vp; let vy = index">
+      <span
+        class="vp-cell"
+        *ngFor="let cell of row; let vx = index"
+        [ngStyle]="cellStyle(cell, vx, vy)"
+        [innerHTML]="cellChar(cell, vx, vy)"
+      ></span>
+    </div>
+  </div>
+
+  <div class="status-bar" [class.visible]="statusMsg()">{{ statusMsg() }}</div>
+
+  <div class="controls-hint">
+    [↑↓←→/WASD] Move &nbsp;|&nbsp; [M] World Map &nbsp;|&nbsp; [Esc] Return to Westeros
+  </div>
+</div>

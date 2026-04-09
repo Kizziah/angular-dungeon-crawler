@@ -117,6 +117,10 @@ export class OverworldComponent implements OnInit, OnDestroy {
         this.setStatus('🌀 A cyan portal swirls open... the Known World awaits!');
         setTimeout(() => this.router.navigate(['/mystara']), 600);
         break;
+      case 'enter-portal3':
+        this.setStatus('🗡️  A golden portal flickers... Hyrule awaits!');
+        setTimeout(() => this.router.navigate(['/hyrule']), 600);
+        break;
       case 'encounter':
         this.setStatus(`⚠️  A monster appears from the ${event.tile}!`);
         break;

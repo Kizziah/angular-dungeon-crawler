@@ -1,0 +1,31 @@
+<div class="hyrule-map-screen">
+  <div class="hyrule-map-header">
+    <span class="title">🗺️  WORLD MAP — HYRULE</span>
+    <span class="hint">[M / Esc] Close</span>
+  </div>
+
+  <div class="hyrule-map-wrap">
+    <div class="hyrule-map-grid" *ngIf="mapRows().length">
+      <div class="map-row" *ngFor="let row of mapRows(); let y = index; trackBy: trackByIndex">
+        <span
+          class="map-cell"
+          *ngFor="let cell of row; let x = index; trackBy: trackByIndex"
+          [ngStyle]="cellStyle(cell)"
+        >{{ cellChar(cell) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hyrule-map-legend">
+    <span class="leg-item"><span style="color:#2255cc">~</span> Ocean</span>
+    <span class="leg-item"><span style="color:#ddbb77">.</span> Shore</span>
+    <span class="leg-item"><span style="color:#44aa44">,</span> Plains</span>
+    <span class="leg-item"><span style="color:#226622">T</span> Forest</span>
+    <span class="leg-item"><span style="color:#888888">^</span> Mountain</span>
+    <span class="leg-item"><span style="color:#ccddee">*</span> Rocky</span>
+    <span class="leg-item"><span style="color:#ffcc00">#</span> Village</span>
+    <span class="leg-item"><span style="color:#aaccff">◆</span> Castle</span>
+    <span class="leg-item"><span style="color:#ff4444">&gt;</span> Dungeon</span>
+    <span class="leg-item"><span style="color:#ffdd44">Ψ</span> Portal</span>
+  </div>
+</div>

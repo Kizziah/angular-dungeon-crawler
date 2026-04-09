@@ -61,7 +61,7 @@ const RAW_MAP: string[] = [
   '~~~~~~~~~.,,,,^^^^^^,,.~~~.ffffffffff.~~~~.,,,,,,,,,,,,,,,,,,,,,fffffffffbff,,,,,,,,r,,ffffffffffffffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~.,,,,^^^^^^,,.~~~.ffffffffff.~~~~.,,,,,,,,,,,,,,,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~.,,,,^^^^^^,,.~~~.ffffffffff.~~~~.,,,,,,,,,,,,,,,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
-  '~~~~~~~~~.,,,pP,,,,,,,.~~~............~~~~...............,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
+  '~~~~~~~~~.,,,pPQ,,,,,,,.~~~............~~~~...............,,,,,,,ffffffff,r,,,,,,,,,,r,,,,,,,,,,,,,,ffffff,,,,,,,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~..............~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.,,,,,,frrrrrbrrrrrrrrrrrrrrrrrrrrrrrrrbrrrrrrrrrrrrrr,,,,,,^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.,,,,,,ffffffff,,,,,,,,,,,,,,,,,,,,,,,,,,,ffffff,,,^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
   '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.,,,,,,ffffffff,,,,,,,,,,,,,,,,,,,,,,,,,,,ffffff,,,^^^^^^^^^^^^^^^^^^^^^^^^^^^^^~~~~~~~~~~~~~~~~~~~~~~~',
@@ -132,7 +132,7 @@ const NAMED_LOCATIONS: { x: number; y: number; type: 'town' | 'city' | 'castle';
 const CHAR_MAP: Record<string, OverworldTileType> = {
   '~': 'ocean', '.': 'coast', ',': 'plains', 'f': 'forest',
   '^': 'mountain', '*': 'snow', '%': 'swamp', '#': 'town',
-  '>': 'dungeon', '=': 'road', 'r': 'river', 'b': 'bridge', 'w': 'wall', 'p': 'portal', 'P': 'portal2',
+  '>': 'dungeon', '=': 'road', 'r': 'river', 'b': 'bridge', 'w': 'wall', 'p': 'portal', 'P': 'portal2', 'Q': 'portal3',
 };
 
 const ENCOUNTER_CHANCE = 0.12;
@@ -222,6 +222,7 @@ export class OverworldService {
       if (targetType === 'dungeon') return { type: 'enter-dungeon', tile: targetType };
       if (targetType === 'portal')  return { type: 'enter-portal',  tile: targetType };
       if (targetType === 'portal2') return { type: 'enter-portal2', tile: targetType };
+      if (targetType === 'portal3') return { type: 'enter-portal3', tile: targetType };
       if (ENCOUNTER_TILES.has(targetType) && Math.random() < ENCOUNTER_CHANCE)
         return { type: 'encounter', tile: targetType };
     }
