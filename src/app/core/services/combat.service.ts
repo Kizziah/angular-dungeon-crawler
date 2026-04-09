@@ -49,7 +49,7 @@ export class CombatService {
 
   resolveMonsterAttack(monster: MonsterInstance, target: Character): CombatResult {
     const roll = rollDice('1d20');
-    const hitThreshold = Math.max(2, 20 - target.ac + 10);
+    const hitThreshold = Math.max(2, 20 - target.ac);
     if (roll < hitThreshold) {
       return { hit: false, damage: 0, message: `${monster.name} misses ${target.name}!` };
     }

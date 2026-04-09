@@ -100,14 +100,15 @@ export class CharacterService {
   calcAC(char: Character): number {
     let ac = 10;
     const eq = char.equipment;
-    if (eq.bodyArmor) ac += (eq.bodyArmor.stats.defense || 0);
-    if (eq.shield) ac += (eq.shield.stats.defense || 0);
-    if (eq.helmet) ac += (eq.helmet.stats.defense || 0);
-    if (eq.gloves) ac += (eq.gloves.stats.defense || 0);
-    if (eq.boots) ac += (eq.boots.stats.defense || 0);
-    if (eq.ring) ac += (eq.ring.stats.defense || 0);
-    if (eq.amulet) ac += (eq.amulet.stats.defense || 0);
-    ac += Math.floor((char.stats.agility - 10) / 2);
+    // Mordor descending AC: lower is better, equipment reduces AC
+    if (eq.bodyArmor) ac -= (eq.bodyArmor.stats.defense || 0);
+    if (eq.shield)    ac -= (eq.shield.stats.defense || 0);
+    if (eq.helmet)    ac -= (eq.helmet.stats.defense || 0);
+    if (eq.gloves)    ac -= (eq.gloves.stats.defense || 0);
+    if (eq.boots)     ac -= (eq.boots.stats.defense || 0);
+    if (eq.ring)      ac -= (eq.ring.stats.defense || 0);
+    if (eq.amulet)    ac -= (eq.amulet.stats.defense || 0);
+    ac -= Math.floor((char.stats.agility - 10) / 2);
     return ac;
   }
 

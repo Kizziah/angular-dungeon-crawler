@@ -96,6 +96,12 @@ export class InventoryComponent implements OnInit {
     return map[key] || key.slice(0, 3).toUpperCase();
   }
 
+  getAttackBonusStr(): string {
+    if (!this.character) return '+0';
+    const b = this.charService.calcAttackBonus(this.character);
+    return b >= 0 ? `+${b}` : `${b}`;
+  }
+
   @HostListener('window:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
     const tag = (e.target as HTMLElement)?.tagName;

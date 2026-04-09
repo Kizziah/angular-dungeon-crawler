@@ -26,7 +26,11 @@
         </div>
         <div class="stat-row">
           <span class="stat-lbl dos-dim">AC:</span>
-          <span class="stat-val">{{ character.ac }}</span>
+          <span class="stat-val">{{ character.ac }} <span class="dos-dim">(lower=better)</span></span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-lbl dos-dim">ATK:</span>
+          <span class="stat-val dos-cyan">{{ getAttackBonusStr() }}</span>
         </div>
         <div class="stat-row">
           <span class="stat-lbl dos-dim">XP:</span>

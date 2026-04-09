@@ -18,6 +18,12 @@
     <span class="mp-label">MP:</span>
     <span class="mp-nums">{{ character.currentMp }}/{{ character.maxMp }}</span>
   </div>
+  <div class="char-combat-stats">
+    <span class="stat-item">AC:<span class="stat-val" [class.ac-good]="getAC() <= 5" [class.ac-bad]="getAC() >= 9">{{ getAC() }}</span></span>
+    <span class="stat-item">ATK:<span class="stat-val atk-val">{{ getAttackBonusStr() }}</span></span>
+    <span class="stat-item">STR:<span class="stat-val">{{ character.stats.strength }}</span></span>
+    <span class="stat-item">AGI:<span class="stat-val">{{ character.stats.agility }}</span></span>
+  </div>
   <div class="char-actions">
     <button *ngIf="!character.inParty" (click)="addToParty.emit(character)" class="btn-add">+Party</button>
     <button *ngIf="character.inParty" (click)="removeFromParty.emit(character)" class="btn-remove">-Party</button>

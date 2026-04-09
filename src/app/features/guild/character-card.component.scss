@@ -98,6 +98,28 @@
     }
   }
 
+  .char-combat-stats {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+
+    .stat-item {
+      color: var(--dos-green-dim);
+
+      .stat-val {
+        margin-left: 2px;
+        color: var(--dos-white);
+        font-weight: bold;
+
+        &.ac-good { color: var(--dos-green); }
+        &.ac-bad  { color: var(--dos-amber); }
+        &.atk-val { color: var(--dos-cyan); }
+      }
+    }
+  }
+
   .char-actions {
     display: flex;
     gap: 6px;

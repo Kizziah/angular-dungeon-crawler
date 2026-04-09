@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Character } from '../../core/models/character.model';
+import { CharacterService } from '../../core/services/character.service';
 
 @Component({
   selector: 'app-character-card',
@@ -15,6 +16,8 @@ export class CharacterCardComponent {
   @Output() addToParty = new EventEmitter<Character>();
   @Output() removeFromParty = new EventEmitter<Character>();
   @Output() viewInventory = new EventEmitter<Character>();
+
+  private charService = inject(CharacterService);
 
   getHpPercent(): number {
     return Math.round((this.character.currentHp / this.character.maxHp) * 100);
@@ -37,5 +40,18 @@ export class CharacterCardComponent {
       case 'Ashes': return '#666666';
       default: return '#33ff33';
     }
+  }
+
+  getAC(): number {
+    return this.charService.calcAC(this.character);
+  }
+
+  getAttackBonus(): number {
+    return this.charService.calcAttackBonus(this.character);
+  }
+
+  getAttackBonusStr(): string {
+    const b = this.getAttackBonus();
+    return b >= 0 ? `+${b}` : `${b}`;
   }
 }
