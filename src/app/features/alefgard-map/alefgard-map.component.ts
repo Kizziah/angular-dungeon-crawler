@@ -5,17 +5,18 @@ import { AlefgardService } from '../../core/services/alefgard.service';
 import { TILE_RENDER, OverworldCell } from '../../core/models/overworld.model';
 
 const ALEFGARD_LOCATIONS = [
-  { x: 21, y: 18, name: 'Tantegel' },
-  { x: 21, y: 22, name: 'Brecconary' },
-  { x: 40, y:  8, name: 'Kol' },
-  { x: 14, y: 42, name: 'Garinham' },
-  { x: 63, y: 27, name: 'Rimuldar' },
-  { x: 36, y: 48, name: 'Hauksness' },
-  { x: 18, y: 50, name: 'Cantlin' },
-  { x: 50, y: 44, name: 'Charlock' },
-  { x: 42, y: 48, name: "Erdrick's Cave" },
-  { x: 30, y: 14, name: 'Mtn Cave' },
-  { x: 17, y: 20, name: 'Portal' },
+  { x: 46, y:  44, name: 'Tantegel' },
+  { x: 46, y:  50, name: 'Brecconary' },
+  { x: 51, y:  12, name: 'Kol' },
+  { x: 51, y:  34, name: 'Mtn Cave' },
+  { x: 36, y:  59, name: 'Garinham' },
+  { x: 90, y:  44, name: 'Rimuldar' },
+  { x: 62, y:  82, name: 'Hauksness' },
+  { x: 70, y:  94, name: 'Cantlin' },
+  { x: 62, y:  74, name: 'Charlock' },
+  { x: 60, y:  64, name: 'Swamp Cave' },
+  { x: 58, y:  90, name: "Erdrick's Cave" },
+  { x: 40, y:  44, name: 'Portal' },
 ];
 
 @Component({
