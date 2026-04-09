@@ -7,19 +7,48 @@ import { TILE_RENDER, OverworldCell } from '../../core/models/overworld.model';
 
 const NAMED_LOCATIONS = [
   { x: 16,  y: 42, name: 'Dejenol' },
-  { x: 90,  y: 27, name: 'Winterfell' },
+  // The Wall
+  { x: 70,  y: 14, name: 'Eastwatch' },
   { x: 90,  y: 14, name: 'Castle Black' },
+  { x: 110, y: 14, name: 'Shadow Tower' },
+  // The North
+  { x: 76,  y: 24, name: 'Deepwood Motte' },
+  { x: 90,  y: 27, name: 'Winterfell' },
+  { x: 100, y: 21, name: 'Dreadfort' },
+  { x: 107, y: 23, name: 'Last Hearth' },
   { x: 115, y: 26, name: 'White Harbor' },
+  { x: 48,  y: 42, name: 'Bear Island' },
+  // Riverlands / Neck
   { x: 80,  y: 36, name: 'Moat Cailin' },
+  { x: 84,  y: 44, name: 'Stoney Sept' },
+  { x: 66,  y: 47, name: 'The Twins' },
   { x: 78,  y: 46, name: 'Riverrun' },
+  { x: 80,  y: 48, name: 'Pinkmaiden' },
   { x: 90,  y: 52, name: 'Harrenhal' },
+  // Vale
+  { x: 120, y: 36, name: 'Gulltown' },
   { x: 112, y: 44, name: 'The Eyrie' },
+  { x: 108, y: 50, name: 'Runestone' },
+  // Westerlands
   { x: 58,  y: 46, name: 'Casterly Rock' },
-  { x: 100, y: 64, name: 'Dragonstone' },
+  { x: 56,  y: 50, name: 'Lannisport' },
+  { x: 48,  y: 55, name: 'Pyke' },
+  // Crownlands
+  { x: 90,  y: 58, name: 'Duskendale' },
   { x: 100, y: 60, name: "King's Landing" },
+  { x: 100, y: 64, name: 'Dragonstone' },
+  // The Reach
   { x: 68,  y: 66, name: 'Highgarden' },
+  { x: 80,  y: 72, name: 'Bitterbridge' },
+  { x: 65,  y: 74, name: 'Oldtown' },
+  // Stormlands / Dorne
   { x: 120, y: 66, name: "Storm's End" },
+  { x: 88,  y: 76, name: 'Starfall' },
   { x: 106, y: 74, name: 'Sunspear' },
+  // Portals
+  { x: 13,  y: 46, name: '→ Alefgard' },
+  { x: 14,  y: 46, name: '→ Mystara' },
+  { x: 15,  y: 46, name: '→ Hyrule' },
 ];
 
 @Component({

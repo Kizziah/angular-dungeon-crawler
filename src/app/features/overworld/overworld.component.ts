@@ -41,8 +41,9 @@ export class OverworldComponent implements OnInit, OnDestroy {
   playerVPY = computed(() => Math.floor(VP_H / 2));
 
   ngOnInit(): void {
-    const newState = this.overworldService.initOverworld();
-    this.gameState.overworldState.set(newState);
+    if (!this.gameState.overworldState()) {
+      this.gameState.overworldState.set(this.overworldService.initOverworld());
+    }
     this.setStatus('⚔️  You step onto the overworld. Use arrows or WASD to move.');
   }
 
@@ -122,11 +123,22 @@ export class OverworldComponent implements OnInit, OnDestroy {
         setTimeout(() => this.router.navigate(['/hyrule']), 600);
         break;
       case 'encounter':
-        this.setStatus(`⚠️  A monster appears from the ${event.tile}!`);
+        this.setStatus(this.encounterMsg(event.tile));
         break;
       case 'move':
         this.clearStatus();
         break;
+    }
+  }
+
+  private encounterMsg(tile?: string): string {
+    switch (tile) {
+      case 'forest':  return '🐺 A pack of wolves charges from the trees!';
+      case 'plains':  return '⚔️  Bandits leap from the tall grass!';
+      case 'swamp':   return '🐍 Something slithers up from the bog!';
+      case 'snow':    return '🧊 White Walkers stir in the frozen wastes!';
+      case 'coast':   return '🦀 Strange creatures lurk along the shore!';
+      default:        return '⚠️  An enemy blocks your path!';
     }
   }
 
