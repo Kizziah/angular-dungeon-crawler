@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "ng build && aws s3 sync dist/mordor/browser/ s3://YOUR-BUCKET-NAME --delete"
   },
   "private": true,
   "dependencies": {
