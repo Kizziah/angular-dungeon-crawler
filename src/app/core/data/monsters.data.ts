@@ -301,5 +301,265 @@ export const MONSTERS: MonsterDef[] = [
     hp: '7d8+14', ac: 17, attack: '2d8+2', attackCount: 1,
     abilities: ['cast-spell'], xpReward: 1200, goldMin: 70, goldMax: 300,
     floorMin: 42, floorMax: 60, description: 'A powerful wind spirit from another plane.'
+  },
+
+  // ── Westeros / Game of Thrones ──────────────────────────────────────────────
+  {
+    id: 'direwolf', name: 'Direwolf', symbol: '🐺❄️', color: '#cccccc',
+    hp: '3d8+6', ac: 15, attack: '1d8+2', attackCount: 1,
+    abilities: [], xpReward: 120, goldMin: 0, goldMax: 8,
+    floorMin: 3, floorMax: 12, description: 'A massive wolf as large as a horse, the sigil beast of House Stark.'
+  },
+  {
+    id: 'wildling', name: 'Wildling', symbol: '🏔️🗡️', color: '#886633',
+    hp: '2d8+2', ac: 13, attack: '1d6+1', attackCount: 1,
+    abilities: [], xpReward: 55, goldMin: 2, goldMax: 18,
+    floorMin: 2, floorMax: 10, description: 'A fierce raider from beyond the Wall, hardened by the frozen wilderness.'
+  },
+  {
+    id: 'white-walker', name: 'White Walker', symbol: '🧊💀', color: '#aaddff',
+    hp: '5d8+10', ac: 17, attack: '1d8+2', attackCount: 1,
+    abilities: ['drain-level', 'breathe-cold'], xpReward: 550, goldMin: 5, goldMax: 30,
+    floorMin: 15, floorMax: 35, description: 'An ancient ice undead general. Its touch drains life and freezes the soul.'
+  },
+  {
+    id: 'wight-walker', name: 'Wight', symbol: '💀🧊', color: '#88aacc',
+    hp: '3d8+6', ac: 14, attack: '1d6+1', attackCount: 1,
+    abilities: ['paralyze'], xpReward: 200, goldMin: 0, goldMax: 15,
+    floorMin: 12, floorMax: 28, description: 'A dead soldier reanimated by the cold magic of the White Walkers.'
+  },
+  {
+    id: 'faceless-assassin', name: 'Faceless Assassin', symbol: '🎭🗡️', color: '#444444',
+    hp: '4d8', ac: 16, attack: '1d6+3', attackCount: 2,
+    abilities: ['poison', 'instant-kill'], xpReward: 650, goldMin: 30, goldMax: 100,
+    floorMin: 20, floorMax: 40, description: 'A servant of the Many-Faced God. Strikes from the shadows with deadly precision.'
+  },
+  {
+    id: 'mountain-clansman', name: 'Mountain Clansman', symbol: '⛰️⚔️', color: '#887755',
+    hp: '3d10+6', ac: 15, attack: '1d10+2', attackCount: 1,
+    abilities: [], xpReward: 175, goldMin: 10, goldMax: 40,
+    floorMin: 5, floorMax: 18, description: 'A rugged hill warrior from the Vale clans, clad in rough hides.'
+  },
+  {
+    id: 'maester', name: 'Maester', symbol: '📜🔗', color: '#886688',
+    hp: '3d6+3', ac: 13, attack: '1d6', attackCount: 1,
+    abilities: ['cast-spell'], xpReward: 220, goldMin: 20, goldMax: 70,
+    floorMin: 8, floorMax: 22, description: 'A learned scholar of the Citadel who wields subtle and dangerous magic.'
+  },
+  {
+    id: 'kingsguard', name: 'Kingsguard', symbol: '🛡️⚔️', color: '#ffffff',
+    hp: '5d10+10', ac: 19, attack: '1d10+4', attackCount: 1,
+    abilities: [], xpReward: 500, goldMin: 40, goldMax: 150,
+    floorMin: 18, floorMax: 35, description: 'An elite knight in white plate armor. Among the finest swords in the realm.'
+  },
+  {
+    id: 'dothraki-rider', name: 'Dothraki Rider', symbol: '🐎⚔️', color: '#cc8833',
+    hp: '3d8+3', ac: 14, attack: '1d8+1', attackCount: 2,
+    abilities: [], xpReward: 250, goldMin: 15, goldMax: 55,
+    floorMin: 10, floorMax: 25, description: 'A fearsome horse-lord warrior of the Dothraki sea. Strikes twice with curved arakh.'
+  },
+  {
+    id: 'shadowcat', name: 'Shadowcat', symbol: '🐆🌑', color: '#222244',
+    hp: '2d8+4', ac: 15, attack: '1d6+1', attackCount: 2,
+    abilities: [], xpReward: 130, goldMin: 0, goldMax: 10,
+    floorMin: 4, floorMax: 14, description: 'A large black predatory cat with a white stripe. Hunts silently from the shadows.'
+  },
+
+  // ── Alefgard / Dragon Warrior ───────────────────────────────────────────────
+  {
+    id: 'slime', name: 'Slime', symbol: '💧😊', color: '#4488ff',
+    hp: '1d4+1', ac: 11, attack: '1d3', attackCount: 1,
+    abilities: [], xpReward: 8, goldMin: 1, goldMax: 4,
+    floorMin: 1, floorMax: 4, description: 'A cheerful blue blob. Weak but unexpectedly resilient.'
+  },
+  {
+    id: 'drakee', name: 'Drakee', symbol: '🦇🔴', color: '#cc4466',
+    hp: '1d6+1', ac: 12, attack: '1d4', attackCount: 1,
+    abilities: [], xpReward: 12, goldMin: 1, goldMax: 6,
+    floorMin: 1, floorMax: 6, description: 'A small bat-like dragon that swoops at adventurers in dark corridors.'
+  },
+  {
+    id: 'ghost-dq', name: 'Ghost', symbol: '👻💜', color: '#bb88ff',
+    hp: '2d6+2', ac: 13, attack: '1d6', attackCount: 1,
+    abilities: ['petrify'], xpReward: 75, goldMin: 0, goldMax: 12,
+    floorMin: 3, floorMax: 10, description: 'A floating spirit that can freeze enemies with supernatural terror.'
+  },
+  {
+    id: 'magician-dq', name: 'Magician', symbol: '🧙🪄', color: '#cc6688',
+    hp: '2d8+2', ac: 13, attack: '1d6', attackCount: 1,
+    abilities: ['cast-spell'], xpReward: 110, goldMin: 10, goldMax: 35,
+    floorMin: 5, floorMax: 15, description: 'A robed spellcaster whose arcane bolts punch through armor.'
+  },
+  {
+    id: 'metal-slime', name: 'Metal Slime', symbol: '🪙😐', color: '#ccccdd',
+    hp: '1d2', ac: 20, attack: '1d3', attackCount: 1,
+    abilities: ['steal-gold'], xpReward: 1000, goldMin: 50, goldMax: 200,
+    floorMin: 5, floorMax: 20, description: 'A tiny silver slime nearly impossible to hit. Flees instantly, but worth a fortune.'
+  },
+  {
+    id: 'scorpion', name: 'Scorpion', symbol: '🦂🟡', color: '#ccaa00',
+    hp: '2d6+2', ac: 14, attack: '1d6', attackCount: 1,
+    abilities: ['poison'], xpReward: 90, goldMin: 0, goldMax: 15,
+    floorMin: 4, floorMax: 12, description: 'A large desert scorpion with a venomous sting.'
+  },
+  {
+    id: 'wyvern', name: 'Wyvern', symbol: '🐉💨', color: '#669933',
+    hp: '5d10+10', ac: 16, attack: '1d10+3', attackCount: 2,
+    abilities: ['breathe-fire'], xpReward: 500, goldMin: 20, goldMax: 90,
+    floorMin: 15, floorMax: 30, description: 'A two-legged dragon-kin that breathes gouts of flame.'
+  },
+  {
+    id: 'golem-dq', name: 'Golem', symbol: '🗿⚙️', color: '#886644',
+    hp: '7d10+14', ac: 18, attack: '2d8+3', attackCount: 1,
+    abilities: [], xpReward: 700, goldMin: 0, goldMax: 40,
+    floorMin: 20, floorMax: 40, description: 'A clay guardian immune to magic, animated by an ancient alchemical process.'
+  },
+  {
+    id: 'dragonlord-knight', name: 'Dragonlord Knight', symbol: '⚔️🐉', color: '#882200',
+    hp: '8d10+16', ac: 19, attack: '2d8+5', attackCount: 1,
+    abilities: ['drain-level'], xpReward: 1100, goldMin: 60, goldMax: 250,
+    floorMin: 35, floorMax: 55, description: 'An armored champion in service to the Dragonlord. His black blade drains life.'
+  },
+  {
+    id: 'stoneman', name: 'Stoneman', symbol: '🪨💪', color: '#998877',
+    hp: '6d10+12', ac: 17, attack: '2d8+4', attackCount: 1,
+    abilities: [], xpReward: 600, goldMin: 10, goldMax: 80,
+    floorMin: 25, floorMax: 45, description: 'A massive earth elemental humanoid of the deep dungeon.'
+  },
+
+  // ── Mystara / D&D Known World ───────────────────────────────────────────────
+  {
+    id: 'gnome', name: 'Gnome', symbol: '🧑‍🔧💎', color: '#886633',
+    hp: '1d8+1', ac: 13, attack: '1d6', attackCount: 1,
+    abilities: ['steal-gold'], xpReward: 60, goldMin: 5, goldMax: 25,
+    floorMin: 5, floorMax: 15, description: 'A small earth creature with nimble hands. Quick to pilfer a coin purse.'
+  },
+  {
+    id: 'bugbear', name: 'Bugbear', symbol: '🐻⚔️', color: '#886633',
+    hp: '3d8+6', ac: 15, attack: '1d8+2', attackCount: 1,
+    abilities: [], xpReward: 160, goldMin: 8, goldMax: 35,
+    floorMin: 8, floorMax: 20, description: 'A large, stealthy goblinoid that ambushes from the darkness.'
+  },
+  {
+    id: 'centaur', name: 'Centaur', symbol: '🏇🏹', color: '#cc9966',
+    hp: '4d8+4', ac: 15, attack: '1d6+2', attackCount: 2,
+    abilities: [], xpReward: 280, goldMin: 10, goldMax: 50,
+    floorMin: 10, floorMax: 25, description: 'A horse-man warrior that attacks twice with hooves and bow.'
+  },
+  {
+    id: 'blink-dog', name: 'Blink Dog', symbol: '🐕✨', color: '#ccaa66',
+    hp: '2d8+2', ac: 16, attack: '1d6', attackCount: 1,
+    abilities: [], xpReward: 140, goldMin: 0, goldMax: 8,
+    floorMin: 6, floorMax: 18, description: 'A teleporting canine that vanishes mid-combat, reappearing to attack from behind.'
+  },
+  {
+    id: 'rust-monster', name: 'Rust Monster', symbol: '🦞🔧', color: '#cc8844',
+    hp: '4d8', ac: 16, attack: '1d6', attackCount: 1,
+    abilities: ['steal-gold'], xpReward: 300, goldMin: 0, goldMax: 30,
+    floorMin: 12, floorMax: 28, description: 'Its antennae corrode metal on contact, destroying weapons and armor.'
+  },
+  {
+    id: 'rakshasa', name: 'Rakshasa', symbol: '🐯🔮', color: '#cc6622',
+    hp: '7d8+14', ac: 17, attack: '2d6+2', attackCount: 1,
+    abilities: ['cast-spell', 'petrify'], xpReward: 900, goldMin: 60, goldMax: 250,
+    floorMin: 30, floorMax: 55, description: 'A tiger-headed demon noble who weaves illusions and hardens enemies to stone.'
+  },
+  {
+    id: 'mind-flayer', name: 'Mind Flayer', symbol: '🪸🧠', color: '#9955bb',
+    hp: '8d8+16', ac: 17, attack: '2d4', attackCount: 4,
+    abilities: ['drain-level'], xpReward: 1300, goldMin: 80, goldMax: 300,
+    floorMin: 35, floorMax: 60, description: 'A tentacled psionic horror. Four attacks drain life as it devours minds.'
+  },
+  {
+    id: 'displacer-beast', name: 'Displacer Beast', symbol: '🐆👁️', color: '#334488',
+    hp: '5d10+10', ac: 19, attack: '1d8+2', attackCount: 2,
+    abilities: [], xpReward: 500, goldMin: 15, goldMax: 70,
+    floorMin: 18, floorMax: 38, description: 'A panther-like beast with two tentacles. Appears to be where it is not.'
+  },
+  {
+    id: 'owlbear', name: 'Owlbear', symbol: '🦉🐻', color: '#886633',
+    hp: '5d8+10', ac: 15, attack: '1d8+3', attackCount: 2,
+    abilities: [], xpReward: 360, goldMin: 5, goldMax: 40,
+    floorMin: 12, floorMax: 28, description: 'A ferocious hybrid of owl and bear. Attacks with razor talons twice.'
+  },
+  {
+    id: 'treant', name: 'Treant', symbol: '🌳🤜', color: '#448833',
+    hp: '6d10+18', ac: 17, attack: '2d6+4', attackCount: 2,
+    abilities: [], xpReward: 600, goldMin: 0, goldMax: 50,
+    floorMin: 15, floorMax: 35, description: 'A living tree of immense strength. Its bark-covered fists crush stone.'
+  },
+  {
+    id: 'naga', name: 'Naga', symbol: '🐍🔮', color: '#226644',
+    hp: '6d8+12', ac: 16, attack: '1d8+2', attackCount: 1,
+    abilities: ['poison', 'cast-spell'], xpReward: 700, goldMin: 30, goldMax: 130,
+    floorMin: 22, floorMax: 42, description: 'A serpent with a human-like head. Combines venomous bites with arcane magic.'
+  },
+  {
+    id: 'gargoyle', name: 'Gargoyle', symbol: '🗿🦇', color: '#888899',
+    hp: '4d8+8', ac: 17, attack: '1d6+1', attackCount: 2,
+    abilities: [], xpReward: 320, goldMin: 0, goldMax: 35,
+    floorMin: 14, floorMax: 30, description: 'A winged stone creature that lurks on cornices, immune to non-magical weapons.'
+  },
+
+  // ── Hyrule / Zelda ─────────────────────────────────────────────────────────
+  {
+    id: 'bokoblin', name: 'Bokoblin', symbol: '👺🏏', color: '#cc4466',
+    hp: '1d6+1', ac: 12, attack: '1d4+1', attackCount: 1,
+    abilities: [], xpReward: 18, goldMin: 1, goldMax: 8,
+    floorMin: 1, floorMax: 5, description: 'A weak pink goblin-like creature armed with a crude bone club.'
+  },
+  {
+    id: 'moblin', name: 'Moblin', symbol: '🐷🔱', color: '#aa6633',
+    hp: '2d8+4', ac: 14, attack: '1d8+1', attackCount: 1,
+    abilities: [], xpReward: 70, goldMin: 3, goldMax: 20,
+    floorMin: 3, floorMax: 12, description: 'A pig-snouted soldier armed with a long spear. Patrols dungeon corridors.'
+  },
+  {
+    id: 'keese', name: 'Keese', symbol: '🦇🔥', color: '#ff6600',
+    hp: '1d4+2', ac: 14, attack: '1d4', attackCount: 1,
+    abilities: ['breathe-fire'], xpReward: 22, goldMin: 0, goldMax: 5,
+    floorMin: 2, floorMax: 8, description: 'A bat that flits through dungeon air with wings sheathed in flame.'
+  },
+  {
+    id: 'lizalfos', name: 'Lizalfos', symbol: '🦎⚡', color: '#33aa55',
+    hp: '3d8+6', ac: 16, attack: '1d8+2', attackCount: 1,
+    abilities: [], xpReward: 190, goldMin: 8, goldMax: 35,
+    floorMin: 8, floorMax: 20, description: 'An agile lizard warrior that leaps across the battlefield with frightening speed.'
+  },
+  {
+    id: 'stalfos', name: 'Stalfos', symbol: '💀⚔️', color: '#ccccaa',
+    hp: '4d8+8', ac: 17, attack: '1d8+3', attackCount: 1,
+    abilities: ['drain-level'], xpReward: 370, goldMin: 10, goldMax: 45,
+    floorMin: 10, floorMax: 25, description: 'A skeleton knight reborn in darkness. Its blade saps the life of those it strikes.'
+  },
+  {
+    id: 'peahat', name: 'Peahat', symbol: '🌀🌿', color: '#44aa44',
+    hp: '2d8+4', ac: 15, attack: '1d6+1', attackCount: 1,
+    abilities: ['paralyze'], xpReward: 150, goldMin: 0, goldMax: 20,
+    floorMin: 5, floorMax: 15, description: 'A spinning plant-blade that whirls across the floor, numbing those it strikes.'
+  },
+  {
+    id: 'wizzrobe', name: 'Wizzrobe', symbol: '🧙‍♂️⚡', color: '#8844cc',
+    hp: '3d8+6', ac: 16, attack: '1d8+2', attackCount: 1,
+    abilities: ['cast-spell'], xpReward: 350, goldMin: 25, goldMax: 80,
+    floorMin: 12, floorMax: 30, description: 'A teleporting wizard in a pointed hat. Vanishes and reappears to hurl magic bolts.'
+  },
+  {
+    id: 'darknut', name: 'Darknut', symbol: '🛡️🗡️', color: '#443322',
+    hp: '5d10+10', ac: 20, attack: '1d10+4', attackCount: 1,
+    abilities: [], xpReward: 450, goldMin: 25, goldMax: 100,
+    floorMin: 15, floorMax: 35, description: 'A heavily armored knight in full plate. Its shield deflects most frontal attacks.'
+  },
+  {
+    id: 'lynel', name: 'Lynel', symbol: '🦁⚔️', color: '#cc4422',
+    hp: '7d10+14', ac: 18, attack: '2d8+5', attackCount: 2,
+    abilities: ['breathe-fire'], xpReward: 1000, goldMin: 50, goldMax: 200,
+    floorMin: 20, floorMax: 40, description: 'A fearsome lion-centaur with a raised sword. One of the most dangerous creatures in Hyrule.'
+  },
+  {
+    id: 'poe', name: 'Poe', symbol: '🏮👻', color: '#88aaff',
+    hp: '3d8', ac: 15, attack: '1d6+1', attackCount: 1,
+    abilities: ['drain-level'], xpReward: 240, goldMin: 5, goldMax: 30,
+    floorMin: 8, floorMax: 22, description: 'A lantern-carrying ghost that haunts graveyards and dungeons, draining life.'
   }
 ];
