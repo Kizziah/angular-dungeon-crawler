@@ -15,7 +15,7 @@ export class CharacterService {
     const maxHp = Math.max(1, rollDice(classDef.hitDie) + Math.floor((stats.vitality - 10) / 2) + raceDef.hpBonus);
     const maxMp = classDef.spellProgression ? Math.floor((stats.intelligence + stats.piety) / 2) : 0;
     return {
-      id: crypto.randomUUID(),
+      id: this.generateId(),
       name,
       race,
       class: cls,
@@ -119,6 +119,18 @@ export class CharacterService {
   calcAttackBonus(char: Character): number {
     const classDef = CLASSES.find(c => c.name === char.class)!;
     return Math.floor(char.level * classDef.attackBonus / 2) + Math.floor((char.stats.strength - 10) / 2);
+  }
+
+  private generateId(): string {
+    // crypto.randomUUID() requires a secure context (HTTPS).
+    // localhost is exempt, but plain HTTP on S3 is not — use a fallback.
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
   }
 
   isAlive(char: Character): boolean {
