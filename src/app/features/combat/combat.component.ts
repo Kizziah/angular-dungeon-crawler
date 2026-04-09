@@ -23,7 +23,7 @@ export class CombatComponent implements OnInit {
   private combatService = inject(CombatService);
   private router = inject(Router);
 
-  @Output() done = new EventEmitter<void>();
+  @Output() done = new EventEmitter<'victory' | 'defeat' | 'fled'>();
 
   combatState: CombatState | null = null;
   selectedEnemyIndex = 0;
@@ -31,7 +31,7 @@ export class CombatComponent implements OnInit {
   ngOnInit(): void {
     const cs = this.gameState.combatState();
     if (!cs) {
-      this.done.emit();
+      this.done.emit('victory');
       return;
     }
     this.combatState = cs;
@@ -89,7 +89,7 @@ export class CombatComponent implements OnInit {
     } else if (newState.phase === 'defeat') {
       this.handleDefeat(newState);
     } else if (newState.phase === 'fled') {
-      this.done.emit();
+      this.done.emit('fled');
     }
   }
 
@@ -130,8 +130,9 @@ export class CombatComponent implements OnInit {
   }
 
   continueAfterCombat(): void {
+    const phase = this.combatState?.phase as 'victory' | 'defeat' | 'fled' | undefined;
     this.gameState.combatState.set(null);
-    this.done.emit();
+    this.done.emit(phase ?? 'victory');
   }
 
   @HostListener('window:keydown', ['$event'])

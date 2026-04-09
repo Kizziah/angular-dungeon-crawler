@@ -40,7 +40,7 @@
 
       <!-- Combat (replaces party/log while in combat) -->
       <ng-container *ngIf="inCombat; else explorePanel">
-        <app-combat (done)="onCombatDone()"></app-combat>
+        <app-combat (done)="onCombatDone($event)"></app-combat>
       </ng-container>
 
       <ng-template #explorePanel>

@@ -117,10 +117,23 @@ export class DungeonComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCombatDone(): void {
+  onCombatDone(result: 'victory' | 'defeat' | 'fled'): void {
     this.gameState.combatState.set(null);
     this.party = this.gameState.activeParty();
-    this.addLog('Combat over. Continuing exploration.');
+
+    if (result === 'defeat') {
+      this.addLog('💀 The party has been slain...');
+      // Remove dungeon state so next entry restarts
+      this.gameState.dungeonState.set(null);
+      this.router.navigate(['/guild']);
+      return;
+    }
+
+    if (result === 'fled') {
+      this.addLog('You fled from combat!');
+    } else {
+      this.addLog('Victory! Continuing exploration.');
+    }
   }
 
   handleTrap(trap: any): void {
