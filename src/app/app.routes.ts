@@ -8,6 +8,7 @@ export const routes: Routes = [
   { path: 'alefgard', loadComponent: () => import('./features/alefgard/alefgard.component').then(m => m.AlefgardComponent) },
   { path: 'alefgard-map', loadComponent: () => import('./features/alefgard-map/alefgard-map.component').then(m => m.AlefgardMapComponent) },
   { path: 'mystara', loadComponent: () => import('./features/mystara/mystara.component').then(m => m.MystaraComponent) },
+  { path: 'mystara-map', loadComponent: () => import('./features/mystara-map/mystara-map.component').then(m => m.MystaraMapComponent) },
   { path: 'create-character', loadComponent: () => import('./features/character-creation/character-creation.component').then(m => m.CharacterCreationComponent) },
   { path: 'town', loadComponent: () => import('./features/town/town.component').then(m => m.TownComponent) },
   { path: 'town/inn', loadComponent: () => import('./features/town/inn.component').then(m => m.InnComponent) },

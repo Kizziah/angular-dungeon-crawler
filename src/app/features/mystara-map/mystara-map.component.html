@@ -1,0 +1,32 @@
+<div class="mystara-map-screen">
+  <div class="mystara-map-header">
+    <span class="title">🗺️  WORLD MAP — MYSTARA (THE KNOWN WORLD)</span>
+    <span class="hint">[M / Esc] Close</span>
+  </div>
+
+  <div class="mystara-map-wrap">
+    <div class="mystara-map-grid" *ngIf="mapRows().length">
+      <div class="map-row" *ngFor="let row of mapRows(); let y = index; trackBy: trackByIndex">
+        <span
+          class="map-cell"
+          *ngFor="let cell of row; let x = index; trackBy: trackByIndex"
+          [ngStyle]="cellStyle(cell)"
+        >{{ cellChar(cell) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mystara-map-legend">
+    <span class="leg-item"><span style="color:#2255cc">~</span> Ocean</span>
+    <span class="leg-item"><span style="color:#44bbaa">.</span> Coast</span>
+    <span class="leg-item"><span style="color:#44aa44">,</span> Plains</span>
+    <span class="leg-item"><span style="color:#226622">T</span> Forest</span>
+    <span class="leg-item"><span style="color:#888888">^</span> Mountain</span>
+    <span class="leg-item"><span style="color:#ccaa55">*</span> Desert</span>
+    <span class="leg-item"><span style="color:#557755">%</span> Swamp</span>
+    <span class="leg-item"><span style="color:#ffcc00">#</span> Town/City</span>
+    <span class="leg-item"><span style="color:#aaccff">◆</span> Castle</span>
+    <span class="leg-item"><span style="color:#ff4444">&gt;</span> Dungeon</span>
+    <span class="leg-item"><span style="color:#88ffff">Ø</span> Portal</span>
+  </div>
+</div>
