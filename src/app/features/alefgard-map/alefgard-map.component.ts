@@ -6,17 +6,17 @@ import { TILE_RENDER, OverworldCell } from '../../core/models/overworld.model';
 
 const ALEFGARD_LOCATIONS = [
   { x: 42, y:  43, name: 'Tantegel' },
-  { x: 42, y:  47, name: 'Brecconary' },
+  { x: 42, y:  46, name: 'Brecconary' },
   { x: 40, y:   9, name: 'Kol' },
   { x: 46, y:  30, name: 'Mtn Cave' },
   { x: 14, y:  60, name: 'Garinham' },
-  { x: 88, y:  44, name: 'Rimuldar' },
+  { x: 88, y:  45, name: 'Rimuldar' },
   { x: 22, y: 104, name: 'Hauksness' },
-  { x: 80, y: 112, name: 'Cantlin' },
+  { x: 82, y: 107, name: 'Cantlin' },
   { x: 62, y:  84, name: 'Charlock' },
-  { x: 52, y:  82, name: 'Swamp Cave' },
+  { x: 53, y:  81, name: 'Swamp Cave' },
   { x: 54, y: 112, name: "Erdrick's Cave" },
-  { x: 38, y:  43, name: 'Portal' },
+  { x: 40, y:  43, name: 'Portal' },
 ];
 
 @Component({
