@@ -158,9 +158,9 @@ export class OverworldComponent implements OnInit, OnDestroy {
   cellStyle(cell: OverworldCell | null, vpX: number, vpY: number): Record<string, string> {
     const isPlayer = vpX === this.playerVPX() && vpY === this.playerVPY();
     if (isPlayer) {
-      // Cyan tint when sailing
-      const bg = this.inShip() ? '#001a33' : '#333300';
-      return { color: '#ffffff', 'background-color': bg };
+      // Let CSS handle player color/glow; just set a subtle background
+      const bg = this.inShip() ? '#001a33' : '#1a1400';
+      return { 'background-color': bg };
     }
 
     const c = cell ?? this.OOB_CELL;
@@ -170,7 +170,7 @@ export class OverworldComponent implements OnInit, OnDestroy {
 
   cellChar(cell: OverworldCell | null, vpX: number, vpY: number): string {
     if (vpX === this.playerVPX() && vpY === this.playerVPY()) {
-      return this.inShip() ? '⛵' : '@';
+      return this.inShip() ? '⛵' : '☺';
     }
     const c = cell ?? this.OOB_CELL;
     return TILE_RENDER[c.type].char;

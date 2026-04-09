@@ -63,6 +63,20 @@ $text: #cccccc;
   cursor: default;
 }
 
+@keyframes player-pulse {
+  0%, 100% { text-shadow: 0 0 4px #ffdd00, 0 0 8px #ffaa00; }
+  50%       { text-shadow: 0 0 8px #ffffff, 0 0 16px #ffdd00, 0 0 24px #ff8800; }
+}
+
+.player-tile {
+  color: #ffee44 !important;
+  background-color: transparent !important;
+  font-size: 1.25rem !important;
+  animation: player-pulse 1.4s ease-in-out infinite;
+  z-index: 1;
+  position: relative;
+}
+
 .status-bar {
   margin-top: 10px;
   height: 1.6em;
