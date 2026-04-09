@@ -118,7 +118,7 @@ export class HyruleService {
         const type = (CHAR_MAP[ch] ?? 'ocean') as OverworldTileType;
         row.push({
           type,
-          visited: false,
+          visited: true,
           passable: !IMPASSABLE_TILES.has(type),
         });
       }
