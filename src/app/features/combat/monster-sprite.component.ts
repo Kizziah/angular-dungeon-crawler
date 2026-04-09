@@ -530,6 +530,38 @@ DRAW_FNS['wizzrobe'] = p => { const dk = shade(p,-50); const li = shade(p,70);
     <circle cx="6"  cy="48" r="3" fill="${Y}" opacity="0.5"/>`;
 };
 
+DRAW_FNS['clansman'] = p => { const dk = shade(p,-60); const fur = '#6b4f2a';
+  return `
+    <!-- fur cloak -->
+    <path d="M16,38 Q32,62 48,38 Q44,54 32,62 Q20,54 16,38 Z" fill="${fur}" stroke="#3e2f1c" stroke-width="2"/>
+    <!-- body -->
+    <rect x="22" y="34" width="20" height="22" fill="#3e2f1c"/>
+    <!-- head -->
+    <circle cx="32" cy="22" r="10" fill="#d8a77a" stroke="${K}" stroke-width="1.5"/>
+    <!-- messy hair -->
+    <path d="M22,20 Q32,8 42,20 Q40,12 32,10 Q24,12 22,20 Z" fill="#4a2f1b"/>
+    <!-- big beard -->
+    <path d="M22,26 Q32,40 42,26 Q40,44 32,46 Q24,44 22,26 Z" fill="#4a2f1b"/>
+    <!-- eyes -->
+    <circle cx="28" cy="22" r="1.5" fill="${K}"/>
+    <circle cx="36" cy="22" r="1.5" fill="${K}"/>
+    <!-- fur hood arc -->
+    <path d="M22,18 Q32,10 42,18" fill="none" stroke="#8a6a3c" stroke-width="3"/>
+    <!-- arms -->
+    <line x1="22" y1="38" x2="12" y2="54" stroke="#3e2f1c" stroke-width="5" stroke-linecap="round"/>
+    <line x1="42" y1="38" x2="52" y2="54" stroke="#3e2f1c" stroke-width="5" stroke-linecap="round"/>
+    <!-- axe handle -->
+    <rect x="51" y="50" width="3" height="14" fill="#5a3d1e"/>
+    <!-- axe head -->
+    <polygon points="54,50 63,55 54,60" fill="#b0b0b0" stroke="#777" stroke-width="1"/>
+    <!-- legs -->
+    <line x1="28" y1="56" x2="25" y2="63" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+    <line x1="36" y1="56" x2="39" y2="63" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+    <!-- boots -->
+    <rect x="22" y="63" width="7" height="3" fill="#111" rx="1"/>
+    <rect x="36" y="63" width="7" height="3" fill="#111" rx="1"/>`;
+};
+
 
 // ── monster ID → archetype ────────────────────────────────────────────────────
 const SPRITE_KEY_MAP: Record<string, string> = {
@@ -562,7 +594,7 @@ const SPRITE_KEY_MAP: Record<string, string> = {
   'direwolf':'direwolf',
   'wildling':'orc','dothraki-rider':'orc',
   'white-walker':'ghost','wight-walker':'ghost','faceless-assassin':'ghost',
-  'mountain-clansman':'large',
+  'mountain-clansman':'clansman',
   'maester':'lich',
   'kingsguard':'soldier',
   'shadowcat':'wolf',
