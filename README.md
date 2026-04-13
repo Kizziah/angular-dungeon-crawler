@@ -2,6 +2,8 @@
 
 > A retro DOS-style dungeon crawler RPG built with Angular. Explore procedurally generated dungeons, fight monsters, manage your party, and delve ever deeper into the depths.
 
+🎮 **[Live Demo → http://mdmordor.s3-website-us-east-1.amazonaws.com/](http://mdmordor.s3-website-us-east-1.amazonaws.com/)**
+
 ---
 
 ## Screenshots
