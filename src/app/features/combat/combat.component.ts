@@ -39,7 +39,14 @@ export class CombatComponent implements OnInit {
 
   getCurrentActor(): Character | null {
     if (!this.combatState) return null;
-    return this.combatState.party[this.combatState.currentActorIndex] || null;
+    // Find the first living character starting from currentActorIndex
+    const party = this.combatState.party;
+    const start = this.combatState.currentActorIndex;
+    for (let i = 0; i < party.length; i++) {
+      const c = party[(start + i) % party.length];
+      if (c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned') return c;
+    }
+    return null;
   }
 
   getCurrentActorSpells(): string[] {
@@ -73,6 +80,10 @@ export class CombatComponent implements OnInit {
     const actor = this.getCurrentActor();
     if (!actor) return;
 
+    // Use the actual index of the alive actor in the party array
+    const actorIndex = this.combatState.party.indexOf(actor);
+    const stateWithCorrectActor = { ...this.combatState, currentActorIndex: actorIndex };
+
     const combatAction: CombatAction = {
       type: action.type as any,
       actorId: actor.id,
@@ -80,7 +91,7 @@ export class CombatComponent implements OnInit {
       spellId: action.spellId
     };
 
-    const newState = this.combatService.processPlayerAction(this.combatState, combatAction);
+    const newState = this.combatService.processPlayerAction(stateWithCorrectActor, combatAction);
     this.combatState = newState;
     this.gameState.combatState.set(newState);
 

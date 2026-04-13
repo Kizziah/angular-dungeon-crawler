@@ -15,7 +15,7 @@ export class AppComponent {
   private gameState = inject(GameStateService);
   private router = inject(Router);
 
-  title = 'MORDOR: THE DEPTHS OF DEJENOL';
+  title = 'MORDOR';
   currentRoute = '';
 
   guild = this.gameState.guild;

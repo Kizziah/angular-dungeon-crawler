@@ -2,6 +2,7 @@ import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
+import { OverworldService, TOWN_X, TOWN_Y } from '../../core/services/overworld.service';
 
 @Component({
   selector: 'app-town',
@@ -12,6 +13,7 @@ import { GameStateService } from '../../core/services/game-state.service';
 })
 export class TownComponent {
   private gameState = inject(GameStateService);
+  private overworldService = inject(OverworldService);
   private router = inject(Router);
 
   guild = this.gameState.guild;
@@ -54,6 +56,13 @@ export class TownComponent {
   }
 
   leaveToOverworld(): void {
+    let state = this.gameState.overworldState();
+    if (!state) {
+      state = this.overworldService.initOverworld();
+    }
+    state.playerX = TOWN_X;
+    state.playerY = TOWN_Y;
+    this.gameState.overworldState.set({ ...state });
     this.router.navigate(['/overworld']);
   }
 }

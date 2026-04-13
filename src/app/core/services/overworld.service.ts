@@ -98,7 +98,7 @@ const RAW_MAP: string[] = [
 ];
 
 // Town + dungeon + ships override raw map
-const TOWN_X    = 16;  const TOWN_Y    = 42;
+export const TOWN_X    = 16;  export const TOWN_Y    = 42;
 const DUNGEON_X = 20;  const DUNGEON_Y = 40;
 
 // Player start: just west of town gate

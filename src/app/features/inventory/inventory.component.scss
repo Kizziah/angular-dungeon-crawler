@@ -27,6 +27,15 @@
     gap: 12px;
     flex: 1;
     overflow: hidden;
+    flex-direction: column;
+  }
+
+  .gear-row {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
   }
 
   .panel-title {
@@ -36,7 +45,6 @@
   }
 
   .stats-panel {
-    width: 180px;
     flex-shrink: 0;
 
     .stat-grid { margin-bottom: 12px; }

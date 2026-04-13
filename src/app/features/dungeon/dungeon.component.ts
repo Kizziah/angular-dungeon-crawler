@@ -7,6 +7,7 @@ import { DungeonViewComponent } from './dungeon-view.component';
 import { MinimapComponent } from './minimap.component';
 import { EncounterLogComponent } from './encounter-log.component';
 import { CombatComponent } from '../combat/combat.component';
+import { InventoryComponent } from '../inventory/inventory.component';
 import { DungeonState } from '../../core/models/dungeon.model';
 import { Character } from '../../core/models/character.model';
 import { Item } from '../../core/models/item.model';
@@ -14,7 +15,7 @@ import { Item } from '../../core/models/item.model';
 @Component({
   selector: 'app-dungeon',
   standalone: true,
-  imports: [CommonModule, DungeonViewComponent, MinimapComponent, EncounterLogComponent, CombatComponent],
+  imports: [CommonModule, DungeonViewComponent, MinimapComponent, EncounterLogComponent, CombatComponent, InventoryComponent],
   templateUrl: './dungeon.component.html',
   styleUrls: ['./dungeon.component.scss']
 })
@@ -29,13 +30,19 @@ export class DungeonComponent implements OnInit, OnDestroy {
   pendingChest: Item[] = [];
   showChest = false;
   showConfirmExit = false;
+  inventoryCharId: string | null = null;
 
   get inCombat(): boolean {
     return !!this.gameState.combatState();
   }
 
   ngOnInit(): void {
-    this.party = this.gameState.activeParty();
+    this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
+    if (this.party.length === 0) {
+      this.router.navigate(['/guild']);
+      return;
+    }
+    this.inventoryCharId = this.party[0].id;
     let ds = this.gameState.dungeonState();
     if (!ds) {
       ds = this.dungeonService.initDungeonState();
@@ -57,7 +64,6 @@ export class DungeonComponent implements OnInit, OnDestroy {
       case 'd': case 'D': case 'ArrowRight': e.preventDefault(); this.move(1, 0);  break;
       case '>': case '.': this.useStairsDown(); break;
       case '<': case ',': this.useStairsUp();   break;
-      case 'i': case 'I': this.openInventory(); break;
       case 'Escape': this.showConfirmExit = true; break;
     }
   }
@@ -69,22 +75,23 @@ export class DungeonComponent implements OnInit, OnDestroy {
     this.gameState.dungeonState.set(newState);
 
     switch (event.type) {
-      case 'encounter':
+      case 'encounter': {
+        const aliveParty = this.party.filter(c => c.currentHp > 0 && c.status !== 'Dead');
+        if (aliveParty.length === 0) break;
         this.addLog(`⚔ An enemy appears!`);
-        this.gameState.combatState.set(null);
         const enemies = event.data;
-        const combatState = {
+        this.gameState.combatState.set({
           active: true, round: 1,
-          party: this.party.map(c => ({ ...c })),
-          enemies: enemies.monsters,
+          party: aliveParty.map(c => ({ ...c })),
+          enemies: enemies.monsters.map((m: any) => ({ ...m })),
           log: ['Combat begins!'],
           currentActorIndex: 0,
           phase: 'player-input' as const,
           pendingActions: [],
           xpGained: 0, goldGained: 0, loot: []
-        };
-        this.gameState.combatState.set(combatState);
+        });
         break;
+      }
       case 'chest':
         this.pendingChest = event.data;
         this.showChest = true;
@@ -119,7 +126,11 @@ export class DungeonComponent implements OnInit, OnDestroy {
 
   onCombatDone(result: 'victory' | 'defeat' | 'fled'): void {
     this.gameState.combatState.set(null);
-    this.party = this.gameState.activeParty();
+    this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
+    // Refresh inventory panel to show updated character state
+    if (this.party.length > 0 && !this.party.find(c => c.id === this.inventoryCharId)) {
+      this.inventoryCharId = this.party[0].id;
+    }
 
     if (result === 'defeat') {
       this.addLog('💀 The party has been slain...');
@@ -246,8 +257,12 @@ export class DungeonComponent implements OnInit, OnDestroy {
     }
   }
 
-  openInventory(): void {
-    if (this.party.length === 0) return;
-    this.router.navigate(['/inventory', this.party[0].id], { queryParams: { returnTo: 'dungeon' } });
+  selectInventoryChar(charId: string): void {
+    this.inventoryCharId = charId;
+  }
+
+  closeInventory(): void {
+    // Refresh party after any equip/drop changes
+    this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
   }
 }

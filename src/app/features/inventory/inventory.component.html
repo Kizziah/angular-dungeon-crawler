@@ -48,8 +48,10 @@
       </div>
     </div>
 
-    <!-- Equipment -->
-    <div class="equip-panel">
+    <!-- Equipment + Bag side by side -->
+    <div class="gear-row">
+      <!-- Equipment -->
+      <div class="equip-panel">
       <div class="panel-title dos-dim">EQUIPMENT:</div>
       <div *ngFor="let slot of equipmentSlots" class="equip-row">
         <span class="slot-lbl dos-dim">{{ getSlotLabel(slot) }}:</span>
@@ -82,9 +84,10 @@
         <div *ngIf="character.inventory.length === 0" class="dos-dim">No items.</div>
       </div>
     </div>
+    </div><!-- end gear-row -->
   </div>
 
-  <button (click)="back()" class="back-btn">◄ Back to {{ returnTo === '/dungeon' ? 'Dungeon' : 'Guild' }}</button>
+  <button (click)="back()" class="back-btn">◄ {{ isEmbedded ? 'Close [ESC]' : ('Back to ' + (returnTo === '/dungeon' ? 'Dungeon' : 'Guild')) }}</button>
 </div>
 
 <ng-template #notFound>

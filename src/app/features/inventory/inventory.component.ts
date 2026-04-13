@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { Component, HostListener, inject, Input, OnChanges, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
@@ -13,11 +13,15 @@ import { Item } from '../../core/models/item.model';
   templateUrl: './inventory.component.html',
   styleUrls: ['./inventory.component.scss']
 })
-export class InventoryComponent implements OnInit {
+export class InventoryComponent implements OnInit, OnChanges {
   private gameState = inject(GameStateService);
   private charService = inject(CharacterService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  /** When set, the component works as an embedded panel instead of a routed page */
+  @Input() embeddedCharId: string | null = null;
+  @Output() close = new EventEmitter<void>();
 
   character: Character | null = null;
   selectedItem: Item | null = null;
@@ -26,11 +30,26 @@ export class InventoryComponent implements OnInit {
 
   equipmentSlots: (keyof Equipment)[] = ['weapon', 'shield', 'helmet', 'bodyArmor', 'gloves', 'boots', 'ring', 'amulet'];
 
+  get isEmbedded(): boolean { return this.embeddedCharId !== null; }
+
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    this.character = this.gameState.guild().characters.find(c => c.id === id) || null;
-    const ret = this.route.snapshot.queryParamMap.get('returnTo');
-    if (ret === 'dungeon') this.returnTo = '/dungeon';
+    this.loadCharacter();
+  }
+
+  ngOnChanges(): void {
+    this.loadCharacter();
+    this.message = '';
+  }
+
+  private loadCharacter(): void {
+    if (this.embeddedCharId) {
+      this.character = this.gameState.guild().characters.find(c => c.id === this.embeddedCharId) || null;
+    } else {
+      const id = this.route.snapshot.paramMap.get('id');
+      this.character = this.gameState.guild().characters.find(c => c.id === id) || null;
+      const ret = this.route.snapshot.queryParamMap.get('returnTo');
+      if (ret === 'dungeon') this.returnTo = '/dungeon';
+    }
   }
 
   equip(item: Item): void {
@@ -110,6 +129,10 @@ export class InventoryComponent implements OnInit {
   }
 
   back(): void {
-    this.router.navigate([this.returnTo]);
+    if (this.isEmbedded) {
+      this.close.emit();
+    } else {
+      this.router.navigate([this.returnTo]);
+    }
   }
 }

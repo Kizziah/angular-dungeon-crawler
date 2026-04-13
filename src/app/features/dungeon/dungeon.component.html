@@ -20,15 +20,14 @@
       ></app-dungeon-view>
 
       <div class="controls-hint dos-dim">
-        WASD / Arrow Keys to move | [I] Inventory | ESC to exit
-        <span *ngIf="getCurrentTileType() === 'stairs-down'" class="dos-amber"> | [&gt;] Descend stairs</span>
-        <span *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="dos-amber"> | [&lt;] Ascend stairs</span>
+        WASD / Arrow Keys to move | ESC to exit
+        <span *ngIf="getCurrentTileType() === 'stairs-down'" class="dos-amber"> | [&gt;] Descend</span>
+        <span *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="dos-amber"> | [&lt;] Ascend</span>
       </div>
     </div>
 
-    <!-- Right panel -->
-    <div class="right-panel">
-      <!-- Minimap (hidden during combat) -->
+    <!-- Middle panel: minimap + combat/log -->
+    <div class="middle-panel">
       <div class="minimap-section" *ngIf="!inCombat">
         <div class="panel-title dos-dim">MAP (Floor {{ getCurrentFloorLevel() }}):</div>
         <app-minimap
@@ -38,13 +37,11 @@
         ></app-minimap>
       </div>
 
-      <!-- Combat (replaces party/log while in combat) -->
       <ng-container *ngIf="inCombat; else explorePanel">
         <app-combat (done)="onCombatDone($event)"></app-combat>
       </ng-container>
 
       <ng-template #explorePanel>
-        <!-- Party status -->
         <div class="party-section">
           <div class="panel-title dos-dim">PARTY:</div>
           <div *ngFor="let char of party" class="party-char-row">
@@ -55,13 +52,27 @@
             </span>
           </div>
         </div>
-
-        <!-- Log -->
         <div class="log-section">
           <div class="panel-title dos-dim">EVENT LOG:</div>
           <app-encounter-log [messages]="eventLog"></app-encounter-log>
         </div>
       </ng-template>
+    </div>
+
+    <!-- Inventory panel: always visible -->
+    <div class="inv-panel">
+      <div class="inventory-tabs" *ngIf="party.length > 1">
+        <button
+          *ngFor="let char of party"
+          class="inv-tab"
+          [class.active]="inventoryCharId === char.id"
+          (click)="selectInventoryChar(char.id)"
+        >{{ char.name }}</button>
+      </div>
+      <app-inventory
+        [embeddedCharId]="inventoryCharId"
+        (close)="closeInventory()"
+      ></app-inventory>
     </div>
   </div>
 
