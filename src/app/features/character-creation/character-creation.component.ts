@@ -94,7 +94,7 @@ export class CharacterCreationComponent {
   }
 
   reroll(): void {
-    if (this.rerollCount() < 5) {
+    if (this.rerollCount() < 10) {
       this.rollStats();
     }
   }

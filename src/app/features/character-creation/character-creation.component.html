@@ -96,7 +96,7 @@
 
   <!-- STEP: Stats -->
   <div *ngIf="step() === 'stats'" class="step-panel">
-    <div class="step-title">Your rolled stats: ({{ 5 - rerollCount() }} rerolls left)</div>
+    <div class="step-title">Your rolled stats: ({{ 10 - rerollCount() }} rerolls left)</div>
     <div class="stats-grid" *ngIf="rolledStats()">
       <div *ngFor="let key of statKeys()" class="stat-row">
         <span class="stat-label dos-dim">{{ statLabel(key) }}:</span>
@@ -108,7 +108,7 @@
       </div>
     </div>
     <div class="btn-row">
-      <button (click)="reroll()" [disabled]="rerollCount() >= 5">🎲 Reroll</button>
+      <button (click)="reroll()" [disabled]="rerollCount() >= 10">🎲 Reroll</button>
       <button (click)="prevStep()">◄ Back</button>
       <button (click)="nextStep()">Accept ►</button>
     </div>
