@@ -81,10 +81,7 @@ export class CombatComponent implements OnInit {
     const actor = this.getCurrentActor();
     if (!actor) return;
 
-    // Use the actual index of the alive actor in the party array
     const actorIndex = this.combatState.party.indexOf(actor);
-    const stateWithCorrectActor = { ...this.combatState, currentActorIndex: actorIndex };
-
     const combatAction: CombatAction = {
       type: action.type as any,
       actorId: actor.id,
@@ -92,7 +89,10 @@ export class CombatComponent implements OnInit {
       spellId: action.spellId
     };
 
-    const newState = this.combatService.processPlayerAction(stateWithCorrectActor, combatAction);
+    const newState = this.combatService.processPlayerAction(
+      { ...this.combatState, currentActorIndex: actorIndex },
+      combatAction
+    );
     this.combatState = newState;
     this.gameState.combatState.set(newState);
 
@@ -103,6 +103,8 @@ export class CombatComponent implements OnInit {
     } else if (newState.phase === 'fled') {
       this.done.emit('fled');
     }
+    // If phase is still 'player-input', the next party member's action panel
+    // will automatically appear via getCurrentActor() using updated currentActorIndex.
   }
 
   handleVictory(state: CombatState): void {

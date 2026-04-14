@@ -164,95 +164,135 @@ export class CombatService {
   }
 
   processPlayerAction(state: CombatState, action: CombatAction): CombatState {
+    // Flee is immediate — don't wait for other party members
+    if (action.type === 'flee') {
+      if (this.attemptFlee(state.party)) {
+        return { ...state, phase: 'fled', log: [...state.log, 'The party flees!'] };
+      }
+      // Failed flee still costs the whole round
+      return this.resolveRound({
+        ...state,
+        pendingActions: state.party
+          .filter(c => c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned')
+          .map((c, _, arr) => ({ type: 'defend' as const, actorId: c.id, targetIndex: 0 })),
+        log: [...state.log, 'Cannot flee!']
+      });
+    }
+
+    // Record this actor's choice
+    const newPending: CombatAction[] = [...state.pendingActions, { ...action, actorId: state.party[state.currentActorIndex]?.id }];
+
+    // How many alive members still need to act?
+    const aliveMembers = state.party.filter(c => c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned');
+
+    if (newPending.length >= aliveMembers.length) {
+      // All party members have chosen — resolve the full round
+      return this.resolveRound({ ...state, pendingActions: newPending });
+    }
+
+    // Advance to the next alive party member
+    let nextIdx = state.currentActorIndex + 1;
+    while (nextIdx < state.party.length) {
+      const c = state.party[nextIdx];
+      if (c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned') break;
+      nextIdx++;
+    }
+
+    return { ...state, pendingActions: newPending, currentActorIndex: nextIdx };
+  }
+
+  private resolvePartyAction(state: CombatState, action: CombatAction): CombatState {
     let newState = { ...state, log: [...state.log] };
+    const actorIdx = newState.party.findIndex(c => c.id === action.actorId);
+    if (actorIdx < 0) return newState;
+    const actor = newState.party[actorIdx];
+    if (!actor || actor.currentHp <= 0 || actor.status === 'Dead') return newState;
 
     switch (action.type) {
       case 'attack': {
-        const attacker = state.party[state.currentActorIndex];
         const targetIdx = action.targetIndex ?? 0;
-        const aliveEnemies = state.enemies.filter(e => e.status === 'alive');
-        const target = aliveEnemies[targetIdx] ?? state.enemies.find(e => e.status === 'alive');
-        if (attacker && target) {
-          const enemyIdx = state.enemies.indexOf(target);
-          const result = this.resolveAttack(attacker, target);
+        const aliveEnemies = newState.enemies.filter(e => e.status === 'alive');
+        const target = aliveEnemies[targetIdx] ?? aliveEnemies[0];
+        if (target) {
+          const enemyIdx = newState.enemies.indexOf(target);
+          const result = this.resolveAttack(actor, target);
           newState = this.applyResult(newState, result, true, enemyIdx);
         }
         break;
       }
       case 'spell': {
-        const caster = state.party[state.currentActorIndex];
-        if (caster && action.spellId) {
+        if (action.spellId) {
           const aliveEnemies = newState.enemies.filter(e => e.status === 'alive');
           const spell = SPELLS.find(s => s.id === action.spellId);
           const spellTargets: (Character | MonsterInstance)[] = spell?.targetType === 'all-enemies'
-            ? aliveEnemies
-            : aliveEnemies.slice(0, 1);
-          const { results, updatedCaster } = this.resolveSpell(caster, action.spellId, spellTargets);
-          const newParty = newState.party.map((c, i) => i === state.currentActorIndex ? updatedCaster : c);
+            ? aliveEnemies : aliveEnemies.slice(0, 1);
+          const { results, updatedCaster } = this.resolveSpell(actor, action.spellId, spellTargets);
+          const newParty = newState.party.map((c, i) => i === actorIdx ? updatedCaster : c);
           newState = { ...newState, party: newParty };
           for (const result of results) {
             if (result.damage > 0) {
-              const enemyIdx = newState.enemies.findIndex(e => e.status === 'alive');
-              if (enemyIdx >= 0) newState = this.applyResult(newState, result, true, enemyIdx);
+              const eIdx = newState.enemies.findIndex(e => e.status === 'alive');
+              if (eIdx >= 0) newState = this.applyResult(newState, result, true, eIdx);
             } else {
-              newState.log = [...newState.log, result.message];
+              newState = { ...newState, log: [...newState.log, result.message] };
             }
           }
         }
         break;
       }
-      case 'item': {
-        newState.log = [...newState.log, 'Item used.'];
-        break;
-      }
-      case 'flee': {
-        if (this.attemptFlee(state.party)) {
-          return { ...newState, phase: 'fled', log: [...newState.log, 'The party flees!'] };
-        } else {
-          newState.log = [...newState.log, 'Cannot flee!'];
-        }
-        break;
-      }
       case 'defend': {
-        const defender = state.party[state.currentActorIndex];
-        newState.log = [...newState.log, `${defender?.name} takes a defensive stance.`];
+        newState = { ...newState, log: [...newState.log, `${actor.name} takes a defensive stance.`] };
+        break;
+      }
+      case 'item': {
+        newState = { ...newState, log: [...newState.log, `${actor.name} uses an item.`] };
         break;
       }
     }
-
-    if (this.checkVictory(newState)) {
-      const loot = this.generateLoot(newState.enemies);
-      return {
-        ...newState,
-        phase: 'victory',
-        xpGained: loot.xp,
-        goldGained: loot.gold,
-        loot: loot.items,
-        log: [...newState.log, `🏆 Victory! Gained ${loot.xp} XP and ${loot.gold} gold!`]
-      };
-    }
-
-    if (newState.phase !== 'fled' && newState.phase !== 'victory') {
-      for (const monster of newState.enemies.filter(e => e.status === 'alive')) {
-        const living = newState.party
-          .map((c, i) => ({ c, i }))
-          .filter(({ c }) => c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned');
-        if (living.length === 0) break;
-
-        for (let a = 0; a < monster.attackCount; a++) {
-          const { c: target, i: targetIdx } = living[Math.floor(Math.random() * living.length)];
-          const result = this.resolveMonsterAttack(monster, target);
-          newState = this.applyResult(newState, result, false, targetIdx);
-        }
-      }
-
-      if (this.checkDefeat(newState)) {
-        return { ...newState, phase: 'defeat', log: [...newState.log, '💀 The party has been defeated!'] };
-      }
-
-      newState = { ...newState, round: newState.round + 1 };
-    }
-
     return newState;
+  }
+
+  private resolveRound(state: CombatState): CombatState {
+    let newState = { ...state };
+
+    // Resolve all pending party actions in order
+    for (const action of state.pendingActions) {
+      newState = this.resolvePartyAction(newState, action);
+      if (this.checkVictory(newState)) {
+        const loot = this.generateLoot(newState.enemies);
+        return {
+          ...newState, phase: 'victory',
+          xpGained: loot.xp, goldGained: loot.gold, loot: loot.items,
+          log: [...newState.log, `🏆 Victory! Gained ${loot.xp} XP and ${loot.gold} gold!`]
+        };
+      }
+    }
+
+    // Monster phase — all alive monsters attack
+    for (const monster of newState.enemies.filter(e => e.status === 'alive')) {
+      const living = newState.party
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned');
+      if (living.length === 0) break;
+      for (let a = 0; a < monster.attackCount; a++) {
+        const { c: target, i: targetIdx } = living[Math.floor(Math.random() * living.length)];
+        const result = this.resolveMonsterAttack(monster, target);
+        newState = this.applyResult(newState, result, false, targetIdx);
+      }
+    }
+
+    if (this.checkDefeat(newState)) {
+      return { ...newState, phase: 'defeat', log: [...newState.log, '💀 The party has been defeated!'] };
+    }
+
+    // Reset for next round — find first alive member
+    const firstAlive = newState.party.findIndex(c => c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned');
+    return {
+      ...newState,
+      pendingActions: [],
+      currentActorIndex: Math.max(0, firstAlive),
+      round: newState.round + 1,
+      phase: 'player-input'
+    };
   }
 }
