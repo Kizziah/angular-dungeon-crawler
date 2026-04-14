@@ -5,6 +5,7 @@
     <div class="tab-bar">
       <button [class.active]="tab==='monsters'" (click)="tab='monsters'; selectedItem=null">⚔️ Bestiary ({{ allMonsters.length }})</button>
       <button [class.active]="tab==='items'"    (click)="tab='items';    selectedMonster=null">🎒 Item Codex ({{ allItems.length }})</button>
+      <button [class.active]="tab==='maps'"     (click)="tab='maps'">🗺️ World Atlas</button>
     </div>
   </div>
 
@@ -113,6 +114,30 @@
         <ng-template #noItem>
           <div class="no-selection dos-dim"><div>Select an item</div><div>to read its entry.</div></div>
         </ng-template>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="tab==='maps'">
+    <div class="maps-grid">
+      <div class="world-card" *ngFor="let w of worlds; trackBy: trackByIdx">
+        <div class="world-card-header">
+          <span class="world-emoji">{{ w.emoji }}</span>
+          <div>
+            <div class="world-name dos-amber">{{ w.name }}</div>
+            <div class="world-subtitle dos-dim">{{ w.subtitle }}</div>
+          </div>
+        </div>
+        <div class="minimap" (click)="goToMap(w.route)" title="View {{ w.name }}">
+          <div class="mini-row" *ngFor="let row of w.grid; trackBy: trackByIdx">
+            <span class="mini-cell" *ngFor="let col of row; trackBy: trackByIdx"
+                  [style.background]="col"></span>
+          </div>
+        </div>
+        <div class="location-list">
+          <span class="loc-tag" *ngFor="let loc of w.locations">{{ loc }}</span>
+        </div>
+        <button class="view-map-btn" (click)="goToMap(w.route)">View Full Map →</button>
       </div>
     </div>
   </ng-container>

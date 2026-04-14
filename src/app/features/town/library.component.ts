@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,6 +7,27 @@ import { ITEMS, ItemDef } from '../../core/data/items.data';
 import { MonsterDef } from '../../core/models/monster.model';
 import { ItemType } from '../../core/models/item.model';
 import { MonsterSpriteComponent } from '../combat/monster-sprite.component';
+import { AlefgardService } from '../../core/services/alefgard.service';
+import { HyruleService } from '../../core/services/hyrule.service';
+import { MystaraService } from '../../core/services/mystara.service';
+import { OverworldService } from '../../core/services/overworld.service';
+import { GameStateService } from '../../core/services/game-state.service';
+import { TILE_RENDER, OverworldCell } from '../../core/models/overworld.model';
+import { TORLAND_LOCATIONS } from '../../core/data/torland_map.data';
+
+interface WorldInfo {
+  name: string;
+  emoji: string;
+  subtitle: string;
+  route: string;
+  grid: string[][];
+  locations: string[];
+}
+
+const MINI_STEP = 3;
+const ALEFGARD_LOCS = ['Tantegel Castle', 'Brecconary', 'Kol', 'Garinham', 'Rimuldar', 'Hauksness', 'Cantlin', 'Charlock'];
+const HYRULE_LOCS   = ['Hyrule Castle', 'Kakariko', 'Mido', 'Saria', 'Nabooru', 'Ruto', 'Death Mountain'];
+const MYSTARA_LOCS  = ['Specularum', 'Kelvin', 'Threshold', 'Thyatis', 'Darokin', 'Glantri', 'Alfheim', 'Ylaruam'];
 
 const ITEM_TYPE_ICONS: Record<string, string> = {
   Weapon: '⚔️', Shield: '🛡️', Helmet: '⛑️', BodyArmor: '🥋',
@@ -21,10 +42,79 @@ const ITEM_TYPE_ICONS: Record<string, string> = {
   templateUrl: './library.component.html',
   styleUrls: ['./library.component.scss']
 })
-export class LibraryComponent {
+export class LibraryComponent implements OnInit {
   private router = inject(Router);
+  private alefgardService = inject(AlefgardService);
+  private hyruleService   = inject(HyruleService);
+  private mystaraService  = inject(MystaraService);
+  private overworldService = inject(OverworldService);
+  private gameState        = inject(GameStateService);
 
-  tab: 'monsters' | 'items' = 'monsters';
+  tab: 'monsters' | 'items' | 'maps' = 'monsters';
+
+  // World Maps
+  worlds: WorldInfo[] = [];
+
+  ngOnInit(): void {
+    this.buildWorlds();
+  }
+
+  private buildMini(map: OverworldCell[][]): string[][] {
+    const rows: string[][] = [];
+    for (let y = 0; y < map.length; y += MINI_STEP) {
+      const row: string[] = [];
+      for (let x = 0; x < (map[y]?.length ?? 0); x += MINI_STEP) {
+        const cell = map[y]?.[x];
+        row.push(cell ? (TILE_RENDER[cell.type].bg ?? '#000') : '#000');
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  private buildWorlds(): void {
+    const torlandState = this.gameState.overworldState() ?? this.overworldService.initOverworld();
+    this.worlds = [
+      {
+        name: 'Torland',
+        emoji: '🗺️',
+        subtitle: 'The Known World',
+        route: '/worldmap',
+        grid: this.buildMini(this.overworldService.getFullMap(torlandState)),
+        locations: TORLAND_LOCATIONS
+          .filter(l => l.type === 'town' || l.type === 'castle')
+          .map(l => l.name),
+      },
+      {
+        name: 'Alefgard',
+        emoji: '🏰',
+        subtitle: 'Dragon Warrior',
+        route: '/alefgard-map',
+        grid: this.buildMini(this.alefgardService.getFullMap()),
+        locations: ALEFGARD_LOCS,
+      },
+      {
+        name: 'Hyrule',
+        emoji: '🗡️',
+        subtitle: 'The Legend of Zelda',
+        route: '/hyrule-map',
+        grid: this.buildMini(this.hyruleService.getFullMap()),
+        locations: HYRULE_LOCS,
+      },
+      {
+        name: 'Mystara',
+        emoji: '🌍',
+        subtitle: 'D&D Known World',
+        route: '/mystara-map',
+        grid: this.buildMini(this.mystaraService.getFullMap()),
+        locations: MYSTARA_LOCS,
+      },
+    ];
+  }
+
+  goToMap(route: string): void { this.router.navigate([route]); }
+
+  trackByIdx(i: number): number { return i; }
 
   // Monsters
   allMonsters: MonsterDef[] = [...MONSTERS].sort((a, b) => a.floorMin - b.floorMin);

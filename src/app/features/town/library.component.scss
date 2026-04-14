@@ -212,3 +212,75 @@
     flex-shrink: 0;
   }
 }
+
+// ── WORLD ATLAS ─────────────────────────────────────────────────────────────
+.maps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+
+  .world-card {
+    background: #0a0a12;
+    border: 1px solid var(--dos-border);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .world-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      .world-emoji { font-size: 1.4rem; }
+      .world-name  { font-size: 0.9rem; letter-spacing: 1px; }
+      .world-subtitle { font-size: 0.65rem; }
+    }
+
+    .minimap {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      border: 1px solid #333;
+      align-self: flex-start;
+      line-height: 0;
+      &:hover { border-color: var(--dos-amber); }
+
+      .mini-row {
+        display: flex;
+        .mini-cell {
+          display: inline-block;
+          width: 2px;
+          height: 2px;
+        }
+      }
+    }
+
+    .location-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      .loc-tag {
+        font-size: 0.6rem;
+        color: var(--dos-dim, #555);
+        background: #111;
+        border: 1px solid #333;
+        padding: 1px 4px;
+      }
+    }
+
+    .view-map-btn {
+      align-self: flex-start;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      background: transparent;
+      border: 1px solid var(--dos-amber, #ffb000);
+      color: var(--dos-amber, #ffb000);
+      cursor: pointer;
+      font-family: inherit;
+      &:hover { background: var(--dos-amber, #ffb000); color: #000; }
+    }
+  }
+}

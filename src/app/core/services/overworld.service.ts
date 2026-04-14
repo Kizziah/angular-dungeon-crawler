@@ -138,6 +138,10 @@ export class OverworldService {
       }
   }
 
+  getFullMap(state: OverworldState): OverworldCell[][] {
+    return state.map;
+  }
+
   getViewport(state: OverworldState, vpW: number, vpH: number): {
     cells: (OverworldCell | null)[][]; offsetX: number; offsetY: number
   } {
