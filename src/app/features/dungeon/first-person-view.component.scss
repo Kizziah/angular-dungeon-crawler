@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.fp-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--dos-border);
+  background: #000;
+  image-rendering: pixelated;
+}

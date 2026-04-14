@@ -22,6 +22,8 @@ export class InventoryComponent implements OnInit, OnChanges {
   /** When set, the component works as an embedded panel instead of a routed page */
   @Input() embeddedCharId: string | null = null;
   @Output() close = new EventEmitter<void>();
+  @Output() itemDragStart = new EventEmitter<{ item: Item; fromCharId: string }>();
+  @Output() itemDragEnd = new EventEmitter<void>();
 
   character: Character | null = null;
   selectedItem: Item | null = null;
@@ -86,6 +88,23 @@ export class InventoryComponent implements OnInit, OnChanges {
     }));
   }
 
+  onDragStart(event: DragEvent, item: Item): void {
+    if (!this.character) return;
+    event.dataTransfer?.setData('text/plain', JSON.stringify({ itemId: item.id, fromCharId: this.character.id }));
+    this.itemDragStart.emit({ item, fromCharId: this.character.id });
+  }
+
+  onDragEnd(): void {
+    this.itemDragEnd.emit();
+  }
+
+  /** Remove an item (called by dungeon when dropped onto another character) */
+  removeItem(itemId: string): void {
+    if (!this.character) return;
+    const updated = { ...this.character, inventory: this.character.inventory.filter(i => i.id !== itemId) };
+    this.saveChar(updated);
+  }
+
   canEquip(item: Item): boolean {
     return this.charService.getEquipmentSlot(item.type) !== null;
   }
@@ -119,6 +138,11 @@ export class InventoryComponent implements OnInit, OnChanges {
     if (!this.character) return '+0';
     const b = this.charService.calcAttackBonus(this.character);
     return b >= 0 ? `+${b}` : `${b}`;
+  }
+
+  getWeaponDamageStr(): string {
+    if (!this.character) return '1d4';
+    return this.charService.getWeaponDamage(this.character);
   }
 
   @HostListener('window:keydown', ['$event'])

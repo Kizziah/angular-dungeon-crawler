@@ -30,7 +30,7 @@
         </div>
         <div class="stat-row">
           <span class="stat-lbl dos-dim">ATK:</span>
-          <span class="stat-val dos-cyan">{{ getAttackBonusStr() }}</span>
+          <span class="stat-val dos-cyan">{{ getAttackBonusStr() }} <span class="dos-dim">({{ getWeaponDamageStr() }})</span></span>
         </div>
         <div class="stat-row">
           <span class="stat-lbl dos-dim">XP:</span>
@@ -71,7 +71,12 @@
     <div class="bag-panel">
       <div class="panel-title dos-dim">INVENTORY ({{ character.inventory.length }} items):</div>
       <div class="bag-list">
-        <div *ngFor="let item of character.inventory" class="bag-item" [class.cursed]="item.cursed">
+        <div *ngFor="let item of character.inventory"
+             class="bag-item"
+             [class.cursed]="item.cursed"
+             draggable="true"
+             (dragstart)="onDragStart($event, item)"
+             (dragend)="onDragEnd()">
           <span class="item-name" [class.dos-amber]="!item.identified">
             {{ getItemDisplay(item) }}
           </span>

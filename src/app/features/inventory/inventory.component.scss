@@ -104,6 +104,10 @@
       padding: 4px 6px;
       font-size: 12px;
       border-bottom: 1px solid rgba(0,170,0,0.15);
+      cursor: grab;
+
+      &:active { cursor: grabbing; }
+      &[draggable="true"]:hover { background: rgba(0,170,0,0.08); }
 
       &.cursed { .item-name { color: var(--dos-red); } }
 

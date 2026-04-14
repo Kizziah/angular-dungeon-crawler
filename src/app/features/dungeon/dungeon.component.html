@@ -11,24 +11,61 @@
   <div class="dungeon-layout">
     <!-- Main view -->
     <div class="main-panel">
-      <div class="view-label dos-dim">DUNGEON VIEW:</div>
-      <app-dungeon-view
-        *ngIf="getCurrentFloor() && dungeonState"
-        [floor]="getCurrentFloor()!"
-        [position]="getCurrentPosition()"
-        [direction]="getCurrentDirection()"
-      ></app-dungeon-view>
+      <!-- Top row: first-person view + enemies panel side by side -->
+      <div class="view-row">
+        <div class="view-col">
+          <div class="view-label dos-dim">DUNGEON VIEW:</div>
+          <app-first-person-view
+            *ngIf="getCurrentFloor() && dungeonState"
+            [floor]="getCurrentFloor()!"
+            [position]="getCurrentPosition()"
+            [direction]="getCurrentDirection()"
+          ></app-first-person-view>
+          <div class="controls-hint dos-dim" *ngIf="!inCombat">
+            WASD / Arrow Keys to move | ESC to exit
+            <span *ngIf="getCurrentTileType() === 'stairs-down'" class="dos-amber"> | [&gt;] Descend</span>
+            <span *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="dos-amber"> | [&lt;] Ascend</span>
+          </div>
+        </div>
 
-      <div class="controls-hint dos-dim">
-        WASD / Arrow Keys to move | ESC to exit
-        <span *ngIf="getCurrentTileType() === 'stairs-down'" class="dos-amber"> | [&gt;] Descend</span>
-        <span *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="dos-amber"> | [&lt;] Ascend</span>
+        <!-- Enemies panel shown beside the dungeon view during combat -->
+        <div class="combat-enemies-panel" *ngIf="inCombat">
+          <div class="panel-title dos-red">ENEMIES:</div>
+          <div
+            *ngFor="let enemy of combatEnemies"
+            class="enemy-row"
+            [class.dead]="enemy.status === 'dead'"
+          >
+            <app-monster-sprite
+              [monsterId]="enemy.definitionId"
+              [color]="enemy.status === 'dead' ? '#444' : enemy.color"
+              [size]="48"
+            ></app-monster-sprite>
+            <div class="enemy-info">
+              <span class="enemy-name" [style.color]="enemy.status === 'dead' ? '#444' : enemy.color">
+                {{ enemy.name }}<span *ngIf="enemy.status === 'dead'"> [DEAD]</span>
+              </span>
+              <div class="hp-bar-wrap" *ngIf="enemy.status === 'alive'">
+                <div class="hp-fill"
+                  [style.width]="getHpPct(enemy) + '%'"
+                  [style.background]="getHpColor(getHpPct(enemy))">
+                </div>
+              </div>
+              <span class="hp-text dos-dim" *ngIf="enemy.status === 'alive'">
+                {{ enemy.currentHp }}/{{ enemy.maxHp }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- Combat below the view row -->
+      <app-combat *ngIf="inCombat" [hideEnemies]="true" (done)="onCombatDone($event)"></app-combat>
     </div>
 
-    <!-- Middle panel: minimap + combat/log -->
+    <!-- Middle panel: minimap + party/log -->
     <div class="middle-panel">
-      <div class="minimap-section" *ngIf="!inCombat">
+      <div class="minimap-section">
         <div class="panel-title dos-dim">MAP (Floor {{ getCurrentFloorLevel() }}):</div>
         <app-minimap
           *ngIf="getCurrentFloor() && dungeonState"
@@ -37,26 +74,20 @@
         ></app-minimap>
       </div>
 
-      <ng-container *ngIf="inCombat; else explorePanel">
-        <app-combat (done)="onCombatDone($event)"></app-combat>
-      </ng-container>
-
-      <ng-template #explorePanel>
-        <div class="party-section">
-          <div class="panel-title dos-dim">PARTY:</div>
-          <div *ngFor="let char of party" class="party-char-row">
-            <span class="dos-amber">{{ char.name }}</span>
-            <span class="dos-dim"> Lv.{{ char.level }}</span>
-            <span [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
-              {{ char.currentHp }}/{{ char.maxHp }}HP
-            </span>
-          </div>
+      <div class="party-section">
+        <div class="panel-title dos-dim">PARTY:</div>
+        <div *ngFor="let char of party" class="party-char-row">
+          <span class="dos-amber">{{ char.name }}</span>
+          <span class="dos-dim"> Lv.{{ char.level }}</span>
+          <span [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
+            {{ char.currentHp }}/{{ char.maxHp }}HP
+          </span>
         </div>
-        <div class="log-section">
-          <div class="panel-title dos-dim">EVENT LOG:</div>
-          <app-encounter-log [messages]="eventLog"></app-encounter-log>
-        </div>
-      </ng-template>
+      </div>
+      <div class="log-section">
+        <div class="panel-title dos-dim">EVENT LOG:</div>
+        <app-encounter-log [messages]="eventLog"></app-encounter-log>
+      </div>
     </div>
 
     <!-- Inventory panel: always visible -->
@@ -66,12 +97,21 @@
           *ngFor="let char of party"
           class="inv-tab"
           [class.active]="inventoryCharId === char.id"
+          [class.drop-target]="dragOverTabCharId === char.id"
           (click)="selectInventoryChar(char.id)"
+          (dragover)="onTabDragOver($event, char.id)"
+          (dragleave)="onTabDragLeave()"
+          (drop)="onTabDrop($event, char.id)"
         >{{ char.name }}</button>
+      </div>
+      <div *ngIf="draggedItem" class="drag-hint dos-dim">
+        ↑ Drop on a party member tab to transfer
       </div>
       <app-inventory
         [embeddedCharId]="inventoryCharId"
         (close)="closeInventory()"
+        (itemDragStart)="onItemDragStart($event)"
+        (itemDragEnd)="onItemDragEnd()"
       ></app-inventory>
     </div>
   </div>

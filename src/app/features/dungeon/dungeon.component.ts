@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
 import { DungeonService } from '../../core/services/dungeon.service';
-import { DungeonViewComponent } from './dungeon-view.component';
+import { FirstPersonViewComponent } from './first-person-view.component';
 import { MinimapComponent } from './minimap.component';
 import { EncounterLogComponent } from './encounter-log.component';
 import { CombatComponent } from '../combat/combat.component';
+import { MonsterSpriteComponent } from '../combat/monster-sprite.component';
 import { InventoryComponent } from '../inventory/inventory.component';
 import { DungeonState } from '../../core/models/dungeon.model';
 import { Character } from '../../core/models/character.model';
@@ -15,7 +16,7 @@ import { Item } from '../../core/models/item.model';
 @Component({
   selector: 'app-dungeon',
   standalone: true,
-  imports: [CommonModule, DungeonViewComponent, MinimapComponent, EncounterLogComponent, CombatComponent, InventoryComponent],
+  imports: [CommonModule, FirstPersonViewComponent, MinimapComponent, EncounterLogComponent, CombatComponent, MonsterSpriteComponent, InventoryComponent],
   templateUrl: './dungeon.component.html',
   styleUrls: ['./dungeon.component.scss']
 })
@@ -31,6 +32,8 @@ export class DungeonComponent implements OnInit, OnDestroy {
   showChest = false;
   showConfirmExit = false;
   inventoryCharId: string | null = null;
+  draggedItem: { item: Item; fromCharId: string } | null = null;
+  dragOverTabCharId: string | null = null;
 
   get inCombat(): boolean {
     return !!this.gameState.combatState();
@@ -261,8 +264,67 @@ export class DungeonComponent implements OnInit, OnDestroy {
     this.inventoryCharId = charId;
   }
 
+  onItemDragStart(payload: { item: Item; fromCharId: string }): void {
+    this.draggedItem = payload;
+  }
+
+  onItemDragEnd(): void {
+    this.draggedItem = null;
+    this.dragOverTabCharId = null;
+  }
+
+  onTabDragOver(event: DragEvent, charId: string): void {
+    if (this.draggedItem && this.draggedItem.fromCharId !== charId) {
+      event.preventDefault();
+      this.dragOverTabCharId = charId;
+    }
+  }
+
+  onTabDragLeave(): void {
+    this.dragOverTabCharId = null;
+  }
+
+  onTabDrop(event: DragEvent, targetCharId: string): void {
+    event.preventDefault();
+    this.dragOverTabCharId = null;
+    if (!this.draggedItem || this.draggedItem.fromCharId === targetCharId) return;
+
+    const { item, fromCharId } = this.draggedItem;
+    this.draggedItem = null;
+
+    this.gameState.updateGuild(g => {
+      const chars = g.characters.map(c => {
+        if (c.id === fromCharId) {
+          return { ...c, inventory: c.inventory.filter(i => i.id !== item.id) };
+        }
+        if (c.id === targetCharId) {
+          return { ...c, inventory: [...c.inventory, item] };
+        }
+        return c;
+      });
+      return { ...g, characters: chars };
+    });
+
+    const target = this.party.find(c => c.id === targetCharId);
+    this.addLog(`📦 ${item.name || item.unidentifiedName} → ${target?.name ?? 'party member'}`);
+    this.inventoryCharId = targetCharId;
+  }
+
   closeInventory(): void {
-    // Refresh party after any equip/drop changes
     this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
+  }
+
+  get combatEnemies() {
+    return this.gameState.combatState()?.enemies ?? [];
+  }
+
+  getHpPct(e: { currentHp: number; maxHp: number }): number {
+    return e.maxHp > 0 ? Math.round((e.currentHp / e.maxHp) * 100) : 0;
+  }
+
+  getHpColor(pct: number): string {
+    if (pct > 60) return '#33ff33';
+    if (pct > 30) return '#ffaa00';
+    return '#ff4444';
   }
 }

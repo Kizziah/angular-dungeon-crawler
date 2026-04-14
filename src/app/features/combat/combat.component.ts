@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, HostListener, inject, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
@@ -24,6 +24,7 @@ export class CombatComponent implements OnInit {
   private router = inject(Router);
 
   @Output() done = new EventEmitter<'victory' | 'defeat' | 'fled'>();
+  @Input() hideEnemies = false;
 
   combatState: CombatState | null = null;
   selectedEnemyIndex = 0;
@@ -105,22 +106,39 @@ export class CombatComponent implements OnInit {
   }
 
   handleVictory(state: CombatState): void {
-    // Apply XP to party
+    // Find the first living party member to receive loot
+    const firstAlive = state.party.find(p => p.currentHp > 0 && p.status !== 'Dead');
+
     this.gameState.updateGuild(g => ({
       ...g,
       gold: g.gold + state.goldGained,
       characters: g.characters.map(c => {
         const combatChar = state.party.find(p => p.id === c.id);
         if (!combatChar) return c;
+        // Give loot items to the first living party member
+        const newItems = (firstAlive && c.id === firstAlive.id && state.loot?.length)
+          ? [...c.inventory, ...state.loot]
+          : c.inventory;
         return {
           ...c,
           experience: c.experience + Math.floor(state.xpGained / state.party.length),
           currentHp: combatChar.currentHp,
           currentMp: combatChar.currentMp,
-          kills: c.kills + state.enemies.length
+          kills: c.kills + state.enemies.length,
+          inventory: newItems
         };
       })
     }));
+
+    // Announce loot in victory event
+    if (state.loot?.length) {
+      const names = state.loot.map(i => i.unidentifiedName).join(', ');
+      this.combatState = {
+        ...state,
+        log: [...state.log, `🎒 Looted: ${names}`]
+      };
+      this.gameState.combatState.set(this.combatState);
+    }
   }
 
   handleDefeat(state: CombatState): void {

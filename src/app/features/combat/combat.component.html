@@ -8,7 +8,7 @@
 
   <div class="combat-layout">
     <!-- Enemies -->
-    <div class="enemies-panel">
+    <div class="enemies-panel" *ngIf="!hideEnemies">
       <div class="panel-title dos-red">ENEMIES:</div>
       <div
         *ngFor="let enemy of combatState.enemies; let i = index"

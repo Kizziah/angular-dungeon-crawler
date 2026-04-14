@@ -234,14 +234,15 @@ export class CombatService {
 
     if (newState.phase !== 'fled' && newState.phase !== 'victory') {
       for (const monster of newState.enemies.filter(e => e.status === 'alive')) {
-        const results = this.resolveMonsterTurn(monster, newState.party);
-        for (const result of results) {
-          const targetIdx = newState.party.findIndex(c =>
-            c.currentHp > 0 && c.status !== 'Dead'
-          );
-          if (targetIdx >= 0) {
-            newState = this.applyResult(newState, result, false, targetIdx);
-          }
+        const living = newState.party
+          .map((c, i) => ({ c, i }))
+          .filter(({ c }) => c.currentHp > 0 && c.status !== 'Dead' && c.status !== 'Stoned');
+        if (living.length === 0) break;
+
+        for (let a = 0; a < monster.attackCount; a++) {
+          const { c: target, i: targetIdx } = living[Math.floor(Math.random() * living.length)];
+          const result = this.resolveMonsterAttack(monster, target);
+          newState = this.applyResult(newState, result, false, targetIdx);
         }
       }
 

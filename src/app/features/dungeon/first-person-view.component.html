@@ -1,0 +1,110 @@
+<svg class="fp-canvas" viewBox="0 0 512 384" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+  <defs>
+    <!-- Stone block pattern: solid blocks with bevel highlight/shadow -->
+    <pattern id="stone" x="0" y="0" width="64" height="64" patternUnits="userSpaceOnUse">
+      <!-- Mortar background -->
+      <rect width="64" height="64" fill="#1c1c1c"/>
+      <!-- Stone block fill -->
+      <rect x="3" y="3" width="58" height="58" fill="#787878"/>
+      <!-- Top highlight -->
+      <rect x="3" y="3" width="58" height="6" fill="#a0a0a0"/>
+      <!-- Left highlight -->
+      <rect x="3" y="3" width="6" height="58" fill="#919191"/>
+      <!-- Bottom shadow -->
+      <rect x="3" y="55" width="58" height="6" fill="#484848"/>
+      <!-- Right shadow -->
+      <rect x="55" y="3" width="6" height="58" fill="#525252"/>
+    </pattern>
+
+    <!-- Dark stone for ceiling — brighter so it's visible -->
+    <pattern id="stone-ceil" x="0" y="0" width="64" height="64" patternUnits="userSpaceOnUse">
+      <rect width="64" height="64" fill="#222222"/>
+      <rect x="3" y="3" width="58" height="58" fill="#686868"/>
+      <rect x="3" y="3" width="58" height="5" fill="#848484"/>
+      <rect x="3" y="3" width="5" height="58" fill="#787878"/>
+      <rect x="3" y="56" width="58" height="5" fill="#3c3c3c"/>
+      <rect x="56" y="3" width="5" height="58" fill="#444444"/>
+    </pattern>
+
+    <!-- Wood plank floor -->
+    <pattern id="wood" x="0" y="192" width="512" height="20" patternUnits="userSpaceOnUse">
+      <rect width="512" height="20" fill="#3a1c06"/>
+      <!-- plank divider -->
+      <line x1="0" y1="19" x2="512" y2="19" stroke="#1a0a01" stroke-width="2"/>
+      <!-- subtle wood grain -->
+      <line x1="0" y1="9"  x2="512" y2="9"  stroke="#2a1304" stroke-width="1" opacity="0.5"/>
+    </pattern>
+
+    <!-- Vignette -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="55%" stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.6"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Base background: fill with patterns so any gaps look consistent -->
+  <rect width="512" height="192" fill="url(#stone-ceil)"/>
+  <rect y="192" width="512" height="192" fill="url(#wood)"/>
+  <!-- Deep-fog darkening on the far background -->
+  <rect width="512" height="192" fill="rgba(0,0,0,0.45)"/>
+  <rect y="192" width="512" height="192" fill="rgba(0,0,0,0.35)"/>
+
+  <!-- Scene elements rendered back-to-front -->
+  <ng-container *ngFor="let el of scene">
+
+    <!-- Ceiling trapezoids: dark stone pattern -->
+    <ng-container *ngIf="el.kind === 'ceiling'">
+      <polygon [attr.points]="el.points" fill="url(#stone-ceil)"/>
+      <polygon [attr.points]="el.points" [attr.fill]="el.fill"/>
+    </ng-container>
+
+    <!-- Floor trapezoids: wood plank pattern -->
+    <ng-container *ngIf="el.kind === 'floor'">
+      <polygon [attr.points]="el.points" fill="url(#wood)"/>
+      <polygon [attr.points]="el.points" [attr.fill]="el.fill"/>
+    </ng-container>
+
+    <!-- Front wall: stone blocks + depth darken -->
+    <ng-container *ngIf="isFrontWall(el)">
+      <rect [attr.x]="el.x" [attr.y]="el.y"
+            [attr.width]="el.w" [attr.height]="el.h"
+            fill="url(#stone)"/>
+      <rect [attr.x]="el.x" [attr.y]="el.y"
+            [attr.width]="el.w" [attr.height]="el.h"
+            [attr.fill]="el.fill"/>
+    </ng-container>
+
+    <!-- Side walls: stone blocks as polygon + depth darken overlay -->
+    <ng-container *ngIf="isSideWall(el)">
+      <polygon [attr.points]="el.points" fill="url(#stone)"/>
+      <polygon [attr.points]="el.points" [attr.fill]="el.fill"/>
+    </ng-container>
+
+    <!-- Door -->
+    <svg *ngIf="isDoor(el)"
+         [attr.x]="el.x" [attr.y]="el.y"
+         [attr.width]="el.w" [attr.height]="el.h"
+         viewBox="0 0 160 210"
+         preserveAspectRatio="none">
+      <rect width="160" height="210" fill="url(#stone)"/>
+      <rect x="16" y="0" width="128" height="210" fill="#4e2310"/>
+      <rect x="23" y="4" width="114" height="202" fill="#7a3f2b"/>
+      <rect x="23" y="96"  width="114" height="10" fill="#5a2a1a" opacity="0.6"/>
+      <rect x="23" y="110" width="114" height="10" fill="#5a2a1a" opacity="0.6"/>
+      <line x1="44"  y1="4" x2="44"  y2="206" stroke="#5a2a1a" stroke-width="5" opacity="0.55"/>
+      <line x1="65"  y1="4" x2="65"  y2="206" stroke="#5a2a1a" stroke-width="5" opacity="0.55"/>
+      <line x1="86"  y1="4" x2="86"  y2="206" stroke="#5a2a1a" stroke-width="5" opacity="0.55"/>
+      <line x1="107" y1="4" x2="107" y2="206" stroke="#5a2a1a" stroke-width="5" opacity="0.55"/>
+      <line x1="128" y1="4" x2="128" y2="206" stroke="#5a2a1a" stroke-width="5" opacity="0.55"/>
+      <circle cx="44" cy="112" r="13" fill="none" stroke="#c9b37a" stroke-width="6"/>
+      <circle cx="44" cy="112" r="5"  fill="#c9b37a"/>
+    </svg>
+
+  </ng-container>
+
+  <!-- Vignette -->
+  <rect width="512" height="384" fill="url(#vignette)" pointer-events="none"/>
+  <!-- Horizon line -->
+  <line x1="0" y1="192" x2="512" y2="192" stroke="#111" stroke-width="1"/>
+</svg>
+

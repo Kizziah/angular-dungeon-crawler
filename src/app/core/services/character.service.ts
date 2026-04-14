@@ -118,7 +118,13 @@ export class CharacterService {
 
   calcAttackBonus(char: Character): number {
     const classDef = CLASSES.find(c => c.name === char.class)!;
-    return Math.floor(char.level * classDef.attackBonus / 2) + Math.floor((char.stats.strength - 10) / 2);
+    const base = Math.floor(char.level * classDef.attackBonus / 2) + Math.floor((char.stats.strength - 10) / 2);
+    const weaponBonus = char.equipment?.weapon?.stats.attack ?? 0;
+    return base + weaponBonus;
+  }
+
+  getWeaponDamage(char: Character): string {
+    return char.equipment?.weapon?.stats.damage ?? '1d4';
   }
 
   private generateId(): string {
