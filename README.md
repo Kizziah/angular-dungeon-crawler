@@ -83,7 +83,15 @@ The backend powers cloud saves, real-time overworld, global chat, trading, and l
 
 **Requirements:** Python 3.11+, pip
 
-**1. Install dependencies**
+**1. Create and activate a virtual environment**
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+```
+
+**2. Install dependencies**
 
 ```bash
 cd backend
