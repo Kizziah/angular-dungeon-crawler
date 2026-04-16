@@ -64,12 +64,86 @@
 
 ## Getting Started
 
+### Frontend (Angular)
+
 ```bash
 npm install
 ng serve
 ```
 
 Then open [http://localhost:4200](http://localhost:4200).
+
+Free single-player mode works immediately — no backend required.
+
+---
+
+### Backend (Python / Django) — MMO Premium Features
+
+The backend powers cloud saves, real-time overworld, global chat, trading, and leaderboards for premium subscribers.
+
+**Requirements:** Python 3.11+, pip
+
+**1. Install dependencies**
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+**2. Configure environment**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in your values:
+
+| Variable | Description |
+|----------|-------------|
+| `SECRET_KEY` | Django secret key (any random string for dev) |
+| `DEBUG` | `True` for local dev |
+| `DATABASE_URL` | Postgres URL — omit to use SQLite |
+| `STRIPE_SECRET_KEY` | From your Stripe dashboard |
+| `STRIPE_WEBHOOK_SECRET` | From `stripe listen` CLI (see below) |
+| `STRIPE_PRICE_ID` | Your monthly subscription price ID |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:4200` |
+
+**3. Apply migrations**
+
+```bash
+python manage.py migrate
+```
+
+**4. Create an admin user (optional)**
+
+```bash
+python manage.py createsuperuser
+```
+
+**5. Run the dev server**
+
+For HTTP only (no WebSockets):
+```bash
+python manage.py runserver
+```
+
+For full WebSocket support (chat + real-time overworld), use Daphne:
+```bash
+daphne mordor_backend.asgi:application
+```
+
+API is available at **http://localhost:8000/api/**  
+Admin panel at **http://localhost:8000/admin/**
+
+**6. Test Stripe webhooks locally (optional)**
+
+```bash
+stripe listen --forward-to localhost:8000/api/accounts/stripe/webhook/
+```
+
+Copy the webhook signing secret printed by `stripe listen` into `STRIPE_WEBHOOK_SECRET` in your `.env`.
+
+---
 
 ## Build
 
