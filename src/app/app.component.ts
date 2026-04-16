@@ -3,17 +3,20 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { GameStateService } from './core/services/game-state.service';
+import { AuthService } from './core/services/auth.service';
+import { ChatOverlayComponent } from './features/chat/chat-overlay.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, ChatOverlayComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
   private gameState = inject(GameStateService);
   private router = inject(Router);
+  readonly auth = inject(AuthService);
 
   title = 'MORDOR';
   currentRoute = '';

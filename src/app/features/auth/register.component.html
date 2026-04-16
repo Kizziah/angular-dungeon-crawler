@@ -1,0 +1,32 @@
+<div class="dos-screen">
+  <div class="dos-window register-box">
+    <div class="dos-title">⚔ MORDOR MMO — CREATE ACCOUNT ⚔</div>
+    <div class="dos-body">
+      <div class="field">
+        <label>Username:</label>
+        <input class="dos-input" [(ngModel)]="username" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Email (optional, for billing):</label>
+        <input class="dos-input" type="email" [(ngModel)]="email" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Password (min 8 chars):</label>
+        <input class="dos-input" type="password" [(ngModel)]="password" autocomplete="new-password" />
+      </div>
+      <div class="tier-info">
+        <span class="badge free">Free</span> Full single-player game, localStorage saves<br>
+        <span class="badge premium">Premium ⭐</span> Cloud saves, see other players, chat, dungeons, trading
+      </div>
+      @if (error()) {
+        <div class="error">{{ error() }}</div>
+      }
+      <div class="actions">
+        <button class="dos-btn" (click)="submit()" [disabled]="loading()">
+          {{ loading() ? 'Creating...' : 'Create Free Account' }}
+        </button>
+        <button class="dos-btn secondary" routerLink="/login">Back to Login</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
 import { OverworldService } from '../../core/services/overworld.service';
+import { AuthService } from '../../core/services/auth.service';
+import { WebSocketService, OnlinePlayer } from '../../core/services/websocket.service';
 import { TILE_RENDER, OverworldCell } from '../../core/models/overworld.model';
 
 const VP_W = 21;
@@ -19,6 +21,8 @@ export class OverworldComponent implements OnInit, OnDestroy {
   private gameState = inject(GameStateService);
   private overworldService = inject(OverworldService);
   private router = inject(Router);
+  private auth = inject(AuthService);
+  private ws = inject(WebSocketService);
 
   statusMsg = signal('');
   private statusTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -40,15 +44,30 @@ export class OverworldComponent implements OnInit, OnDestroy {
   playerVPX = computed(() => Math.floor(VP_W / 2));
   playerVPY = computed(() => Math.floor(VP_H / 2));
 
+  /** Map of "x,y" → OnlinePlayer for O(1) tile lookup */
+  private onlinePlayerMap = computed(() => {
+    const map = new Map<string, OnlinePlayer>();
+    for (const p of this.ws.onlinePlayers()) {
+      map.set(`${p.x},${p.y}`, p);
+    }
+    return map;
+  });
+
   ngOnInit(): void {
     if (!this.gameState.overworldState()) {
       this.gameState.overworldState.set(this.overworldService.initOverworld());
     }
     this.setStatus('⚔️  You step onto the overworld. Use arrows or WASD to move.');
+
+    if (this.auth.isPremium()) {
+      this.ws.connectToWorld('main');
+      this.broadcastPosition();
+    }
   }
 
   ngOnDestroy(): void {
     if (this.statusTimeout) clearTimeout(this.statusTimeout);
+    if (this.auth.isPremium()) this.ws.disconnectWorld();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -77,6 +96,10 @@ export class OverworldComponent implements OnInit, OnDestroy {
 
     const event = this.overworldService.movePlayer(s, dx, dy);
     this.gameState.overworldState.set({ ...s });
+
+    if (event.type === 'move' || event.type === 'encounter') {
+      this.broadcastPosition();
+    }
 
     switch (event.type) {
       case 'blocked':
@@ -131,6 +154,13 @@ export class OverworldComponent implements OnInit, OnDestroy {
     }
   }
 
+  private broadcastPosition(): void {
+    const s = this.gameState.overworldState();
+    if (!s) return;
+    const guildName = this.gameState.guild()?.name ?? '';
+    this.ws.sendWorldPosition(s.playerX, s.playerY, guildName);
+  }
+
   private encounterMsg(tile?: string): string {
     switch (tile) {
       case 'forest':  return '🐺 A pack of wolves charges from the trees!';
@@ -158,9 +188,14 @@ export class OverworldComponent implements OnInit, OnDestroy {
   cellStyle(cell: OverworldCell | null, vpX: number, vpY: number): Record<string, string> {
     const isPlayer = vpX === this.playerVPX() && vpY === this.playerVPY();
     if (isPlayer) {
-      // Let CSS handle player color/glow; just set a subtle background
       const bg = this.inShip() ? '#001a33' : '#1a1400';
       return { 'background-color': bg };
+    }
+
+    const worldX = this.state ? this.state.playerX - Math.floor(VP_W / 2) + vpX : -1;
+    const worldY = this.state ? this.state.playerY - Math.floor(VP_H / 2) + vpY : -1;
+    if (this.onlinePlayerMap().has(`${worldX},${worldY}`)) {
+      return { color: '#00ffff', 'background-color': '#001a1a' };
     }
 
     const c = cell ?? this.OOB_CELL;
@@ -172,6 +207,13 @@ export class OverworldComponent implements OnInit, OnDestroy {
     if (vpX === this.playerVPX() && vpY === this.playerVPY()) {
       return this.inShip() ? '⛵' : '☺';
     }
+
+    const worldX = this.state ? this.state.playerX - Math.floor(VP_W / 2) + vpX : -1;
+    const worldY = this.state ? this.state.playerY - Math.floor(VP_H / 2) + vpY : -1;
+    if (this.onlinePlayerMap().has(`${worldX},${worldY}`)) {
+      return '@';
+    }
+
     const c = cell ?? this.OOB_CELL;
     return TILE_RENDER[c.type].char;
   }

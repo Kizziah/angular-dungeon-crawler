@@ -1,0 +1,65 @@
+.leaderboard-page {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.dos-title {
+  background: #5f0000;
+  color: #ffcc00;
+  padding: 6px 12px;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #333;
+
+  .tab {
+    flex: 1;
+    background: #111;
+    color: #888;
+    border: none;
+    border-right: 1px solid #222;
+    padding: 6px 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+
+    &.active { background: #1a0000; color: #ffcc00; }
+    &:hover:not(.active) { color: #ccc; }
+  }
+}
+
+.loading { padding: 24px; text-align: center; color: #555; }
+
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    background: #111;
+    color: #888;
+    padding: 5px 8px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+  }
+
+  td {
+    padding: 4px 8px;
+    color: #ccc;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  tr:hover td { background: #0a0a1a; }
+
+  tr.dead td { color: #555; text-decoration: line-through; }
+
+  .rank { color: #ffcc00; font-weight: bold; width: 30px; }
+  .name { color: #fff; }
+  .level { color: #0f0; }
+  .player { color: #88aaff; }
+}

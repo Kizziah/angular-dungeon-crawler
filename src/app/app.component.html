@@ -2,9 +2,17 @@
   <div class="title-bar">
     <span class="title-text">{{ title }}</span>
     <span class="location">[ {{ getRouteLabel() }} ]</span>
-    <span class="party-info" *ngIf="party().length > 0">
-      Party: {{ party().length }} | Gold: {{ guild().gold }}gp
-    </span>
+    @if (party().length > 0) {
+      <span class="party-info">Party: {{ party().length }} | Gold: {{ guild().gold }}gp</span>
+    }
+    @if (auth.isLoggedIn()) {
+      <span class="auth-info">
+        {{ auth.currentUser()?.username }}
+        @if (auth.isPremium()) {
+          <span class="premium-badge">★ PREMIUM</span>
+        }
+      </span>
+    }
   </div>
   <div class="app-content">
     <router-outlet />
@@ -15,3 +23,7 @@
     <span class="dos-dim">© 2026</span>
   </div>
 </div>
+
+@if (auth.isPremium()) {
+  <app-chat-overlay />
+}

@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { Observable, of, tap, catchError } from 'rxjs';
+import { AuthService } from './auth.service';
+import { MmoService } from './mmo.service';
 
 export interface AppSaveState {
   guild: any;
@@ -15,22 +18,65 @@ export interface SaveSlotInfo {
   exists: boolean;
 }
 
+/**
+ * SaveService transparently switches between:
+ *  - localStorage  (free / logged-out users)
+ *  - Django cloud  (premium users)
+ *
+ * All callers continue to use the same API; the premium path is additive.
+ */
 @Injectable({ providedIn: 'root' })
 export class SaveService {
   private readonly VERSION = '1.0.0';
   private readonly KEY_PREFIX = 'mordor_save_';
 
+  constructor(private auth: AuthService, private mmo: MmoService) {}
+
+  // ── Write ─────────────────────────────────────────────────────────────────
+
   save(slot: number, state: AppSaveState): void {
-    const key = `${this.KEY_PREFIX}${slot}`;
-    localStorage.setItem(key, JSON.stringify({ ...state, timestamp: Date.now(), version: this.VERSION }));
+    const full = { ...state, timestamp: Date.now(), version: this.VERSION };
+    // Always write localStorage as a local backup
+    localStorage.setItem(`${this.KEY_PREFIX}${slot}`, JSON.stringify(full));
+
+    if (this.auth.isPremium()) {
+      this.mmo.uploadSave(slot, full).pipe(catchError(() => of(null))).subscribe();
+    }
   }
 
-  load(slot: number): AppSaveState | null {
-    const key = `${this.KEY_PREFIX}${slot}`;
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
+  autoSave(state: AppSaveState): void {
+    this.save(0, state);
   }
+
+  // ── Read ──────────────────────────────────────────────────────────────────
+
+  load(slot: number): AppSaveState | null {
+    return this._loadLocal(slot);
+  }
+
+  /** Load from cloud and sync to localStorage, then return the state. */
+  loadFromCloud(slot: number): Observable<AppSaveState | null> {
+    if (!this.auth.isPremium()) return of(this._loadLocal(slot));
+
+    return this.mmo.loadSave(slot).pipe(
+      tap(remote => {
+        if (remote) {
+          const mapped: AppSaveState = {
+            guild: (remote as any).guild_state,
+            dungeonState: (remote as any).dungeon_state,
+            overworldState: (remote as any).overworld_state,
+            timestamp: new Date((remote as any).updated_at).getTime(),
+            version: (remote as any).version,
+          };
+          // Sync cloud save into localStorage so offline play still works
+          localStorage.setItem(`${this.KEY_PREFIX}${slot}`, JSON.stringify(mapped));
+        }
+      }),
+      catchError(() => of(this._loadLocal(slot))),
+    ) as Observable<AppSaveState | null>;
+  }
+
+  // ── Listing / deleting ────────────────────────────────────────────────────
 
   listSlots(): SaveSlotInfo[] {
     const slots: SaveSlotInfo[] = [];
@@ -52,9 +98,16 @@ export class SaveService {
 
   deleteSave(slot: number): void {
     localStorage.removeItem(`${this.KEY_PREFIX}${slot}`);
+    if (this.auth.isPremium()) {
+      this.mmo.deleteSave(slot).pipe(catchError(() => of(null))).subscribe();
+    }
   }
 
-  autoSave(state: AppSaveState): void {
-    this.save(0, state);
+  // ── Private ───────────────────────────────────────────────────────────────
+
+  private _loadLocal(slot: number): AppSaveState | null {
+    const raw = localStorage.getItem(`${this.KEY_PREFIX}${slot}`);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
   }
 }

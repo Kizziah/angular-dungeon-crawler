@@ -1,0 +1,60 @@
+<div class="trade-page">
+  <div class="dos-window">
+    <div class="dos-title">⚖ PLAYER TRADING</div>
+
+    <div class="section-header">Incoming Trade Offers</div>
+    @if (pendingTrades().length === 0) {
+      <div class="empty">No pending trades.</div>
+    }
+    @for (trade of pendingTrades(); track trade.id) {
+      <div class="trade-card">
+        <div class="trade-from">From: <span class="highlight">{{ trade.sender_username }}</span></div>
+        @if (trade.message) { <div class="trade-msg">"{{ trade.message }}"</div> }
+        <div class="trade-items">
+          <div class="side">
+            <div class="side-label">They offer:</div>
+            <div>{{ trade.sender_gold }} gold</div>
+            @for (item of trade.sender_items; track $index) {
+              <div>• {{ item.name }}</div>
+            }
+          </div>
+          <div class="arrow">⇄</div>
+          <div class="side">
+            <div class="side-label">They want:</div>
+            <div>{{ trade.receiver_gold }} gold</div>
+            @for (item of trade.receiver_items; track $index) {
+              <div>• {{ item.name }}</div>
+            }
+          </div>
+        </div>
+        <div class="trade-actions">
+          <button class="dos-btn accept" (click)="accept(trade.id)">Accept</button>
+          <button class="dos-btn decline" (click)="decline(trade.id)">Decline</button>
+        </div>
+      </div>
+    }
+
+    <div class="section-header">Send a Trade Offer</div>
+    <div class="form">
+      <div class="field">
+        <label>Player username:</label>
+        <input class="dos-input" [(ngModel)]="newOffer.receiverUsername" placeholder="Username" />
+      </div>
+      <div class="field">
+        <label>Your gold offer:</label>
+        <input class="dos-input" type="number" [(ngModel)]="newOffer.senderGold" min="0" />
+      </div>
+      <div class="field">
+        <label>Gold you want in return:</label>
+        <input class="dos-input" type="number" [(ngModel)]="newOffer.receiverGold" min="0" />
+      </div>
+      <div class="field">
+        <label>Message (optional):</label>
+        <input class="dos-input" [(ngModel)]="newOffer.message" maxlength="300" />
+      </div>
+      @if (errorMsg()) { <div class="error">{{ errorMsg() }}</div> }
+      @if (successMsg()) { <div class="success">{{ successMsg() }}</div> }
+      <button class="dos-btn" (click)="sendOffer()">Send Offer</button>
+    </div>
+  </div>
+</div>

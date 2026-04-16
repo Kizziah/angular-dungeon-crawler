@@ -1,7 +1,11 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { premiumGuard } from './core/guards/premium.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/guild', pathMatch: 'full' },
+  { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) },
+  { path: 'register', loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent) },
   { path: 'guild', loadComponent: () => import('./features/guild/guild.component').then(m => m.GuildComponent) },
   { path: 'overworld', loadComponent: () => import('./features/overworld/overworld.component').then(m => m.OverworldComponent) },
   { path: 'worldmap', loadComponent: () => import('./features/worldmap/worldmap.component').then(m => m.WorldMapComponent) },
@@ -23,4 +27,6 @@ export const routes: Routes = [
   { path: 'dungeon', loadComponent: () => import('./features/dungeon/dungeon.component').then(m => m.DungeonComponent) },
   { path: 'combat', loadComponent: () => import('./features/combat/combat.component').then(m => m.CombatComponent) },
   { path: 'inventory/:id', loadComponent: () => import('./features/inventory/inventory.component').then(m => m.InventoryComponent) },
+  { path: 'leaderboard', loadComponent: () => import('./features/leaderboard/leaderboard.component').then(m => m.LeaderboardComponent), canActivate: [premiumGuard] },
+  { path: 'trade', loadComponent: () => import('./features/trading/trade.component').then(m => m.TradeComponent), canActivate: [premiumGuard] },
 ];

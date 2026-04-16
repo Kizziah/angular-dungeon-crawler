@@ -1,0 +1,50 @@
+<div class="leaderboard-page">
+  <div class="dos-window">
+    <div class="dos-title">🏆 HALL OF LEGENDS</div>
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab() === 'characters'" (click)="setTab('characters')">Top Characters</button>
+      <button class="tab" [class.active]="activeTab() === 'guilds'" (click)="setTab('guilds')">Top Guilds</button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading...</div>
+    } @else if (activeTab() === 'characters') {
+      <table class="lb-table">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Class</th><th>Race</th><th>Lv</th><th>Kills</th><th>Player</th></tr>
+        </thead>
+        <tbody>
+          @for (c of characters(); track $index) {
+            <tr [class.dead]="c.status === 'Dead' || c.status === 'Ashes'">
+              <td class="rank">{{ $index + 1 }}</td>
+              <td class="name">{{ c.character_name }}</td>
+              <td>{{ c.class }}</td>
+              <td>{{ c.race }}</td>
+              <td class="level">{{ c.level }}</td>
+              <td>{{ c.kills }}</td>
+              <td class="player">{{ c.username }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <table class="lb-table">
+        <thead>
+          <tr><th>#</th><th>Guild</th><th>Members</th><th>Total XP</th><th>Total Lv</th><th>Player</th></tr>
+        </thead>
+        <tbody>
+          @for (g of guilds(); track $index) {
+            <tr>
+              <td class="rank">{{ $index + 1 }}</td>
+              <td class="name">{{ g.guild_name }}</td>
+              <td>{{ g.member_count }}</td>
+              <td>{{ g.total_xp | number }}</td>
+              <td>{{ g.total_level }}</td>
+              <td class="player">{{ g.username }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="chat-overlay" [class.collapsed]="!isOpen()">
+  <div class="chat-header" (click)="toggle()">
+    <span>💬 Chat — {{ currentRoom() }}</span>
+    <span class="toggle-icon">{{ isOpen() ? '▼' : '▲' }}</span>
+  </div>
+
+  @if (isOpen()) {
+    <div class="room-tabs">
+      @for (room of rooms; track room.id) {
+        <button
+          class="tab"
+          [class.active]="currentRoom() === room.id"
+          (click)="switchRoom(room.id)">
+          {{ room.label }}
+        </button>
+      }
+    </div>
+
+    <div class="messages" #messageList>
+      @for (msg of ws.chatMessages(); track msg.id) {
+        <div class="msg">
+          <span class="username">{{ msg.username }}:</span>
+          <span class="content">{{ msg.content }}</span>
+        </div>
+      }
+      @if (ws.chatMessages().length === 0) {
+        <div class="empty">No messages yet.</div>
+      }
+    </div>
+
+    <div class="input-row">
+      <input
+        class="chat-input"
+        [(ngModel)]="draft"
+        (keyup.enter)="send()"
+        placeholder="Type a message..."
+        maxlength="500" />
+      <button class="send-btn" (click)="send()">Send</button>
+    </div>
+  }
+</div>

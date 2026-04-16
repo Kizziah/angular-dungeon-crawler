@@ -1,0 +1,25 @@
+<div class="dos-screen">
+  <div class="dos-window login-box">
+    <div class="dos-title">⚔ MORDOR MMO — LOGIN ⚔</div>
+    <div class="dos-body">
+      <div class="field">
+        <label>Username:</label>
+        <input class="dos-input" [(ngModel)]="username" (keyup.enter)="submit()" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password:</label>
+        <input class="dos-input" type="password" [(ngModel)]="password" (keyup.enter)="submit()" autocomplete="current-password" />
+      </div>
+      @if (error()) {
+        <div class="error">{{ error() }}</div>
+      }
+      <div class="actions">
+        <button class="dos-btn" (click)="submit()" [disabled]="loading()">
+          {{ loading() ? 'Logging in...' : 'Login' }}
+        </button>
+        <button class="dos-btn secondary" routerLink="/register">Register</button>
+        <button class="dos-btn secondary" routerLink="/guild">Play Free</button>
+      </div>
+    </div>
+  </div>
+</div>

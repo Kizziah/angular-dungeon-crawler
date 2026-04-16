@@ -1,0 +1,51 @@
+.dos-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #000;
+}
+
+.login-box { width: 420px; }
+
+.dos-title {
+  background: #0000aa;
+  color: #fff;
+  padding: 4px 8px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #555;
+}
+
+.dos-body { padding: 16px; }
+
+.field {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label { color: #aaa; font-size: 12px; }
+}
+
+.dos-input {
+  background: #000;
+  color: #0f0;
+  border: 1px solid #555;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus { outline: none; border-color: #0f0; }
+}
+
+.error { color: #f44; margin-bottom: 12px; font-size: 13px; }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
