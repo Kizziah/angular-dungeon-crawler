@@ -1,6 +1,6 @@
 import {
   Component, Input, OnChanges, AfterViewInit, OnDestroy, SimpleChanges,
-  ViewChild, ElementRef, NgZone
+  ViewChild, ElementRef, NgZone, HostListener
 } from '@angular/core';
 import * as THREE from 'three';
 import { DungeonFloor, Position } from '../../core/models/dungeon.model';
@@ -149,6 +149,13 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     });
     this.planeGeo?.dispose();
     this.renderer?.dispose();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKey(e: KeyboardEvent): void {
+    if (e.key === 'z' || e.key === 'Z') {
+      this.pendingAttack = true;
+    }
   }
 
   // ─── Three.js setup ───────────────────────────────────────────────────────
@@ -1064,8 +1071,8 @@ function makeShieldMesh(shield: Item): THREE.Group {
   const isEnch   = id.includes('-p');
   const isCursed = shield.cursed;
 
-  const w = isTower ? 0.22 : isLarge ? 0.20 : 0.16;
-  const h = isTower ? 0.36 : isLarge ? 0.27 : 0.20;
+  const w = isTower ? 0.22 : isLarge ? 0.50 : 0.16;
+  const h = isTower ? 0.36 : isLarge ? 0.57 : 0.20;
 
   const g = new THREE.Group();
   const lam = (hex: number, rough = 0.25, metal = 0.75, em = 0, emI = 0): THREE.MeshStandardMaterial => {
