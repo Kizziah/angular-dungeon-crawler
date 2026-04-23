@@ -5,6 +5,7 @@
   padding: 8px;
   outline: none;
   gap: 0;
+  overflow: hidden;
 
   .dungeon-header {
     display: flex;
@@ -13,104 +14,96 @@
     margin-bottom: 8px;
     border-bottom: 1px solid var(--dos-border);
     padding-bottom: 6px;
+    flex-shrink: 0;
   }
 
+  // ── Two-column layout: dominant view + compact sidebar ──────────────────
   .dungeon-layout {
     display: grid;
-    grid-template-columns: auto minmax(300px, 1fr) minmax(420px, 2fr);
+    grid-template-columns: 1fr 280px;
     gap: 12px;
     overflow: hidden;
     min-height: 0;
   }
 
-  .main-panel {
+  // ── Left column: 3-D dungeon view fills all available space ────────────
+  .view-panel {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    min-height: 0;
     overflow: hidden;
 
-    .view-label { font-size: 12px; }
+    app-first-person-view {
+      display: block;
+      flex: 1;
+      min-height: 0;
+      // Canvas stretches to fill the panel; aspect-ratio handled by component
+      ::ng-deep .fp-canvas {
+        width: 100%;
+        height: 100%;
+        max-height: calc(100vh - 80px);
+        object-fit: contain;
+      }
+    }
 
     .controls-hint {
       font-size: 11px;
-      margin-top: 4px;
-    }
-
-    .view-row {
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-
-      .view-col {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        flex-shrink: 0;
-      }
-    }
-
-    .combat-enemies-panel {
-      flex: 1;
-      border: 1px solid var(--dos-red);
-      padding: 8px;
-      overflow-y: auto;
-      min-width: 160px;
-
-      .panel-title { font-size: 12px; margin-bottom: 6px; letter-spacing: 1px; }
-
-      .enemy-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 4px;
-        border-bottom: 1px solid rgba(255,68,68,0.15);
-        &.dead { opacity: 0.4; }
-
-        .enemy-info {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          flex: 1;
-          min-width: 0;
-        }
-
-        .enemy-name { font-size: 13px; }
-
-        .hp-bar-wrap {
-          width: 100%; height: 6px;
-          background: #220000;
-          border: 1px solid #440000;
-          .hp-fill { height: 100%; transition: width 0.3s; }
-        }
-
-        .hp-text { font-size: 11px; }
-      }
+      flex-shrink: 0;
     }
 
     app-combat {
       width: 100%;
+      flex-shrink: 0;
     }
   }
 
-  .middle-panel {
+  // ── Right column: compact sidebar ──────────────────────────────────────
+  .side-panel {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     overflow: hidden;
     min-height: 0;
     min-width: 0;
 
-    .panel-title { font-size: 12px; margin-bottom: 4px; }
+    .panel-title { font-size: 11px; margin-bottom: 3px; }
+  }
+
+  .minimap-section {
+    flex-shrink: 0;
+  }
+
+  .party-section {
+    border: 1px solid var(--dos-border);
+    padding: 5px 7px;
+    flex-shrink: 0;
+
+    .party-char-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 11px;
+      padding: 2px 0;
+
+      .hp-danger { color: var(--dos-red); }
+    }
+  }
+
+  .log-section {
+    flex: 0 0 auto;
+    max-height: 120px;
+    overflow: hidden;
   }
 
   .inv-panel {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    border-left: 1px solid var(--dos-border);
-    padding-left: 10px;
+    border-top: 1px solid var(--dos-border);
+    padding-top: 8px;
     overflow: hidden;
     min-height: 0;
-    min-width: 0;
 
     .inventory-tabs {
       display: flex;
@@ -121,8 +114,8 @@
       flex-wrap: wrap;
 
       .inv-tab {
-        padding: 3px 10px;
-        font-size: 11px;
+        padding: 2px 8px;
+        font-size: 10px;
         transition: background 0.15s, outline 0.1s;
 
         &.active {
@@ -160,51 +153,29 @@
       ::ng-deep .inventory-screen {
         height: 100%;
         flex: 1;
-        padding: 6px 4px;
+        padding: 4px 2px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;
       }
 
       ::ng-deep .inv-header {
-        font-size: 12px;
+        font-size: 11px;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 3px;
       }
 
       ::ng-deep .stat-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0 16px;
+        gap: 0 10px;
       }
 
       ::ng-deep .back-btn {
         display: none;
       }
     }
-  }
-
-  .party-section {
-    border: 1px solid var(--dos-border);
-    padding: 6px 8px;
-    flex-shrink: 0;
-
-    .party-char-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      font-size: 12px;
-      padding: 2px 0;
-
-      .hp-danger { color: var(--dos-red); }
-    }
-  }
-
-  .log-section {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
   }
 
   .modal-overlay {
@@ -236,31 +207,33 @@
     }
   }
 
-  // Tablet: stack inventory below
-  @media (max-width: 1100px) {
-    .dungeon-layout {
-      grid-template-columns: auto 1fr;
-      grid-template-rows: 1fr auto;
-    }
-
-    .inv-panel {
-      grid-column: 1 / -1;
-      border-left: none;
-      border-top: 1px solid var(--dos-border);
-      padding-left: 0;
-      padding-top: 8px;
-      max-height: 40vh;
-    }
-  }
-
-  // Mobile: single column
-  @media (max-width: 700px) {
+  // Tablet: sidebar below the view
+  @media (max-width: 900px) {
     .dungeon-layout {
       grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto;
+      grid-template-rows: auto 1fr;
     }
 
-    .middle-panel { grid-column: 1; }
-    .inv-panel { grid-column: 1; max-height: 50vh; }
+    .side-panel {
+      flex-direction: row;
+      flex-wrap: wrap;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .log-section { max-height: 80px; }
+    .inv-panel { min-width: 240px; border-top: none; border-left: 1px solid var(--dos-border); padding-top: 0; padding-left: 8px; }
+  }
+
+  // Mobile: single column, view shrinks
+  @media (max-width: 600px) {
+    .dungeon-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+    }
+
+    .side-panel { flex-direction: column; max-height: none; }
+    .inv-panel { border-left: none; border-top: 1px solid var(--dos-border); padding-left: 0; padding-top: 8px; }
   }
 }
+

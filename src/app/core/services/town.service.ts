@@ -31,7 +31,7 @@ export class TownService {
   }
 
   resurrect(char: Character, guildGold: number): { success: boolean; cost: number; char: Character } {
-    const cost = 500 + char.level * 100;
+    const cost = char.level === 1 ? 0 : 500 + char.level * 100;
     if (guildGold < cost) return { success: false, cost, char };
     const successChance = Math.max(0.1, 0.9 - char.level * 0.05);
     if (Math.random() < successChance) {

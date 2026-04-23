@@ -71,7 +71,7 @@ export class TempleComponent {
   }
 
   getResurrectCost(char: Character): number {
-    return 500 + char.level * 100;
+    return char.level === 1 ? 0 : 500 + char.level * 100;
   }
 
   getCureCost(char: Character): number {

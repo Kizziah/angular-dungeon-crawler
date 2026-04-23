@@ -1,12 +1,15 @@
 :host {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .fp-canvas {
   display: block;
   width: 100%;
-  height: auto;
+  // Height follows aspect ratio (4:3) but won't exceed the viewport
+  aspect-ratio: 4 / 3;
+  max-height: calc(100vh - 80px);
   border: 1px solid var(--dos-border);
   background: #000;
-  image-rendering: pixelated;
 }

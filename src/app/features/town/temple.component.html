@@ -21,7 +21,7 @@
           [disabled]="guild().gold < getResurrectCost(char)"
           class="btn-resurrect"
         >
-          Resurrect ({{ getResurrectCost(char) }} gp)
+          Resurrect ({{ char.level === 1 ? 'FREE' : getResurrectCost(char) + ' gp' }})
         </button>
         <button
           *ngIf="char.status === 'Poisoned' || char.status === 'Paralyzed' || char.status === 'Stoned'"

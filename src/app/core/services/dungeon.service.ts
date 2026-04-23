@@ -205,7 +205,12 @@ export class DungeonService {
     }
   }
 
-  moveParty(state: DungeonState, dx: number, dy: number): { newState: DungeonState; event: DungeonEvent } {
+  /** Turn the party in-place without moving. */
+  turnParty(state: DungeonState, dir: 'N' | 'S' | 'E' | 'W'): DungeonState {
+    return { ...state, partyDirection: dir };
+  }
+
+  moveParty(state: DungeonState, dx: number, dy: number, facing?: 'N' | 'S' | 'E' | 'W'): { newState: DungeonState; event: DungeonEvent } {
     const floor = state.floors[state.currentFloor];
     const newX = state.partyPosition.x + dx;
     const newY = state.partyPosition.y + dy;
@@ -223,7 +228,7 @@ export class DungeonService {
     newCells[newY][newX].visited = true;
     this.revealAdjacentWalls(newCells, newX, newY, floor.width, floor.height);
 
-    const direction = dx > 0 ? 'E' : dx < 0 ? 'W' : dy > 0 ? 'S' : 'N';
+    const direction = facing ?? (dx > 0 ? 'E' : dx < 0 ? 'W' : dy > 0 ? 'S' : 'N');
     const newState: DungeonState = {
       ...state,
       partyPosition: { x: newX, y: newY },

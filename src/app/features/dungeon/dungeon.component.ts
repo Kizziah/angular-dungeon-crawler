@@ -7,7 +7,6 @@ import { FirstPersonViewComponent } from './first-person-view.component';
 import { MinimapComponent } from './minimap.component';
 import { EncounterLogComponent } from './encounter-log.component';
 import { CombatComponent } from '../combat/combat.component';
-import { MonsterSpriteComponent } from '../combat/monster-sprite.component';
 import { InventoryComponent } from '../inventory/inventory.component';
 import { DungeonState } from '../../core/models/dungeon.model';
 import { Character } from '../../core/models/character.model';
@@ -16,7 +15,7 @@ import { Item } from '../../core/models/item.model';
 @Component({
   selector: 'app-dungeon',
   standalone: true,
-  imports: [CommonModule, FirstPersonViewComponent, MinimapComponent, EncounterLogComponent, CombatComponent, MonsterSpriteComponent, InventoryComponent],
+  imports: [CommonModule, FirstPersonViewComponent, MinimapComponent, EncounterLogComponent, CombatComponent, InventoryComponent],
   templateUrl: './dungeon.component.html',
   styleUrls: ['./dungeon.component.scss']
 })
@@ -60,25 +59,62 @@ export class DungeonComponent implements OnInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
     if (this.showChest || this.showConfirmExit || this.inCombat) return;
+    const facing = (this.dungeonState?.partyDirection ?? 'N') as 'N' | 'S' | 'E' | 'W';
     switch (e.key) {
-      case 'w': case 'W': case 'ArrowUp':    e.preventDefault(); this.move(0, -1); break;
-      case 's': case 'S': case 'ArrowDown':  e.preventDefault(); this.move(0, 1);  break;
-      case 'a': case 'A': case 'ArrowLeft':  e.preventDefault(); this.move(-1, 0); break;
-      case 'd': case 'D': case 'ArrowRight': e.preventDefault(); this.move(1, 0);  break;
+      case 'w': case 'W': case 'ArrowUp':    e.preventDefault(); this.moveForward(facing);  break;
+      case 's': case 'S': case 'ArrowDown':  e.preventDefault(); this.moveBackward(facing); break;
+      case 'a': case 'A': case 'ArrowLeft':  e.preventDefault(); this.turnLeft(facing);     break;
+      case 'd': case 'D': case 'ArrowRight': e.preventDefault(); this.turnRight(facing);    break;
       case '>': case '.': this.useStairsDown(); break;
       case '<': case ',': this.useStairsUp();   break;
       case 'Escape': this.showConfirmExit = true; break;
     }
   }
 
-  move(dx: number, dy: number): void {
+  private static readonly FORWARD: Record<string, [number, number]> = {
+    N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0]
+  };
+  private static readonly TURN_LEFT: Record<string, 'N' | 'S' | 'E' | 'W'> = {
+    N: 'W', W: 'S', S: 'E', E: 'N'
+  };
+  private static readonly TURN_RIGHT: Record<string, 'N' | 'S' | 'E' | 'W'> = {
+    N: 'E', E: 'S', S: 'W', W: 'N'
+  };
+
+  private moveForward(facing: 'N' | 'S' | 'E' | 'W'): void {
+    const [dx, dy] = DungeonComponent.FORWARD[facing];
+    this.move(dx, dy, facing);
+  }
+
+  private moveBackward(facing: 'N' | 'S' | 'E' | 'W'): void {
+    const [dx, dy] = DungeonComponent.FORWARD[facing];
+    this.move(-dx, -dy, facing); // keep same facing direction while stepping back
+  }
+
+  private turnLeft(facing: 'N' | 'S' | 'E' | 'W'): void {
     if (!this.dungeonState) return;
-    const { newState, event } = this.dungeonService.moveParty(this.dungeonState, dx, dy);
+    const newDir = DungeonComponent.TURN_LEFT[facing];
+    this.dungeonState = this.dungeonService.turnParty(this.dungeonState, newDir);
+    this.gameState.dungeonState.set(this.dungeonState);
+  }
+
+  private turnRight(facing: 'N' | 'S' | 'E' | 'W'): void {
+    if (!this.dungeonState) return;
+    const newDir = DungeonComponent.TURN_RIGHT[facing];
+    this.dungeonState = this.dungeonService.turnParty(this.dungeonState, newDir);
+    this.gameState.dungeonState.set(this.dungeonState);
+  }
+
+  move(dx: number, dy: number, facing?: 'N' | 'S' | 'E' | 'W'): void {
+    if (!this.dungeonState) return;
+    const { newState, event } = this.dungeonService.moveParty(this.dungeonState, dx, dy, facing);
     this.dungeonState = newState;
     this.gameState.dungeonState.set(newState);
 
     switch (event.type) {
+
       case 'encounter': {
+        
         const aliveParty = this.party.filter(c => c.currentHp > 0 && c.status !== 'Dead');
         if (aliveParty.length === 0) break;
         this.addLog(`⚔ An enemy appears!`);
@@ -316,6 +352,12 @@ export class DungeonComponent implements OnInit, OnDestroy {
 
   get combatEnemies() {
     return this.gameState.combatState()?.enemies ?? [];
+  }
+
+  /** Increments with each combat round — drives the attack animation in the 3-D view. */
+  get combatAttackCount(): number {
+    const cs = this.gameState.combatState();
+    return cs ? cs.round : 0;
   }
 
   getHpPct(e: { currentHp: number; maxHp: number }): number {

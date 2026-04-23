@@ -629,7 +629,13 @@ const SPRITE_KEY_MAP: Record<string, string> = {
   'poe':'ghost',
 };
 
-// ── component ─────────────────────────────────────────────────────────────────
+/** Returns the full inline SVG string for a monster (width/height = size px, viewBox 0 0 64 64). */
+export function getMonsterSvg(monsterId: string, color: string, size = 64): string {
+  const key = SPRITE_KEY_MAP[monsterId] ?? 'default';
+  const fn  = DRAW_FNS[key] ?? DRAW_FNS['default'];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64">${fn(color)}</svg>`;
+}
+
 @Component({
   selector: 'app-monster-sprite',
   standalone: true,
