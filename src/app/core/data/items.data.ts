@@ -92,7 +92,7 @@ function makeStaffMesh(opts: { cursed?: boolean; enchanted?: boolean }): THREE.G
   crystal.position.y = 1.2;
   g.add(crystal);
   const bandGeo = new THREE.TorusGeometry(0.1, 0.02, 8, 16);
-  [1.0, 2.2].forEach(y => {
+  [1.0, 0.2].forEach(y => {
     const band = new THREE.Mesh(bandGeo, metalMat);
     band.rotation.x = Math.PI / 2;
     band.position.y = y;
