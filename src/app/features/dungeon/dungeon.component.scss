@@ -58,6 +58,79 @@
     }
   }
 
+  // ── Mobile D-pad (hidden on desktop, shown on touch/small screens) ─────
+  .mobile-dpad {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0 4px;
+    flex-shrink: 0;
+  }
+
+  .dpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 64px);
+    grid-template-rows: repeat(3, 64px);
+    gap: 4px;
+  }
+
+  .dpad-btn {
+    background: rgba(0, 200, 80, 0.15);
+    border: 2px solid var(--dos-green);
+    color: var(--dos-green);
+    font-size: 26px;
+    line-height: 1;
+    border-radius: 10px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+
+    &:active { background: rgba(0, 200, 80, 0.40); }
+  }
+
+  .dpad-center, .dpad-empty {
+    // placeholder cells in the 3x3 grid
+  }
+
+  .dpad-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .action-btn {
+    border-radius: 8px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    font-size: 15px;
+    padding: 8px 16px;
+    transition: background 0.1s;
+  }
+
+  .stair-btn {
+    background: rgba(255, 176, 0, 0.15);
+    border: 2px solid var(--dos-amber);
+    color: var(--dos-amber);
+    &:active { background: rgba(255, 176, 0, 0.35); }
+  }
+
+  .exit-btn {
+    background: rgba(180, 40, 40, 0.15);
+    border: 2px solid #c04040;
+    color: #c04040;
+    &:active { background: rgba(180, 40, 40, 0.35); }
+  }
+
   // ── Right column: compact sidebar ──────────────────────────────────────
   .side-panel {
     display: flex;
@@ -223,6 +296,10 @@
 
     .log-section { max-height: 80px; }
     .inv-panel { min-width: 240px; border-top: none; border-left: 1px solid var(--dos-border); padding-top: 0; padding-left: 8px; }
+
+    // Show D-pad; hide keyboard hint
+    .mobile-dpad { display: flex; }
+    .controls-hint { display: none; }
   }
 
   // Mobile: single column, view shrinks

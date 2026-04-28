@@ -56,6 +56,30 @@ export class DungeonComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {}
 
+  // ─── Mobile D-pad ────────────────────────────────────────────────────────────
+
+  dpadForward(): void {
+    if (this.showChest || this.showConfirmExit || this.inCombat) return;
+    this.moveForward((this.dungeonState?.partyDirection ?? 'N') as 'N' | 'S' | 'E' | 'W');
+  }
+
+  dpadBack(): void {
+    if (this.showChest || this.showConfirmExit || this.inCombat) return;
+    this.moveBackward((this.dungeonState?.partyDirection ?? 'N') as 'N' | 'S' | 'E' | 'W');
+  }
+
+  dpadTurnLeft(): void {
+    if (this.showChest || this.showConfirmExit || this.inCombat) return;
+    this.turnLeft((this.dungeonState?.partyDirection ?? 'N') as 'N' | 'S' | 'E' | 'W');
+  }
+
+  dpadTurnRight(): void {
+    if (this.showChest || this.showConfirmExit || this.inCombat) return;
+    this.turnRight((this.dungeonState?.partyDirection ?? 'N') as 'N' | 'S' | 'E' | 'W');
+  }
+
+  // ─── Keyboard ─────────────────────────────────────────────────────────────
+
   @HostListener('window:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
     if (this.showChest || this.showConfirmExit || this.inCombat) return;

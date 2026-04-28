@@ -42,7 +42,7 @@ export function makeShieldMesh(shield: Item): THREE.Group {
   // Fallback: plain grey box
   const g = new THREE.Group();
   g.add(new THREE.Mesh(
-    new THREE.BoxGeometry(0.16, 0.20, 0.04),
+    new THREE.BoxGeometry(0.16, 1.20, 0.04),
     new THREE.MeshStandardMaterial({ color: 0x6677aa, roughness: 0.25, metalness: 0.75 })
   ));
   return g;

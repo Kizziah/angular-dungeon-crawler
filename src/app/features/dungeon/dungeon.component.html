@@ -28,6 +28,26 @@
         <span *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="dos-amber"> | [&lt;] Ascend</span>
       </div>
 
+      <!-- Mobile D-pad (touch controls, hidden on desktop via CSS) -->
+      <div class="mobile-dpad" *ngIf="!inCombat">
+        <div class="dpad-grid">
+          <div class="dpad-empty"></div>
+          <button class="dpad-btn" (click)="dpadForward()" aria-label="Forward">▲</button>
+          <div class="dpad-empty"></div>
+          <button class="dpad-btn" (click)="dpadTurnLeft()" aria-label="Turn Left">◀</button>
+          <div class="dpad-center"></div>
+          <button class="dpad-btn" (click)="dpadTurnRight()" aria-label="Turn Right">▶</button>
+          <div class="dpad-empty"></div>
+          <button class="dpad-btn" (click)="dpadBack()" aria-label="Back">▼</button>
+          <div class="dpad-empty"></div>
+        </div>
+        <div class="dpad-actions">
+          <button *ngIf="getCurrentTileType() === 'stairs-down'" class="action-btn stair-btn" (click)="useStairsDown()">▼ Descend</button>
+          <button *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="action-btn stair-btn" (click)="useStairsUp()">▲ Ascend</button>
+          <button class="action-btn exit-btn" (click)="showConfirmExit = true">✕ Exit</button>
+        </div>
+      </div>
+
       <app-combat *ngIf="inCombat" [hideEnemies]="true" (done)="onCombatDone($event)"></app-combat>
     </div>
 
