@@ -12,6 +12,7 @@ import { buildWalkClip, buildIdleClip, buildRunClip } from './animation-clips';
 import { makeStoneTexture, makeWoodTexture, makeDoorTexture, makeEnemyTexture } from './dungeon-textures';
 import { buildStairsMesh } from './dungeon-geometry';
 import { buildCharacterGeometry, CharacterJoints, equipSig } from './character-mesh';
+import { SpellParticleSystem } from './spell-particles';
 
 const RENDER_W    = 960;
 const RENDER_H    = 720;
@@ -40,6 +41,10 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   @Input() character: Character | null = null;
   /** Increment to trigger a weapon-swing / punch animation on the character. */
   @Input() attackCount: number = 0;
+  /** Increment to trigger a spell animation. */
+  @Input() spellCount: number = 0;
+  /** Spell name or id for the most recent cast — read when spellCount increments. */
+  @Input() spellId: string = '';
 
   @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
 
@@ -95,6 +100,11 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private pendingAttack = false; // set by ngOnChanges, consumed by render loop
   private lastAttackCount = 0;
 
+  // Spell particle system
+  private spellParticles!: SpellParticleSystem;
+  private pendingSpellId = '';
+  private lastSpellCount = 0;
+
   // Reusable camera vectors (avoid per-frame allocations)
   private readonly camTarget = new THREE.Vector3();
 
@@ -148,6 +158,12 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
       this.pendingAttack   = true;
     }
 
+    // Queue spell particle burst whenever spellCount increments
+    if (changes['spellCount'] && this.spellCount !== this.lastSpellCount) {
+      this.lastSpellCount  = this.spellCount;
+      this.pendingSpellId  = this.spellId;
+    }
+
     const floorChanged = changes['floor'] && this.floor.level !== this.lastFloorLevel;
     if (floorChanged) {
       this.snapToPosition();
@@ -183,6 +199,7 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
       m?.map?.dispose(); m?.dispose();
     });
     this.planeGeo?.dispose();
+    this.spellParticles?.dispose();
     this.renderer?.dispose();
   }
 
@@ -273,6 +290,8 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     this.lastEquipSig = equipSig(this.character?.equipment ?? null);
     this.playerGroup.scale.setScalar(0.45);
     this.scene.add(this.playerGroup);
+
+    this.spellParticles = new SpellParticleSystem(this.scene);
 
     this.planeGeo = new THREE.PlaneGeometry(1, 1);
     this.stoneMat    = new THREE.MeshStandardMaterial({ map: makeStoneTexture(false), roughness: 0.85, metalness: 0.05 });
@@ -533,6 +552,34 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
         0.78,
         this.vz - cosA * 0.45 - sinA * 0.22,
       );
+
+      // ── Spell particles ───────────────────────────────────────────────
+      if (this.pendingSpellId && this.spellParticles) {
+        // Hand position (mirror of torch position, opposite side)
+        const hx = this.vx - sinA * 0.40 - cosA * 0.22;
+        const hz = this.vz - cosA * 0.40 + sinA * 0.22;
+        this.spellParticles.trigger(
+          this.pendingSpellId,
+          hx, 0.75, hz,
+          this.vx - sinA * ENEMY_DIST, 0.55, this.vz - cosA * ENEMY_DIST,
+        );
+        this.pendingSpellId = '';
+      }
+      if (this.spellParticles) {
+        this.spellParticles.update(delta);
+        const flash = this.spellParticles.flash;
+        if (flash) {
+          const envelope = Math.pow(1 - flash.time / flash.duration, 2);
+          this.torchLight.color.setRGB(
+            0.98 + (flash.r - 0.98) * envelope,
+            0.73 + (flash.g - 0.73) * envelope,
+            0.33 + (flash.b - 0.33) * envelope,
+          );
+          this.torchLight.intensity += envelope * 14;
+        } else {
+          this.torchLight.color.setHex(0xffbb55);
+        }
+      }
 
       // ── Third-person camera — pulls back & rises as run weight increases ──
       // Mirrors the skinning blending example's cinematic follow camera

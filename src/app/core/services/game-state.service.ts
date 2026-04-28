@@ -4,9 +4,10 @@ import { DungeonState } from '../models/dungeon.model';
 import { CombatState } from '../models/combat.model';
 import { OverworldState } from '../models/overworld.model';
 import { SaveService } from './save.service';
+import { MASON_CHARACTER } from '../data/demo-characters.data';
 
 const DEFAULT_GUILD: GuildState = {
-  characters: [],
+  characters: [MASON_CHARACTER],
   gold: 500,
   bankGold: 0,
   name: 'The Adventurers Guild',

@@ -24,6 +24,7 @@ export class CombatComponent implements OnInit {
   private router = inject(Router);
 
   @Output() done = new EventEmitter<'victory' | 'defeat' | 'fled'>();
+  @Output() spellCast = new EventEmitter<string>();
   @Input() hideEnemies = false;
 
   combatState: CombatState | null = null;
@@ -88,6 +89,11 @@ export class CombatComponent implements OnInit {
       targetIndex: this.selectedEnemyIndex,
       spellId: action.spellId
     };
+
+    // Emit spell cast event before processing so the 3D view can animate it
+    if (action.type === 'spell' && action.spellId) {
+      this.spellCast.emit(action.spellId);
+    }
 
     const newState = this.combatService.processPlayerAction(
       { ...this.combatState, currentActorIndex: actorIndex },

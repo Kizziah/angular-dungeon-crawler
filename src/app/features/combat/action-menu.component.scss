@@ -25,6 +25,8 @@
 
   .spell-list {
     .spell-title { margin-bottom: 6px; }
+    max-height: 180px;
+    overflow-y: auto;
     .spell-btn {
       display: block;
       width: 100%;

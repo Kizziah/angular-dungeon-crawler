@@ -384,6 +384,14 @@ export class DungeonComponent implements OnInit, OnDestroy {
     return cs ? cs.round : 0;
   }
 
+  combatSpellCount = 0;
+  combatSpellId = '';
+
+  onSpellCast(spellId: string): void {
+    this.combatSpellId = spellId;
+    this.combatSpellCount++;
+  }
+
   getHpPct(e: { currentHp: number; maxHp: number }): number {
     return e.maxHp > 0 ? Math.round((e.currentHp / e.maxHp) * 100) : 0;
   }

@@ -20,6 +20,8 @@
         [enemies]="combatEnemies"
         [character]="party[0] || null"
         [attackCount]="combatAttackCount"
+        [spellCount]="combatSpellCount"
+        [spellId]="combatSpellId"
       ></app-first-person-view>
 
       <div class="controls-hint dos-dim" *ngIf="!inCombat">
@@ -48,7 +50,7 @@
         </div>
       </div>
 
-      <app-combat *ngIf="inCombat" [hideEnemies]="true" (done)="onCombatDone($event)"></app-combat>
+      <app-combat *ngIf="inCombat" [hideEnemies]="true" (done)="onCombatDone($event)" (spellCast)="onSpellCast($event)"></app-combat>
     </div>
 
     <!-- ── Right: compact sidebar ──────────────────────────────────────── -->

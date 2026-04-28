@@ -180,7 +180,7 @@ export const ITEMS: ItemDef[] = [
   {
     id: 'greatsword', name: 'Greatsword', unidentifiedName: 'Huge Blade', type: 'Weapon',
     stats: { attack: 1, damage: '2d6' }, cursed: false, value: 350, usable: false, floorMin: 5, floorMax: 99,
-    makeMesh: (cursed) => makeSwordMesh({ cursed, bladeLen: 0.38, guardWidth: 0.24, handleLen: 0.18, bladeWidth: 0.06 }),
+    makeMesh: (cursed) => makeSwordMesh({ cursed, bladeLen: 1.28, guardWidth: 0.24, handleLen: 0.28, bladeWidth: 0.06 }),
   },
   {
     id: 'battle-axe', name: 'Battle Axe', unidentifiedName: 'Heavy Axe', type: 'Weapon',

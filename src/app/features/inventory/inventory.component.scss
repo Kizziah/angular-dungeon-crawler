@@ -22,16 +22,13 @@
     font-size: 13px;
   }
 
-  .inv-layout {
-    display: flex;
+  .inv-layout {    
     gap: 12px;
     flex: 1;
-    overflow: hidden;
-    flex-direction: column;
+    overflow: scroll;    
   }
 
-  .gear-row {
-    display: flex;
+  .gear-row {    
     gap: 12px;
     flex: 1;
     overflow: hidden;
@@ -44,8 +41,10 @@
     letter-spacing: 1px;
   }
 
-  .stats-panel {
-    flex-shrink: 0;
+  .stats-panel {    
+    width: 170px;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     .stat-grid { margin-bottom: 12px; }
     .stat-row {
