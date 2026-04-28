@@ -5,10 +5,13 @@ import {
 import * as THREE from 'three';
 import { DungeonFloor, Position } from '../../core/models/dungeon.model';
 import { MonsterInstance } from '../../core/models/monster.model';
-import { getMonsterSvg } from '../combat/monster-sprite.component';
 import { Character, Equipment } from '../../core/models/character.model';
 import { Item } from '../../core/models/item.model';
 import { makeWeaponMesh, makeShieldMesh, wmesh } from './equipment-meshes';
+import { buildWalkClip, buildIdleClip, buildRunClip } from './animation-clips';
+import { makeStoneTexture, makeWoodTexture, makeDoorTexture, makeEnemyTexture } from './dungeon-textures';
+import { buildStairsMesh } from './dungeon-geometry';
+import { buildCharacterGeometry, CharacterJoints, equipSig } from './character-mesh';
 
 const RENDER_W    = 960;
 const RENDER_H    = 720;
@@ -95,6 +98,18 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   // Reusable camera vectors (avoid per-frame allocations)
   private readonly camTarget = new THREE.Vector3();
 
+  // Mouse-orbit state — lets the player look around the character
+  private camYawOffset   = 0;   // extra horizontal angle added to camera position
+  private camPitchOffset = 0;   // extra vertical offset for camera position
+  private orbitActive    = false;
+  private orbitLastX     = 0;
+  private orbitLastY     = 0;
+  // Bound handlers stored so they can be removed in ngOnDestroy
+  private readonly _onPointerDown = (e: PointerEvent) => this.onOrbitPointerDown(e);
+  private readonly _onPointerMove = (e: PointerEvent) => this.onOrbitPointerMove(e);
+  private readonly _onPointerUp   = (e: PointerEvent) => this.onOrbitPointerUp(e);
+  private readonly _onDblClick    = () => this.resetOrbit();
+
   constructor(private ngZone: NgZone) {}
 
   ngAfterViewInit(): void {
@@ -105,6 +120,15 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
       this.rebuildDungeonGeometry();
       this.buildEnemySprites();
     }
+
+    // Register mouse-orbit listeners on the canvas
+    const canvas = this.canvasRef.nativeElement;
+    canvas.addEventListener('pointerdown', this._onPointerDown);
+    canvas.addEventListener('pointermove', this._onPointerMove);
+    canvas.addEventListener('pointerup',   this._onPointerUp);
+    canvas.addEventListener('pointerleave', this._onPointerUp);
+    canvas.addEventListener('dblclick',    this._onDblClick);
+    canvas.style.cursor = 'grab';
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -139,6 +163,16 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   ngOnDestroy(): void {
     cancelAnimationFrame(this.animId);
     this.mixer?.stopAllAction();
+
+    const canvas = this.canvasRef?.nativeElement;
+    if (canvas) {
+      canvas.removeEventListener('pointerdown', this._onPointerDown);
+      canvas.removeEventListener('pointermove', this._onPointerMove);
+      canvas.removeEventListener('pointerup',   this._onPointerUp);
+      canvas.removeEventListener('pointerleave', this._onPointerUp);
+      canvas.removeEventListener('dblclick',    this._onDblClick);
+    }
+
     for (let i = (this.enemyGroup?.children.length ?? 0) - 1; i >= 0; i--) {
       const s = this.enemyGroup.children[i] as THREE.Sprite;
       (s.material as THREE.SpriteMaterial).map?.dispose();
@@ -157,6 +191,44 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     if (e.key === 'z' || e.key === 'Z') {
       this.pendingAttack = true;
     }
+  }
+
+  // ─── Mouse-orbit handlers ─────────────────────────────────────────────────
+
+  private onOrbitPointerDown(e: PointerEvent): void {
+    this.orbitActive = true;
+    this.orbitLastX  = e.clientX;
+    this.orbitLastY  = e.clientY;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    (e.currentTarget as HTMLElement).style.cursor = 'grabbing';
+  }
+
+  private onOrbitPointerMove(e: PointerEvent): void {
+    if (!this.orbitActive) return;
+    const dx = e.clientX - this.orbitLastX;
+    const dy = e.clientY - this.orbitLastY;
+    this.orbitLastX = e.clientX;
+    this.orbitLastY = e.clientY;
+
+    const YAW_SENS   = 0.006;  // radians per pixel
+    const PITCH_SENS = 0.004;  // world units per pixel (applied to camera Y)
+    const MAX_YAW    = Math.PI * 0.80;  // ±144°
+    const MAX_PITCH  = 0.55;
+
+    this.camYawOffset   = Math.max(-MAX_YAW,   Math.min(MAX_YAW,   this.camYawOffset   + dx * YAW_SENS));
+    this.camPitchOffset = Math.max(-MAX_PITCH,  Math.min(MAX_PITCH, this.camPitchOffset - dy * PITCH_SENS));
+  }
+
+  private onOrbitPointerUp(e: PointerEvent): void {
+    if (!this.orbitActive) return;
+    this.orbitActive = false;
+    (e.currentTarget as HTMLElement).style.cursor = 'grab';
+  }
+
+  /** Double-click resets the orbit back to the default behind-player view. */
+  resetOrbit(): void {
+    this.camYawOffset   = 0;
+    this.camPitchOffset = 0;
   }
 
   // ─── Three.js setup ───────────────────────────────────────────────────────
@@ -217,7 +289,7 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
 
   private buildPlayerMesh(): THREE.Group {
     const g = new THREE.Group();
-    this.buildCharacterGeometry(g, this.character?.equipment ?? null);
+    Object.assign(this, buildCharacterGeometry(g, this.character?.equipment ?? null));
     this.setupAnimationMixer(g);
     return g;
   }
@@ -236,229 +308,8 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     while (this.playerGroup.children.length) {
       this.playerGroup.remove(this.playerGroup.children[0]);
     }
-    this.buildCharacterGeometry(this.playerGroup, this.character?.equipment ?? null);
+    Object.assign(this, buildCharacterGeometry(this.playerGroup, this.character?.equipment ?? null));
     this.setupAnimationMixer(this.playerGroup);
-  }
-
-  /**
-   * Builds a fully-jointed humanoid skeleton with CylinderGeometry limbs,
-   * sphere joints, tapered torso, and equipment-specific armor/weapon meshes.
-   * Joint Groups are stored as fields so the render loop can animate them.
-   */
-  private buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): void {
-    const lam = (hex: number, rough = 0.80, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
-      const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
-      if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
-      return m;
-    };
-    const cyl = (rT: number, rB: number, h: number, s = 8) =>
-      new THREE.CylinderGeometry(rT, rB, h, s);
-    const sph = (r: number, ws = 8, hs = 6) =>
-      new THREE.SphereGeometry(r, ws, hs);
-    const box = (w: number, h: number, d: number) =>
-      new THREE.BoxGeometry(w, h, d);
-
-    // ── Armor / skin tones ───────────────────────────────────────────────
-    const aTier   = armorTier(eq?.bodyArmor?.definitionId);
-    const aColor  = eq?.bodyArmor?.cursed ? 0x220022 : ARMOR_COLORS[aTier];
-    const hTier   = helmTier(eq?.helmet?.definitionId);
-    const hColor  = eq?.helmet?.cursed   ? 0x220022 : HELM_COLORS[hTier];
-    const skin    = 0xffcc99;
-    const legCol  = eq?.bodyArmor?.cursed ? 0x220022
-                  : aTier !== 'none'       ? aColor : 0x2a3040;
-    const bootCol = eq?.boots?.cursed  ? 0x110011
-                  : aTier === 'plate'  ? 0x667788
-                  : aTier === 'chain'  ? 0x445566
-                  : eq?.boots          ? 0x4a3a2a
-                  :                     0x2a1a0a;
-
-    // PBR roughness/metalness per armor tier
-    const [aRough, aMetal] = aTier === 'plate'  ? [0.20, 0.85]
-                           : aTier === 'chain'  ? [0.45, 0.60]
-                           : aTier === 'leather'? [0.85, 0.05]
-                           :                     [0.80, 0.00];
-    const [hRough, hMetal] = hTier === 'great'  ? [0.20, 0.85]
-                           : hTier === 'iron'   ? [0.25, 0.75]
-                           : hTier === 'leather'? [0.85, 0.05]
-                           :                     [0.80, 0.00];
-
-    const bodyMat = lam(aColor, aRough, aMetal);
-    const legMat  = lam(legCol, aRough, aMetal);
-    const armMat  = lam(aTier === 'none' ? skin : aColor, aTier === 'none' ? 0.82 : aRough, aTier === 'none' ? 0.0 : aMetal);
-    const skinMat = lam(skin, 0.82, 0.0);
-    const bootMat = lam(bootCol, 0.75, aTier === 'plate' ? 0.50 : 0.05);
-    const beltMat = lam(0x6a4a2a, 0.80, 0.0);
-    const buckMat = lam(0xccaa44, 0.30, 0.70);
-    const helmMat = lam(hColor, hRough, hMetal);
-
-    // ── HIP GROUP — drives leg sway ──────────────────────────────────────
-    this.hipPivot = new THREE.Group();
-    this.hipPivot.name = 'hipPivot';
-    this.hipPivot.position.set(0, 0.52, 0);
-    g.add(this.hipPivot);
-    this.hipPivot.add(wmesh(box(0.32, 0.10, 0.22), bodyMat, 0, 0, 0));
-
-    // ── LEGS ─────────────────────────────────────────────────────────────
-    for (const side of [-1, 1] as const) {
-      const legPivot = new THREE.Group();
-      legPivot.name = side === -1 ? 'legPivotL' : 'legPivotR';
-      legPivot.position.set(side * 0.10, 0, 0);
-      this.hipPivot.add(legPivot);
-      if (side === -1) this.legPivotL = legPivot;
-      else             this.legPivotR = legPivot;
-
-      // Thigh (tapered cylinder, hangs from hip pivot)
-      legPivot.add(wmesh(cyl(0.076, 0.062, 0.22), legMat, 0, -0.11, 0));
-
-      // Knee joint sphere
-      legPivot.add(wmesh(sph(0.055), legMat, 0, -0.22, 0));
-
-      // Knee pivot
-      const kneePivot = new THREE.Group();
-      kneePivot.name = side === -1 ? 'kneePivotL' : 'kneePivotR';
-      kneePivot.position.set(0, -0.22, 0);
-      legPivot.add(kneePivot);
-      if (side === -1) this.kneePivotL = kneePivot;
-      else             this.kneePivotR = kneePivot;
-
-      // Shin (tapered, narrower than thigh)
-      kneePivot.add(wmesh(cyl(0.058, 0.046, 0.24), legMat, 0, -0.12, 0));
-
-      // Plate knee guard
-      if (aTier === 'plate') {
-        const kCol = eq?.bodyArmor?.cursed ? 0x330033 : 0x9aaac0;
-        kneePivot.add(wmesh(box(0.14, 0.08, 0.14), lam(kCol, 0.20, 0.85), 0, -0.01, 0.05));
-      }
-
-      // Boot (attached at ankle, toe extends forward)
-      const bootGrp = new THREE.Group();
-      bootGrp.position.set(0, -0.24, 0);
-      kneePivot.add(bootGrp);
-      bootGrp.add(wmesh(box(0.16, 0.09, 0.26), bootMat, 0, -0.045, 0.05));
-    }
-
-    // ── TORSO ────────────────────────────────────────────────────────────
-    // Belt
-    g.add(wmesh(box(0.38, 0.08, 0.23), beltMat, 0, 0.52, 0));
-    g.add(wmesh(box(0.08, 0.06, 0.25), buckMat, 0, 0.52, 0));
-    // Waist
-    g.add(wmesh(box(0.36, 0.14, 0.23), bodyMat, 0, 0.61, 0));
-    // Chest (wider, heroic V-shape via layering)
-    g.add(wmesh(box(0.48, 0.18, 0.26), bodyMat, 0, 0.73, 0));
-    // Plate chest & belly
-    if (aTier === 'plate') {
-      const pCol = eq?.bodyArmor?.cursed ? 0x330033 : 0x9aaac0;
-      g.add(wmesh(box(0.28, 0.16, 0.28), lam(pCol, 0.20, 0.85), 0, 0.73, 0));
-      g.add(wmesh(box(0.22, 0.10, 0.25), lam(pCol, 0.20, 0.85), 0, 0.61, 0));
-    }
-
-    // ── PAULDRONS ────────────────────────────────────────────────────────
-    if (aTier !== 'none') {
-      const pSz  = aTier === 'plate' ? 0.23 : aTier === 'chain' ? 0.17 : 0.12;
-      const pCol = eq?.bodyArmor?.cursed ? 0x220022
-                 : aTier === 'plate'      ? 0x9aaac0
-                 : aColor;
-      for (const sx of [-1, 1]) {
-        g.add(wmesh(box(pSz, 0.10, pSz * 0.85), lam(pCol, aRough, aMetal), sx * 0.28, 0.80, 0));
-      }
-    }
-
-    // ── NECK ─────────────────────────────────────────────────────────────
-    g.add(wmesh(cyl(0.06, 0.055, 0.07, 6),
-      lam(hTier === 'none' ? skin : aColor, hTier === 'none' ? 0.82 : aRough, hTier === 'none' ? 0.0 : aMetal), 0, 0.85, 0));
-
-    // ── HEAD ─────────────────────────────────────────────────────────────
-    const headGrp = new THREE.Group();
-    headGrp.position.set(0, 0.96, 0);
-    g.add(headGrp);
-
-    headGrp.add(wmesh(box(0.30, 0.28, 0.27), helmMat, 0, 0, 0));
-
-    // Facial features for unhelmed / leather-capped
-    if (hTier === 'none' || hTier === 'leather') {
-      headGrp.add(wmesh(box(0.07, 0.05, 0.02), lam(0x223344, 0.60, 0.0), -0.07, 0.03, 0.135));
-      headGrp.add(wmesh(box(0.07, 0.05, 0.02), lam(0x223344, 0.60, 0.0),  0.07, 0.03, 0.135));
-      headGrp.add(wmesh(box(0.04, 0.06, 0.04), lam(0xeebbaa, 0.82, 0.0), 0, -0.03, 0.145));
-      if (hTier === 'none') {
-        // Hair strip across top-back
-        headGrp.add(wmesh(box(0.30, 0.06, 0.14), lam(0x3a2010, 0.90, 0.0), 0, 0.16, -0.06));
-      }
-    }
-    if (hTier === 'iron' || hTier === 'great') {
-      headGrp.add(wmesh(box(0.20, 0.06, 0.06), lam(0x111a22, 0.30, 0.70), 0, 0.02, 0.145));
-      headGrp.add(wmesh(box(0.32, 0.05, 0.08), helmMat, 0, 0.08, 0.135));
-    }
-    if (hTier === 'great') {
-      headGrp.add(wmesh(box(0.07, 0.20, 0.08), helmMat, -0.18, -0.05, 0.10));
-      headGrp.add(wmesh(box(0.07, 0.20, 0.08), helmMat,  0.18, -0.05, 0.10));
-      headGrp.add(wmesh(box(0.22, 0.07, 0.05), helmMat, 0, -0.14, 0.125));
-    }
-    if (hTier === 'leather') {
-      headGrp.add(wmesh(box(0.34, 0.04, 0.30), helmMat, 0, 0.14, 0.02));
-    }
-
-    // ── ARMS (shoulder → elbow → hand with sphere joints) ────────────────
-    for (const side of [-1, 1] as const) {
-      const shoulder = new THREE.Group();
-      shoulder.name = side === -1 ? 'shoulderL' : 'shoulderR';
-      shoulder.position.set(side * 0.27, 0.79, 0);
-      g.add(shoulder);
-      if (side === -1) this.shoulderL = shoulder;
-      else             this.shoulderR = shoulder;
-
-      // Shoulder sphere
-      shoulder.add(wmesh(sph(0.062, 8, 6), armMat, 0, 0, 0));
-      // Upper arm (tapered cylinder)
-      shoulder.add(wmesh(cyl(0.056, 0.046, 0.20), armMat, 0, -0.10, 0));
-      // Bracer ring at mid-arm for armored characters
-      if (aTier === 'plate' || aTier === 'chain') {
-        const bCol = eq?.bodyArmor?.cursed ? 0x220022
-                   : aTier === 'plate' ? 0x9aaac0 : 0x4a5a66;
-        shoulder.add(wmesh(cyl(0.060, 0.056, 0.07), lam(bCol, aRough, aMetal), 0, -0.175, 0));
-      }
-
-      // Elbow pivot
-      const elbow = new THREE.Group();
-      elbow.name = side === -1 ? 'elbowL' : 'elbowR';
-      elbow.position.set(0, -0.20, 0);
-      shoulder.add(elbow);
-      if (side === -1) this.elbowL = elbow;
-      else             this.elbowR = elbow;
-
-      // Elbow sphere
-      elbow.add(wmesh(sph(0.048, 8, 6), armMat, 0, 0, 0));
-      // Forearm
-      elbow.add(wmesh(cyl(0.044, 0.036, 0.18), armMat, 0, -0.09, 0));
-      // Wrist guard
-      if (aTier !== 'none') {
-        const wCol = eq?.bodyArmor?.cursed ? 0x220022
-                   : aTier === 'plate' ? 0x9aaac0 : 0x4a5a66;
-        elbow.add(wmesh(cyl(0.050, 0.048, 0.06), lam(wCol, aRough, aMetal), 0, -0.155, 0));
-      }
-      // Hand
-      elbow.add(wmesh(box(0.08, 0.08, 0.07),
-        aTier === 'none' ? skinMat : armMat, 0, -0.22, 0));
-    }
-
-    // ── WEAPON (right hand) ──────────────────────────────────────────────
-    if (eq?.weapon) {
-      const wm = makeWeaponMesh(eq.weapon);
-      wm.position.set(0.02, -0.24, 0.03);
-      this.elbowR.add(wm);
-    }
-
-    // ── SHIELD (left hand) ───────────────────────────────────────────────
-    if (eq?.shield) {
-      const sm = makeShieldMesh(eq.shield);
-      sm.position.set(-0.02, -0.20, 0.08);
-      sm.rotation.set(-Math.PI / 10, 0.12, 0);
-      this.elbowL.add(sm);
-    }
-
-    // Enable shadow casting on all character meshes
-    g.traverse(child => {
-      if (child instanceof THREE.Mesh) child.castShadow = true;
-    });
   }
 
   // ─── AnimationMixer setup (keyframe-driven walk / idle / run) ───────────────
@@ -692,14 +543,25 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
       const lookAtX   = this.vx - sinA * lookAhead;
       const lookAtZ   = this.vz - cosA * lookAhead;
 
+      // Apply mouse-orbit offset: rotate the camera around the player
+      const orbitAngle = this.vAngle + this.camYawOffset;
+      const sinOrbit   = Math.sin(orbitAngle);
+      const cosOrbit   = Math.cos(orbitAngle);
+      const hasOrbit   = Math.abs(this.camYawOffset) > 0.01 || Math.abs(this.camPitchOffset) > 0.01;
+
       this.camTarget.set(
-        this.vx + sinA * camBehind,
-        camH + camBob,
-        this.vz + cosA * camBehind,
+        this.vx + sinOrbit * camBehind,
+        camH + camBob + this.camPitchOffset,
+        this.vz + cosOrbit * camBehind,
       );
       const camLp = 1 - Math.pow(1 - (isMoving ? 0.18 : 0.10), delta * 60);
       this.camera.position.lerp(this.camTarget, camLp);
-      this.camera.lookAt(lookAtX, 0.28 + runWt * 0.12, lookAtZ);
+      // When orbiting, look at the player center; otherwise use normal look-ahead
+      this.camera.lookAt(
+        hasOrbit ? this.vx : lookAtX,
+        0.28 + runWt * 0.12,
+        hasOrbit ? this.vz : lookAtZ,
+      );
 
       // ── Enemy sprites: track smooth position every frame ─────────────
       this.updateEnemyPositions();
@@ -909,488 +771,4 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     if (c.type === 'door') return 'door';
     return 'open';
   }
-}
-
-// ─── Armor / helm classification ─────────────────────────────────────────────
-
-const ARMOR_COLORS: Record<'none' | 'leather' | 'chain' | 'plate', number> = {
-  none:    0x3a2a1a,
-  leather: 0x8b4513,
-  chain:   0x556677,
-  plate:   0x8899bb,
-};
-const HELM_COLORS: Record<'none' | 'leather' | 'iron' | 'great', number> = {
-  none:    0xffcc99,
-  leather: 0x8b4513,
-  iron:    0x6677aa,
-  great:   0x8899bb,
-};
-
-function armorTier(id: string | undefined): 'none' | 'leather' | 'chain' | 'plate' {
-  if (!id) return 'none';
-  if (id.includes('plate') || id === 'cursed-armor') return 'plate';
-  if (id.includes('chain') || id.includes('mail')   || id.includes('elven')) return 'chain';
-  if (id.includes('leather')) return 'leather';
-  return 'none';
-}
-
-function helmTier(id: string | undefined): 'none' | 'leather' | 'iron' | 'great' {
-  if (!id) return 'none';
-  if (id.includes('great')) return 'great';
-  if (id.includes('iron')  || id.includes('helm')) return 'iron';
-  if (id.includes('cap')   || id.includes('leather')) return 'leather';
-  return 'none';
-}
-
-function equipSig(eq: Equipment | null): string {
-  if (!eq) return '';
-  return [eq.weapon?.definitionId, eq.shield?.definitionId,
-          eq.helmet?.definitionId, eq.bodyArmor?.definitionId, eq.boots?.definitionId]
-    .join('|');
-}
-
-
-// ─── AnimationClip factories (keyframe-driven character animation) ────────────
-//
-// Inspired by threejs.org/examples/#webgl_animation_keyframes:
-//   mixer = new THREE.AnimationMixer(model)
-//   mixer.clipAction(clip).play()
-//   mixer.update(delta)  ← called each frame
-
-/** Returns one full walk-cycle AnimationClip using QuaternionKeyframeTracks. */
-function buildWalkClip(): THREE.AnimationClip {
-  const FREQ = 8.5;                      // radians / second (matches legacy walk speed)
-  const T    = (2 * Math.PI) / FREQ;    // one full cycle ≈ 0.74 s
-  const N    = 16;                       // samples per cycle
-  const AX   = new THREE.Vector3(1, 0, 0);
-  const AZ   = new THREE.Vector3(0, 0, 1);
-  const q    = new THREE.Quaternion();
-
-  const times: number[] = [];
-  const legL: number[] = [], legR: number[] = [];
-  const kneeL: number[] = [], kneeR: number[] = [];
-  const hipZ: number[] = [];
-  const shL: number[] = [], shR: number[] = [];
-  const elL: number[] = [], elR: number[] = [];
-
-  for (let i = 0; i <= N; i++) {
-    const frac = i / N;
-    const sw   = Math.sin(frac * 2 * Math.PI);
-    times.push(frac * T);
-
-    q.setFromAxisAngle(AX,  sw * 0.72);  legL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, -sw * 0.72);  legR.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, Math.max(0, -sw) * 0.60); kneeL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, Math.max(0,  sw) * 0.60); kneeR.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AZ, -sw * 0.04);  hipZ.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, -sw * 0.60);  shL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX,  sw * 0.60);  shR.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX,  0.10 + Math.max(0,  sw) * 0.45); elL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX,  0.10 + Math.max(0, -sw) * 0.45); elR.push(q.x, q.y, q.z, q.w);
-  }
-
-  const QKT = (name: string, vals: number[]) =>
-    new THREE.QuaternionKeyframeTrack(`${name}.quaternion`, times, vals);
-
-  return new THREE.AnimationClip('walk', T, [
-    QKT('legPivotL',  legL),  QKT('legPivotR',  legR),
-    QKT('kneePivotL', kneeL), QKT('kneePivotR', kneeR),
-    QKT('hipPivot',   hipZ),
-    QKT('shoulderL',  shL),   QKT('shoulderR',  shR),
-    QKT('elbowL',     elL),   QKT('elbowR',     elR),
-  ]);
-}
-
-/** Gentle idle breathing AnimationClip. */
-function buildIdleClip(): THREE.AnimationClip {
-  const T  = (2 * Math.PI) / 1.8;   // breathing period ≈ 3.49 s
-  const N  = 12;
-  const AX = new THREE.Vector3(1, 0, 0);
-  const q  = new THREE.Quaternion();
-
-  const times: number[] = [];
-  const shL: number[] = [], shR: number[] = [];
-  const elL: number[] = [], elR: number[] = [];
-
-  for (let i = 0; i <= N; i++) {
-    const frac = i / N;
-    const sway = Math.sin(frac * 2 * Math.PI) * 0.015;
-    times.push(frac * T);
-    q.setFromAxisAngle(AX, sway);          shL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, sway);          shR.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, 0.10 + sway);   elL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, 0.10 + sway);   elR.push(q.x, q.y, q.z, q.w);
-  }
-
-  const QKT = (name: string, vals: number[]) =>
-    new THREE.QuaternionKeyframeTrack(`${name}.quaternion`, times, vals);
-
-  return new THREE.AnimationClip('idle', T, [
-    QKT('shoulderL', shL), QKT('shoulderR', shR),
-    QKT('elbowL',    elL), QKT('elbowR',    elR),
-  ]);
-}
-
-/**
- * Run AnimationClip — faster cadence and greater amplitude than walk.
- * Uses the same joint/track layout as buildWalkClip() but tuned for sprinting:
- *   • FREQ 14 Hz (vs 8.5), period 0.45 s
- *   • Leg amplitude 0.90 (vs 0.72), knee bend 0.75 (vs 0.60)
- *   • Shoulder pump 0.80 (vs 0.60), elbow max 0.60 (vs 0.45)
- *   • Hip sway 0.06 (vs 0.04)
- */
-function buildRunClip(): THREE.AnimationClip {
-  const FREQ = 14;
-  const T    = (2 * Math.PI) / FREQ;  // period ≈ 0.45 s
-  const N    = 16;
-  const AX   = new THREE.Vector3(1, 0, 0);
-  const AZ   = new THREE.Vector3(0, 0, 1);
-  const q    = new THREE.Quaternion();
-
-  const times: number[] = [];
-  const hipArr: number[] = [];
-  const lgL: number[] = [], lgR: number[] = [];
-  const knL: number[] = [], knR: number[] = [];
-  const shL: number[] = [], shR: number[] = [];
-  const elL: number[] = [], elR: number[] = [];
-
-  for (let i = 0; i <= N; i++) {
-    const ph   = (i / N) * 2 * Math.PI;
-    const sinP = Math.sin(ph);
-    const cosP = Math.cos(ph);
-    times.push((i / N) * T);
-
-    // Hip sway (Z)
-    q.setFromAxisAngle(AZ, sinP * 0.06);      hipArr.push(q.x, q.y, q.z, q.w);
-    // Legs (X) — opposite phase
-    const legSwing = 0.90;
-    q.setFromAxisAngle(AX,  sinP * legSwing); lgL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, -sinP * legSwing); lgR.push(q.x, q.y, q.z, q.w);
-    // Knees — bend more on trailing leg
-    const kneeBend = 0.75;
-    q.setFromAxisAngle(AX, Math.max(0, -sinP) * kneeBend); knL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, Math.max(0,  sinP) * kneeBend); knR.push(q.x, q.y, q.z, q.w);
-    // Arms pump opposite to legs
-    const shPump = 0.80;
-    q.setFromAxisAngle(AX, -cosP * shPump * 0.5 + sinP * shPump * 0.5); shL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX,  cosP * shPump * 0.5 - sinP * shPump * 0.5); shR.push(q.x, q.y, q.z, q.w);
-    // Elbow bend
-    const elMax = 0.60;
-    q.setFromAxisAngle(AX, Math.max(0.20, Math.abs(sinP)) * elMax); elL.push(q.x, q.y, q.z, q.w);
-    q.setFromAxisAngle(AX, Math.max(0.20, Math.abs(cosP)) * elMax); elR.push(q.x, q.y, q.z, q.w);
-  }
-
-  const QKT = (name: string, vals: number[]) =>
-    new THREE.QuaternionKeyframeTrack(`${name}.quaternion`, times, vals);
-
-  return new THREE.AnimationClip('run', T, [
-    QKT('hipPivot',   hipArr),
-    QKT('legPivotL',  lgL),   QKT('legPivotR',  lgR),
-    QKT('kneePivotL', knL),   QKT('kneePivotR', knR),
-    QKT('shoulderL',  shL),   QKT('shoulderR',  shR),
-    QKT('elbowL',     elL),   QKT('elbowR',     elR),
-  ]);
-}
-
-
-/**
- * Builds a 3-D staircase mesh for a dungeon stair tile (1×1 world unit).
- *
- * Geometry:
- *   • 5 stone steps rising toward -Z (north wall of the tile)
- *   • Two stone pillars + lintel forming an arch at the top
- *   • A glowing portal plane inside the arch
- *     – stairs-up  → blue glow  (leads to previous / shallower floor)
- *     – stairs-down → orange/red glow  (leads to deeper floor)
- *
- * The Group is centered at (0,0,0) so the caller positions it at the tile's
- * world centre (wx, 0, wz).
- */
-function buildStairsMesh(
-  kind:     'up' | 'down',
-  stepMat:  THREE.MeshStandardMaterial,
-  stoneMat: THREE.MeshStandardMaterial,
-): THREE.Group {
-  const g = new THREE.Group();
-
-  const STEPS  = 5;
-  const stepH  = 1.0 / STEPS;   // total height = floor-to-ceiling
-  const stepD  = 0.16;           // depth per step (Z direction)
-  const stepW  = 0.88;           // width (X direction)
-  const startZ = -0.44;          // first step's back edge (north end of tile)
-
-  // ── Steps ───────────────────────────────────────────────────────────────
-  for (let i = 0; i < STEPS; i++) {
-    const riser = new THREE.Mesh(
-      new THREE.BoxGeometry(stepW, stepH, stepD),
-      stepMat,
-    );
-    riser.position.set(0, i * stepH + stepH * 0.5, startZ + i * stepD);
-    riser.castShadow = riser.receiveShadow = true;
-    g.add(riser);
-
-    // Tread (flat top surface, slightly wider than riser)
-    const tread = new THREE.Mesh(
-      new THREE.BoxGeometry(stepW, 0.025, stepD + 0.01),
-      stepMat,
-    );
-    tread.position.set(0, (i + 1) * stepH, startZ + i * stepD);
-    tread.castShadow = tread.receiveShadow = true;
-    g.add(tread);
-  }
-
-  // ── Arch at the top of the staircase ────────────────────────────────────
-  const archZ  = startZ + STEPS * stepD;
-  const archH  = 0.85;
-  const pillarW = 0.075;
-
-  // Left and right pillars
-  for (const sx of [-stepW * 0.5 - pillarW * 0.5, stepW * 0.5 + pillarW * 0.5]) {
-    const pillar = new THREE.Mesh(
-      new THREE.BoxGeometry(pillarW, archH, pillarW),
-      stoneMat,
-    );
-    pillar.position.set(sx, archH * 0.5, archZ);
-    pillar.castShadow = true;
-    g.add(pillar);
-  }
-
-  // Lintel (horizontal beam across the top)
-  const lintel = new THREE.Mesh(
-    new THREE.BoxGeometry(stepW + pillarW * 2 + 0.02, 0.075, pillarW),
-    stoneMat,
-  );
-  lintel.position.set(0, archH + 0.037, archZ);
-  lintel.castShadow = true;
-  g.add(lintel);
-
-  // ── Glowing portal inside the arch ──────────────────────────────────────
-  const glowColor = kind === 'up' ? 0x3366ff : 0xff5500;
-  const glowMat = new THREE.MeshStandardMaterial({
-    color: glowColor,
-    emissive: new THREE.Color(glowColor),
-    emissiveIntensity: 1.4,
-    transparent: true,
-    opacity: 0.80,
-    roughness: 1.0,
-    metalness: 0.0,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  });
-  const portal = new THREE.Mesh(
-    new THREE.PlaneGeometry(stepW, archH),
-    glowMat,
-  );
-  portal.position.set(0, archH * 0.5, archZ + 0.01);
-  g.add(portal);
-
-  // Matching point light to cast glow into the room
-  const light = new THREE.PointLight(glowColor, 1.8, 3.5, 1.8);
-  light.position.set(0, archH * 0.55, archZ);
-  g.add(light);
-
-  // ── Direction arrow painted on the floor ────────────────────────────────
-  // Simple triangle mesh pointing toward the arch
-  const arrowVerts = new Float32Array([
-    0, 0.002,  0.10,    // tip (toward arch / -Z)
-   -0.14, 0.002, 0.32,
-    0.14, 0.002, 0.32,
-  ]);
-  const arrowGeo = new THREE.BufferGeometry();
-  arrowGeo.setAttribute('position', new THREE.BufferAttribute(arrowVerts, 3));
-  arrowGeo.computeVertexNormals();
-  const arrowMat = new THREE.MeshStandardMaterial({
-    color: glowColor, emissive: new THREE.Color(glowColor), emissiveIntensity: 0.8,
-    roughness: 1.0, metalness: 0.0,
-  });
-  const arrow = new THREE.Mesh(arrowGeo, arrowMat);
-  g.add(arrow);
-
-  return g;
-}
-
-function makeStoneTexture(dark: boolean): THREE.CanvasTexture {
-  const cv = document.createElement('canvas');
-  cv.width = 128; cv.height = 128;
-  const ctx = cv.getContext('2d')!;
-
-  // Mortar background
-  ctx.fillStyle = dark ? '#0d0d0d' : '#181818';
-  ctx.fillRect(0, 0, 128, 128);
-
-  // 2×2 grid of bevelled stone blocks
-  for (let row = 0; row < 2; row++) {
-    for (let col = 0; col < 2; col++) {
-      const bx = col * 64, by = row * 64;
-      ctx.fillStyle = dark ? '#474747' : '#727272';
-      ctx.fillRect(bx + 3, by + 3, 58, 58);
-      // Top / left highlight
-      ctx.fillStyle = dark ? '#5e5e5e' : '#989898';
-      ctx.fillRect(bx + 3, by + 3, 58, 5);
-      ctx.fillRect(bx + 3, by + 3, 5, 58);
-      // Bottom / right shadow
-      ctx.fillStyle = dark ? '#282828' : '#3e3e3e';
-      ctx.fillRect(bx + 3, by + 56, 58, 5);
-      ctx.fillRect(bx + 56, by + 3, 5, 58);
-    }
-  }
-
-  const tex = new THREE.CanvasTexture(cv);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  return tex;
-}
-
-function makeWoodTexture(): THREE.CanvasTexture {
-  const cv = document.createElement('canvas');
-  cv.width = 128; cv.height = 128;
-  const ctx = cv.getContext('2d')!;
-
-  for (let i = 0; i < 8; i++) {
-    ctx.fillStyle = i % 2 === 0 ? '#3a1c06' : '#2c1404';
-    ctx.fillRect(0, i * 16, 128, 16);
-    // Plank divider
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.fillRect(0, i * 16 + 14, 128, 2);
-    // Subtle wood grain
-    ctx.fillStyle = 'rgba(80,30,0,0.2)';
-    ctx.fillRect(0, i * 16 + 7, 128, 1);
-  }
-
-  const tex = new THREE.CanvasTexture(cv);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  return tex;
-}
-
-function makeDoorTexture(): THREE.CanvasTexture {
-  const cv = document.createElement('canvas');
-  cv.width = 128; cv.height = 128;
-  const ctx = cv.getContext('2d')!;
-
-  // Stone surround
-  ctx.fillStyle = '#1c1c1c';
-  ctx.fillRect(0, 0, 128, 128);
-  // Outer door frame
-  ctx.fillStyle = '#4e2310';
-  ctx.fillRect(14, 0, 100, 128);
-  // Door face
-  ctx.fillStyle = '#7a3f2b';
-  ctx.fillRect(20, 0, 88, 128);
-  // Vertical plank grain lines
-  ctx.strokeStyle = '#5a2a1a';
-  ctx.lineWidth = 2.5;
-  for (let i = 1; i < 6; i++) {
-    ctx.beginPath();
-    ctx.moveTo(20 + i * 14, 0);
-    ctx.lineTo(20 + i * 14, 128);
-    ctx.stroke();
-  }
-  // Iron ring handle
-  ctx.strokeStyle = '#c9b37a';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.arc(36, 68, 9, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.fillStyle = '#c9b37a';
-  ctx.beginPath();
-  ctx.arc(36, 68, 3.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  return new THREE.CanvasTexture(cv);
-}
-
-// ─── Enemy billboard texture ──────────────────────────────────────────────────
-
-const CANVAS_W = 220;
-const CANVAS_H = 300;
-const ART_H    = 210; // pixels reserved for monster art
-
-/**
- * Draws a 220×300 canvas texture for an enemy billboard.
- * Immediately shows a placeholder, then redraws with the full SVG monster art
- * once the async image load completes (texture.needsUpdate is set).
- */
-function makeEnemyTexture(enemy: MonsterInstance): THREE.CanvasTexture {
-  const cv  = document.createElement('canvas');
-  cv.width  = CANVAS_W;
-  cv.height = CANVAS_H;
-  const ctx = cv.getContext('2d')!;
-
-  function drawBase() {
-    // Background
-    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-    ctx.fillStyle = 'rgba(0,0,0,0.88)';
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-    // Colored border
-    const borderColor = enemy.status === 'dead' ? '#555' : enemy.color;
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(2, 2, CANVAS_W - 4, CANVAS_H - 4);
-  }
-
-  function drawStats() {
-    const isDead = enemy.status === 'dead';
-
-    // Name
-    ctx.font = 'bold 18px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = isDead ? '#555' : enemy.color;
-    ctx.fillText(enemy.name, CANVAS_W / 2, ART_H + 6, CANVAS_W - 12);
-
-    if (!isDead) {
-      // HP bar background
-      const barX = 10, barY = ART_H + 32, barW = CANVAS_W - 20, barH = 14;
-      ctx.fillStyle = '#1a0a0a';
-      ctx.fillRect(barX, barY, barW, barH);
-
-      // HP fill
-      const pct = enemy.maxHp > 0 ? enemy.currentHp / enemy.maxHp : 0;
-      ctx.fillStyle = pct > 0.6 ? '#22cc44' : pct > 0.3 ? '#ccaa00' : '#cc2222';
-      ctx.fillRect(barX, barY, Math.floor(barW * pct), barH);
-
-      // HP text
-      ctx.font = '13px monospace';
-      ctx.fillStyle = '#aaa';
-      ctx.fillText(`${enemy.currentHp} / ${enemy.maxHp}`, CANVAS_W / 2, ART_H + 52);
-    } else {
-      ctx.font = 'bold 16px monospace';
-      ctx.fillStyle = '#555';
-      ctx.textAlign = 'center';
-      ctx.fillText('[DEAD]', CANVAS_W / 2, ART_H + 34);
-    }
-  }
-
-  // Immediate placeholder: coloured glow so billboard is visible right away
-  drawBase();
-  ctx.save();
-  ctx.globalAlpha = 0.18;
-  ctx.fillStyle = enemy.color;
-  ctx.beginPath();
-  ctx.ellipse(CANVAS_W / 2, ART_H / 2, 60, 80, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-  drawStats();
-
-  const texture = new THREE.CanvasTexture(cv);
-
-  // Async: paint the real monster SVG art into the art area
-  const svgStr = getMonsterSvg(enemy.definitionId, enemy.status === 'dead' ? '#555555' : enemy.color, ART_H);
-  const blob   = new Blob([svgStr], { type: 'image/svg+xml' });
-  const url    = URL.createObjectURL(blob);
-  const img    = new Image();
-  img.onload = () => {
-    drawBase();
-    // Centre the square SVG art in the art area
-    const pad = 10;
-    const side = ART_H - pad * 2;
-    const offX = (CANVAS_W - side) / 2;
-    ctx.drawImage(img, offX, pad, side, side);
-    drawStats();
-    URL.revokeObjectURL(url);
-    texture.needsUpdate = true;
-  };
-  img.src = url;
-
-  return texture;
 }

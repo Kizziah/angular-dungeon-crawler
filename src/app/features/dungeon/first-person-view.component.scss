@@ -12,4 +12,9 @@
   max-height: calc(100vh - 80px);
   border: 1px solid var(--dos-border);
   background: #000;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 }
