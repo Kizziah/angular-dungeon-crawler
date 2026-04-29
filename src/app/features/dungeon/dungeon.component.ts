@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
@@ -9,7 +9,6 @@ import { EncounterLogComponent } from './encounter-log.component';
 import { CombatComponent } from '../combat/combat.component';
 import { InventoryComponent } from '../inventory/inventory.component';
 import { DungeonState } from '../../core/models/dungeon.model';
-import { Character } from '../../core/models/character.model';
 import { Item } from '../../core/models/item.model';
 
 @Component({
@@ -25,7 +24,8 @@ export class DungeonComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   dungeonState: DungeonState | null = null;
-  party: Character[] = [];
+  /** Reactively derived from the guild signal so equip changes immediately reflect in the 3-D view. */
+  party = computed(() => this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead'));
   eventLog: string[] = [];
   pendingChest: Item[] = [];
   showChest = false;
@@ -39,12 +39,12 @@ export class DungeonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
-    if (this.party.length === 0) {
+    const initialParty = this.party();
+    if (initialParty.length === 0) {
       this.router.navigate(['/guild']);
       return;
     }
-    this.inventoryCharId = this.party[0].id;
+    this.inventoryCharId = initialParty[0].id;
     let ds = this.gameState.dungeonState();
     if (!ds) {
       ds = this.dungeonService.initDungeonState();
@@ -139,7 +139,7 @@ export class DungeonComponent implements OnInit, OnDestroy {
 
       case 'encounter': {
         
-        const aliveParty = this.party.filter(c => c.currentHp > 0 && c.status !== 'Dead');
+        const aliveParty = this.party().filter(c => c.currentHp > 0 && c.status !== 'Dead');
         if (aliveParty.length === 0) break;
         this.addLog(`⚔ An enemy appears!`);
         const enemies = event.data;
@@ -189,10 +189,10 @@ export class DungeonComponent implements OnInit, OnDestroy {
 
   onCombatDone(result: 'victory' | 'defeat' | 'fled'): void {
     this.gameState.combatState.set(null);
-    this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
+    const currentParty = this.party();
     // Refresh inventory panel to show updated character state
-    if (this.party.length > 0 && !this.party.find(c => c.id === this.inventoryCharId)) {
-      this.inventoryCharId = this.party[0].id;
+    if (currentParty.length > 0 && !currentParty.find(c => c.id === this.inventoryCharId)) {
+      this.inventoryCharId = currentParty[0].id;
     }
 
     if (result === 'defeat') {
@@ -219,7 +219,7 @@ export class DungeonComponent implements OnInit, OnDestroy {
 
   collectChest(): void {
     this.pendingChest.forEach(item => {
-      const firstChar = this.party[0];
+      const firstChar = this.party()[0];
       if (firstChar) {
         this.gameState.updateGuild(g => ({
           ...g,
@@ -365,13 +365,13 @@ export class DungeonComponent implements OnInit, OnDestroy {
       return { ...g, characters: chars };
     });
 
-    const target = this.party.find(c => c.id === targetCharId);
+    const target = this.party().find(c => c.id === targetCharId);
     this.addLog(`📦 ${item.name || item.unidentifiedName} → ${target?.name ?? 'party member'}`);
     this.inventoryCharId = targetCharId;
   }
 
   closeInventory(): void {
-    this.party = this.gameState.activeParty().filter(c => c.currentHp > 0 && c.status !== 'Dead');
+    // no-op: party is now a computed signal, always up to date
   }
 
   get combatEnemies() {

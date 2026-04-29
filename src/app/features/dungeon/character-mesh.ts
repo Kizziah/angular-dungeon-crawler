@@ -49,7 +49,9 @@ export function helmTier(id: string | undefined): 'none' | 'leather' | 'iron' | 
 export function equipSig(eq: Equipment | null): string {
   if (!eq) return '';
   return [eq.weapon?.definitionId, eq.shield?.definitionId,
-          eq.helmet?.definitionId, eq.bodyArmor?.definitionId, eq.boots?.definitionId]
+          eq.helmet?.definitionId, eq.bodyArmor?.definitionId,
+          eq.gloves?.definitionId, eq.boots?.definitionId,
+          eq.ring?.definitionId,   eq.amulet?.definitionId]
     .join('|');
 }
 

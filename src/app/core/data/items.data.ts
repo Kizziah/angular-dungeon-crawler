@@ -25,7 +25,7 @@ function makeSwordMesh(opts: {
   bladeLen?: number; guardWidth?: number; handleLen?: number; bladeWidth?: number;
 }): THREE.Group {
   const { cursed = false, enchanted = false, fire = false, ice = false, holy = false,
-          bladeLen = 0.28, guardWidth = 0.16, handleLen = 0.14, bladeWidth = 0.04 } = opts;
+          bladeLen = 1.3, guardWidth = 0.16, handleLen = 0.14, bladeWidth = 0.04 } = opts;
   const handleMat = lam(cursed ? 0x110011 : 0x5a3a1a, 0.85, 0.0);
   const guardMat  = lam(cursed ? 0x220022 : 0xccaa44, 0.30, 0.75);
   const bMat      = bladeMat({ cursed, enchanted, fire, ice, holy });
@@ -170,7 +170,7 @@ export const ITEMS: ItemDef[] = [
   {
     id: 'longsword', name: 'Longsword', unidentifiedName: 'Long Blade', type: 'Weapon',
     stats: { attack: 0, damage: '1d8' }, cursed: false, value: 100, usable: false, floorMin: 1, floorMax: 99,
-    makeMesh: (cursed) => makeSwordMesh({ cursed }),
+    makeMesh: (cursed) => makeSwordMesh({ cursed, bladeLen: 1.28, guardWidth: 0.14, handleLen: 0.08, bladeWidth: 0.03 }),
   },
   {
     id: 'bastard-sword', name: 'Bastard Sword', unidentifiedName: 'Heavy Blade', type: 'Weapon',

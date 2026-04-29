@@ -5,7 +5,7 @@
       Pos: {{ getCurrentPosition().x }},{{ getCurrentPosition().y }}
       Dir: {{ getCurrentDirection() }}
     </span>
-    <span class="dos-dim">Party: {{ party.length }} members</span>
+    <span class="dos-dim">Party: {{ party().length }} members</span>
   </div>
 
   <div class="dungeon-layout">
@@ -18,7 +18,7 @@
         [position]="getCurrentPosition()"
         [direction]="getCurrentDirection()"
         [enemies]="combatEnemies"
-        [character]="party[0] || null"
+        [character]="party()[0] || null"
         [attackCount]="combatAttackCount"
         [spellCount]="combatSpellCount"
         [spellId]="combatSpellId"
@@ -67,7 +67,7 @@
 
       <div class="party-section">
         <div class="panel-title dos-dim">PARTY:</div>
-        <div *ngFor="let char of party" class="party-char-row">
+        <div *ngFor="let char of party()" class="party-char-row">
           <span class="dos-amber">{{ char.name }}</span>
           <span class="dos-dim"> Lv.{{ char.level }}</span>
           <span [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
@@ -82,9 +82,9 @@
       </div>
 
       <div class="inv-panel">
-        <div class="inventory-tabs" *ngIf="party.length > 1">
+        <div class="inventory-tabs" *ngIf="party().length > 1">
           <button
-            *ngFor="let char of party"
+            *ngFor="let char of party()"
             class="inv-tab"
             [class.active]="inventoryCharId === char.id"
             [class.drop-target]="dragOverTabCharId === char.id"
