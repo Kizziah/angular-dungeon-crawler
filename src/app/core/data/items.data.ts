@@ -357,5 +357,7 @@ export const ITEMS: ItemDef[] = [
   // === FOOD ===
   { id: 'ration', name: 'Field Ration', unidentifiedName: 'Wrapped Food', type: 'Food', stats: {}, cursed: false, value: 10, usable: true, effect: 'food', floorMin: 1, floorMax: 99 },
   { id: 'bread', name: 'Loaf of Bread', unidentifiedName: 'Bread', type: 'Food', stats: {}, cursed: false, value: 5, usable: true, effect: 'food', floorMin: 1, floorMax: 99 },
-  { id: 'roasted-meat', name: 'Roasted Meat', unidentifiedName: 'Meat', type: 'Food', stats: {}, cursed: false, value: 15, usable: true, effect: 'food-large', floorMin: 1, floorMax: 99 }
+  { id: 'roasted-meat', name: 'Roasted Meat', unidentifiedName: 'Meat', type: 'Food', stats: {}, cursed: false, value: 15, usable: true, effect: 'food-large', floorMin: 1, floorMax: 99 },
+  // === PETS ===
+  { id: 'loyal-dog', name: 'Loyal Dog', unidentifiedName: 'Stray Dog', type: 'Pet', stats: { luckBonus: 2 }, cursed: false, value: 0, usable: false, floorMin: 1, floorMax: 99 },
 ];

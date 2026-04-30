@@ -23,6 +23,7 @@ export interface Equipment {
   boots: Item | null;
   ring: Item | null;
   amulet: Item | null;
+  pet: Item | null;
 }
 
 export interface Character {

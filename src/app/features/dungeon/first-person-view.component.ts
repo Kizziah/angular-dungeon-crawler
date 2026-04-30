@@ -100,6 +100,13 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private pendingAttack = false; // set by ngOnChanges, consumed by render loop
   private lastAttackCount = 0;
 
+  // Dog companion joint refs (populated when pet is equipped)
+  private dogFrontLegL?: THREE.Group;
+  private dogFrontLegR?: THREE.Group;
+  private dogBackLegL?:  THREE.Group;
+  private dogBackLegR?:  THREE.Group;
+  private dogTailPivot?: THREE.Group;
+
   // Spell particle system
   private spellParticles!: SpellParticleSystem;
   private pendingSpellId = '';
@@ -537,6 +544,30 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
       }
 
       this.playerGroup.rotation.y = this.vAngle;
+
+      // ── Dog companion animation ───────────────────────────────────────
+      if (this.dogTailPivot) {
+        const wagSpeed = isMoving ? 9.0 : 4.0;
+        const wagAmp   = isMoving ? 0.55 : 0.28;
+        this.dogTailPivot.rotation.z = Math.sin(t * wagSpeed) * wagAmp;
+      }
+      if (this.dogFrontLegL && this.dogFrontLegR && this.dogBackLegL && this.dogBackLegR) {
+        if (isMoving) {
+          const freq = 9.0 + runWt * 6.0;
+          const amp  = 0.42 + runWt * 0.22;
+          const ph   = t * freq;
+          // Diagonal gait: front-left & back-right swing together
+          this.dogFrontLegL.rotation.x =  Math.sin(ph) * amp;
+          this.dogFrontLegR.rotation.x = -Math.sin(ph) * amp;
+          this.dogBackLegL.rotation.x  = -Math.sin(ph) * amp;
+          this.dogBackLegR.rotation.x  =  Math.sin(ph) * amp;
+        } else {
+          this.dogFrontLegL.rotation.x *= 0.82;
+          this.dogFrontLegR.rotation.x *= 0.82;
+          this.dogBackLegL.rotation.x  *= 0.82;
+          this.dogBackLegR.rotation.x  *= 0.82;
+        }
+      }
 
       // ── Torch flicker ─────────────────────────────────────────────────
       this.torchLight.intensity = 7.5

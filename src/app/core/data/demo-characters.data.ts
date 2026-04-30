@@ -38,6 +38,7 @@ const equipment = {
   boots:     item('boots-of-speed'),
   ring:      item('ring-luck'),
   amulet:    item('amulet-vitality'),
+  pet:       item('loyal-dog'),
 };
 
 // ── Inventory: one of every weapon type not already in the weapon slot ─────────

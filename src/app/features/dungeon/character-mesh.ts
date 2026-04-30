@@ -51,7 +51,8 @@ export function equipSig(eq: Equipment | null): string {
   return [eq.weapon?.definitionId, eq.shield?.definitionId,
           eq.helmet?.definitionId, eq.bodyArmor?.definitionId,
           eq.gloves?.definitionId, eq.boots?.definitionId,
-          eq.ring?.definitionId,   eq.amulet?.definitionId]
+          eq.ring?.definitionId,   eq.amulet?.definitionId,
+          eq.pet?.definitionId]
     .join('|');
 }
 
@@ -68,6 +69,12 @@ export interface CharacterJoints {
   shoulderR:  THREE.Group;
   elbowL:     THREE.Group;
   elbowR:     THREE.Group;
+  // Dog companion joints (present only when a pet is equipped)
+  dogFrontLegL?: THREE.Group;
+  dogFrontLegR?: THREE.Group;
+  dogBackLegL?:  THREE.Group;
+  dogBackLegR?:  THREE.Group;
+  dogTailPivot?: THREE.Group;
 }
 
 // ─── Geometry builder ─────────────────────────────────────────────────────────
@@ -278,5 +285,115 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
     if (child instanceof THREE.Mesh) child.castShadow = true;
   });
 
+  // ── PET DOG (left side companion) ────────────────────────────────────
+  if (eq?.pet?.definitionId === 'loyal-dog') {
+    const dog = buildDogMesh(g, eq.pet.cursed);
+    return { hipPivot, legPivotL, legPivotR, kneePivotL, kneePivotR, shoulderL, shoulderR, elbowL, elbowR, ...dog };
+  }
+
   return { hipPivot, legPivotL, legPivotR, kneePivotL, kneePivotR, shoulderL, shoulderR, elbowL, elbowR };
+}
+
+// ─── Dog companion mesh ───────────────────────────────────────────────────────
+
+function buildDogMesh(g: THREE.Group, cursed = false): {
+  dogFrontLegL: THREE.Group; dogFrontLegR: THREE.Group;
+  dogBackLegL:  THREE.Group; dogBackLegR:  THREE.Group;
+  dogTailPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.85, metal = 0.0): THREE.MeshStandardMaterial =>
+    new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+
+  const furColor   = cursed ? 0x110011 : 0xcc9944;
+  const snoutColor = cursed ? 0x0d0008 : 0xe8c870;
+  const eyeColor   = cursed ? 0xff0000 : 0x221100;
+
+  const fur      = lam(furColor);
+  const snoutMat = lam(snoutColor);
+  const eyeMat   = new THREE.MeshStandardMaterial({
+    color: eyeColor, roughness: 0.6,
+    emissive: new THREE.Color(cursed ? 0xff0000 : 0), emissiveIntensity: cursed ? 0.9 : 0,
+  });
+  const noseMat  = lam(0x111111, 0.7);
+
+  const dogRoot = new THREE.Group();
+  // Offset: left side of character, slightly behind, at ground level
+  dogRoot.position.set(-0.90, 0, 0.18);
+  g.add(dogRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 7) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = dogRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Body — elongated along Z, dog faces -Z (same forward as character)
+  add(box(0.44, 0.20, 0.56), fur, 0, 0.30, 0);
+
+  // Neck — angled forward and up
+  const neckGrp = new THREE.Group();
+  neckGrp.position.set(0, 0.36, -0.22);
+  neckGrp.rotation.x = 0.45;
+  dogRoot.add(neckGrp);
+  add(new THREE.CylinderGeometry(0.065, 0.078, 0.18, 7), fur, 0, 0.06, 0, neckGrp);
+
+  // Head
+  const headGrp = new THREE.Group();
+  headGrp.position.set(0, 0.48, -0.30);
+  dogRoot.add(headGrp);
+  add(box(0.27, 0.23, 0.25), fur,      0,      0,      0,     headGrp);
+  add(box(0.15, 0.11, 0.15), snoutMat, 0,     -0.045, -0.18,  headGrp);
+  add(box(0.08, 0.04, 0.04), noseMat,  0,      0.01,  -0.245, headGrp);
+  add(box(0.045, 0.045, 0.03), eyeMat, -0.075, 0.04,  -0.125, headGrp);
+  add(box(0.045, 0.045, 0.03), eyeMat,  0.075, 0.04,  -0.125, headGrp);
+  // Floppy ears
+  const earL = new THREE.Mesh(box(0.075, 0.15, 0.055), fur);
+  earL.position.set(-0.16, -0.02, -0.04); earL.rotation.z =  0.18; earL.castShadow = true;
+  headGrp.add(earL);
+  const earR = new THREE.Mesh(box(0.075, 0.15, 0.055), fur);
+  earR.position.set( 0.16, -0.02, -0.04); earR.rotation.z = -0.18; earR.castShadow = true;
+  headGrp.add(earR);
+
+  // Tail pivot at the rump
+  const tailPivot = new THREE.Group();
+  tailPivot.position.set(0, 0.36, 0.28);
+  tailPivot.rotation.x = -0.55; // base angle — naturally curves up
+  dogRoot.add(tailPivot);
+  add(new THREE.CylinderGeometry(0.028, 0.042, 0.26, 6), fur, 0, 0.13, 0, tailPivot);
+
+  // Legs — pivot at shoulder/hip height
+  const legDefs: Array<{ name: string; x: number; z: number }> = [
+    { name: 'dogFrontLegL', x: -0.145, z: -0.18 },
+    { name: 'dogFrontLegR', x:  0.145, z: -0.18 },
+    { name: 'dogBackLegL',  x: -0.145, z:  0.18 },
+    { name: 'dogBackLegR',  x:  0.145, z:  0.18 },
+  ];
+  const legGroups: Record<string, THREE.Group> = {};
+  for (const def of legDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.30, def.z);
+    dogRoot.add(pivot);
+    // Upper leg
+    add(new THREE.CylinderGeometry(0.044, 0.034, 0.20, 7), fur, 0, -0.10, 0, pivot);
+    // Lower leg + paw
+    const knee = new THREE.Group();
+    knee.position.set(0, -0.20, 0);
+    pivot.add(knee);
+    add(new THREE.CylinderGeometry(0.032, 0.026, 0.18, 7), fur, 0, -0.09, 0, knee);
+    add(box(0.09, 0.05, 0.12), fur, 0, -0.195, 0.02, knee);
+    legGroups[def.name] = pivot;
+  }
+
+  return {
+    dogFrontLegL: legGroups['dogFrontLegL'],
+    dogFrontLegR: legGroups['dogFrontLegR'],
+    dogBackLegL:  legGroups['dogBackLegL'],
+    dogBackLegR:  legGroups['dogBackLegR'],
+    dogTailPivot: tailPivot,
+  };
 }
