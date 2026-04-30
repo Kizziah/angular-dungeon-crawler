@@ -262,7 +262,7 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   // ── WEAPON (right hand) ──────────────────────────────────────────────
   if (eq?.weapon) {
     const wm = makeWeaponMesh(eq.weapon);
-    wm.position.set(0.02, -0.24, 0.03);
+    wm.position.set(0.02, 0.15, 0.03);
     elbowR.add(wm);
   }
 
