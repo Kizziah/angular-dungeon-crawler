@@ -20,7 +20,7 @@
   // ── Two-column layout: dominant view + compact sidebar ──────────────────
   .dungeon-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: 200px 1fr 280px;
     gap: 12px;
     overflow: hidden;
     min-height: 0;

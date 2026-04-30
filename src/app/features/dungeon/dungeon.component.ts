@@ -10,6 +10,7 @@ import { CombatComponent } from '../combat/combat.component';
 import { InventoryComponent } from '../inventory/inventory.component';
 import { DungeonState } from '../../core/models/dungeon.model';
 import { Item } from '../../core/models/item.model';
+import { SoundService } from '../../core/services/sound.service';
 
 @Component({
   selector: 'app-dungeon',
@@ -22,6 +23,7 @@ export class DungeonComponent implements OnInit, OnDestroy {
   private gameState = inject(GameStateService);
   private dungeonService = inject(DungeonService);
   private router = inject(Router);
+  sound = inject(SoundService);
 
   dungeonState: DungeonState | null = null;
   /** Reactively derived from the guild signal so equip changes immediately reflect in the 3-D view. */
@@ -138,7 +140,7 @@ export class DungeonComponent implements OnInit, OnDestroy {
     switch (event.type) {
 
       case 'encounter': {
-        
+        this.sound.play('encounter');
         const aliveParty = this.party().filter(c => c.currentHp > 0 && c.status !== 'Dead');
         if (aliveParty.length === 0) break;
         this.addLog(`⚔ An enemy appears!`);
@@ -156,18 +158,22 @@ export class DungeonComponent implements OnInit, OnDestroy {
         break;
       }
       case 'chest':
+        this.sound.play('chest');
         this.pendingChest = event.data;
         this.showChest = true;
         this.addLog(`📦 Found a chest!`);
         break;
       case 'trap':
+        this.sound.play('trap');
         this.handleTrap(event.data);
         break;
       case 'stairs-down':
+        this.sound.play('stairs-down');
         this.addLog(`Going down to floor ${this.dungeonState.currentFloor + 1}...`);
         this.descend();
         break;
       case 'stairs-up':
+        this.sound.play('stairs-up');
         if (this.dungeonState.currentFloor === 1) {
           this.addLog('Returning to town...');
           this.returnToTown();
@@ -180,9 +186,14 @@ export class DungeonComponent implements OnInit, OnDestroy {
         this.addLog('You are at the dungeon entrance.');
         break;
       case 'door':
+        this.sound.play('door');
         this.addLog('🚪 You open a door.');
         break;
       case 'blocked':
+        this.sound.play('wall-bump');
+        break;
+      case 'none':
+        this.sound.play('footstep');
         break;
     }
   }

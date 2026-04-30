@@ -9,7 +9,32 @@
   </div>
 
   <div class="dungeon-layout">
+    <div class="left-sidebar">
+      <div class="minimap-section">
+        <div class="panel-title dos-dim">MAP (Floor {{ getCurrentFloorLevel() }}):</div>
+        <app-minimap
+          *ngIf="getCurrentFloor() && dungeonState"
+          [floor]="getCurrentFloor()!"
+          [position]="getCurrentPosition()"
+        ></app-minimap>
+      </div>
+      <div class="log-section">
+        <div class="panel-title dos-dim">EVENT LOG:</div>
+        <app-encounter-log [messages]="eventLog"></app-encounter-log>
+      </div>
+      
 
+      <div class="party-section">
+        <div class="panel-title dos-dim">PARTY:</div>
+        <div *ngFor="let char of party()" class="party-char-row">
+          <span class="dos-amber">{{ char.name }}</span>
+          <span class="dos-dim"> Lv.{{ char.level }}</span>
+          <span [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
+            {{ char.currentHp }}/{{ char.maxHp }}HP
+          </span>
+        </div>
+      </div>
+    </div>
     <!-- ── Left: dominant 3-D view ─────────────────────────────────────── -->
     <div class="view-panel">
       <app-first-person-view
@@ -47,6 +72,7 @@
           <button *ngIf="getCurrentTileType() === 'stairs-down'" class="action-btn stair-btn" (click)="useStairsDown()">▼ Descend</button>
           <button *ngIf="getCurrentTileType() === 'stairs-up' || getCurrentTileType() === 'entrance'" class="action-btn stair-btn" (click)="useStairsUp()">▲ Ascend</button>
           <button class="action-btn exit-btn" (click)="showConfirmExit = true">✕ Exit</button>
+          <button class="action-btn mute-btn" (click)="sound.toggleMute()" [title]="sound.isMuted ? 'Unmute' : 'Mute'">{{ sound.isMuted ? '🔇' : '🔊' }}</button>
         </div>
       </div>
 
@@ -55,32 +81,6 @@
 
     <!-- ── Right: compact sidebar ──────────────────────────────────────── -->
     <div class="side-panel">
-
-      <div class="minimap-section">
-        <div class="panel-title dos-dim">MAP (Floor {{ getCurrentFloorLevel() }}):</div>
-        <app-minimap
-          *ngIf="getCurrentFloor() && dungeonState"
-          [floor]="getCurrentFloor()!"
-          [position]="getCurrentPosition()"
-        ></app-minimap>
-      </div>
-
-      <div class="party-section">
-        <div class="panel-title dos-dim">PARTY:</div>
-        <div *ngFor="let char of party()" class="party-char-row">
-          <span class="dos-amber">{{ char.name }}</span>
-          <span class="dos-dim"> Lv.{{ char.level }}</span>
-          <span [class.hp-danger]="char.currentHp < char.maxHp * 0.3">
-            {{ char.currentHp }}/{{ char.maxHp }}HP
-          </span>
-        </div>
-      </div>
-
-      <div class="log-section">
-        <div class="panel-title dos-dim">EVENT LOG:</div>
-        <app-encounter-log [messages]="eventLog"></app-encounter-log>
-      </div>
-
       <div class="inv-panel">
         <div class="inventory-tabs" *ngIf="party().length > 1">
           <button

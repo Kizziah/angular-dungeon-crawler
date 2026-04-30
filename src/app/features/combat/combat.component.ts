@@ -10,6 +10,7 @@ import { SPELLS } from '../../core/data/spells.data';
 import { MonsterSpriteComponent } from './monster-sprite.component';
 import { ActionMenuComponent } from './action-menu.component';
 import { CombatLogComponent } from './combat-log.component';
+import { SoundService } from '../../core/services/sound.service';
 
 @Component({
   selector: 'app-combat',
@@ -22,6 +23,7 @@ export class CombatComponent implements OnInit {
   private gameState = inject(GameStateService);
   private combatService = inject(CombatService);
   private router = inject(Router);
+  private sound = inject(SoundService);
 
   @Output() done = new EventEmitter<'victory' | 'defeat' | 'fled'>();
   @Output() spellCast = new EventEmitter<string>();
@@ -95,6 +97,8 @@ export class CombatComponent implements OnInit {
       this.spellCast.emit(action.spellId);
     }
 
+    const prevLogLen = this.combatState.log.length;
+
     const newState = this.combatService.processPlayerAction(
       { ...this.combatState, currentActorIndex: actorIndex },
       combatAction
@@ -103,14 +107,22 @@ export class CombatComponent implements OnInit {
     this.gameState.combatState.set(newState);
 
     if (newState.phase === 'victory') {
+      this.sound.play('victory');
       this.handleVictory(newState);
     } else if (newState.phase === 'defeat') {
+      this.sound.play('defeat');
       this.handleDefeat(newState);
     } else if (newState.phase === 'fled') {
+      this.sound.play('flee');
       this.done.emit('fled');
+    } else {
+      // Play hit/miss sounds based on new log entries from this round
+      const newEntries = newState.log.slice(prevLogLen);
+      const hasHit  = newEntries.some(l => l.includes(' hits ') || l.includes(' damage'));
+      const hasMiss = newEntries.some(l => l.includes(' miss') || l.toLowerCase().includes('misses'));
+      if (hasHit)  this.sound.play('hit');
+      else if (hasMiss) this.sound.play('miss');
     }
-    // If phase is still 'player-input', the next party member's action panel
-    // will automatically appear via getCurrentActor() using updated currentActorIndex.
   }
 
   handleVictory(state: CombatState): void {
