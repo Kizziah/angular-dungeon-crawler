@@ -86,6 +86,13 @@ export interface CharacterJoints {
   ravenWingR?: THREE.Group;
   // Serpent companion joints
   snakeHeadPivot?: THREE.Group;
+  // Alligator companion joints
+  alligatorTailPivot?: THREE.Group;
+  alligatorJawPivot?:  THREE.Group;
+  // Monkey companion joints
+  monkeyTailPivot?: THREE.Group;
+  monkeyArmL?:      THREE.Group;
+  monkeyArmR?:      THREE.Group;
 }
 
 // ─── Geometry builder ─────────────────────────────────────────────────────────
@@ -312,6 +319,12 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   }
   if (petId === 'coiled-serpent') {
     return { ...base, ...buildSnakeMesh(g, petCursed) };
+  }
+  if (petId === 'alligator') {
+    return { ...base, ...buildAlligatorMesh(g, petCursed) };
+  }
+  if (petId === 'monkey') {
+    return { ...base, ...buildMonkeyMesh(g, petCursed) };
   }
 
   return base;
@@ -708,4 +721,229 @@ function buildSnakeMesh(g: THREE.Group, cursed = false): {
   add(box(0.005, 0.003, 0.030), tongueMat,  0.010, -0.018, -0.085, 0, 0, -0.18, headPivot);
 
   return { snakeHeadPivot: headPivot };
+}
+
+// ─── Alligator companion mesh ──────────────────────────────────────────────────
+
+function buildAlligatorMesh(g: THREE.Group, cursed = false): {
+  alligatorTailPivot: THREE.Group;
+  alligatorJawPivot:  THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.75, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const scaleColor  = cursed ? 0x0a0015 : 0x2a4a18;
+  const bellyColor  = cursed ? 0x1a0028 : 0x7a9a44;
+  const eyeColor    = cursed ? 0xff2200 : 0xddcc00;
+  const toothColor  = cursed ? 0xddbbbb : 0xeeeecc;
+
+  const scaleMat = lam(scaleColor, 0.70, 0.08);
+  const bellyMat = lam(bellyColor, 0.75, 0.02);
+  const eyeMat   = lam(eyeColor, 0.35, 0.1, eyeColor, cursed ? 1.2 : 0.55);
+  const toothMat = lam(toothColor, 0.60);
+
+  // Position: left-front, low to ground
+  const alliRoot = new THREE.Group();
+  alliRoot.position.set(-0.80, 0, -0.10);
+  g.add(alliRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 7) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, rx = 0, ry = 0, rz = 0, parent: THREE.Object3D = alliRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.rotation.set(rx, ry, rz);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Main body — wide, flat, elongated
+  add(box(0.42, 0.14, 0.65), scaleMat, 0, 0.08, 0);
+  // Belly — lighter underside
+  add(box(0.34, 0.06, 0.58), bellyMat, 0, 0.04, 0.02);
+  // Armored back ridge bumps
+  for (let i = 0; i < 5; i++) {
+    add(new THREE.ConeGeometry(0.028, 0.055, 4), scaleMat, 0, 0.17, -0.22 + i * 0.11);
+  }
+
+  // Upper jaw (part of head group)
+  const headGrp = new THREE.Group();
+  headGrp.position.set(0, 0.09, -0.38);
+  alliRoot.add(headGrp);
+  // Head box
+  add(box(0.38, 0.12, 0.24), scaleMat, 0, 0, 0, 0, 0, 0, headGrp);
+  // Snout — long flat protrusion
+  add(box(0.30, 0.08, 0.28), scaleMat, 0, -0.01, -0.26, 0, 0, 0, headGrp);
+  // Nostrils
+  add(box(0.04, 0.04, 0.04), scaleMat, -0.08, 0.03, -0.36, 0, 0, 0, headGrp);
+  add(box(0.04, 0.04, 0.04), scaleMat,  0.08, 0.03, -0.36, 0, 0, 0, headGrp);
+  // Eyes — raised on top of head
+  add(box(0.05, 0.05, 0.04), eyeMat, -0.14, 0.08, -0.04, 0, 0, 0, headGrp);
+  add(box(0.05, 0.05, 0.04), eyeMat,  0.14, 0.08, -0.04, 0, 0, 0, headGrp);
+  // Upper teeth row
+  for (let i = 0; i < 4; i++) {
+    add(new THREE.ConeGeometry(0.018, 0.045, 4), toothMat, -0.09 + i * 0.06, -0.04, -0.15, Math.PI, 0, 0, headGrp);
+  }
+
+  // Lower jaw pivot — snaps open/shut
+  const jawPivot = new THREE.Group();
+  jawPivot.name = 'alligatorJawPivot';
+  jawPivot.position.set(0, -0.04, -0.22);
+  headGrp.add(jawPivot);
+  add(box(0.28, 0.055, 0.28), bellyMat, 0, -0.025, -0.08, 0, 0, 0, jawPivot);
+  // Lower teeth
+  for (let i = 0; i < 4; i++) {
+    add(new THREE.ConeGeometry(0.016, 0.040, 4), toothMat, -0.09 + i * 0.06, 0.02, -0.12, 0, 0, 0, jawPivot);
+  }
+
+  // Tail — long, tapered, sweeps side-to-side
+  const tailPivot = new THREE.Group();
+  tailPivot.name = 'alligatorTailPivot';
+  tailPivot.position.set(0, 0.08, 0.36);
+  alliRoot.add(tailPivot);
+  add(cyl(0.038, 0.072, 0.36, 7), scaleMat, 0, 0.18, 0, 0, 0, 0, tailPivot);
+  // Tail tip segment
+  const tailTip = new THREE.Group();
+  tailTip.position.set(0, 0.36, 0);
+  tailPivot.add(tailTip);
+  add(cyl(0.014, 0.036, 0.28, 6), scaleMat, 0, 0.14, 0, 0, 0, 0, tailTip);
+
+  // Four short stubby legs
+  const legDefs = [
+    { x: -0.22, z: -0.18, rx:  0.15, rz:  0.55 },
+    { x:  0.22, z: -0.18, rx:  0.15, rz: -0.55 },
+    { x: -0.22, z:  0.18, rx: -0.10, rz:  0.55 },
+    { x:  0.22, z:  0.18, rx: -0.10, rz: -0.55 },
+  ];
+  for (const def of legDefs) {
+    const legGrp = new THREE.Group();
+    legGrp.position.set(def.x, 0.07, def.z);
+    legGrp.rotation.set(def.rx, 0, def.rz);
+    alliRoot.add(legGrp);
+    add(cyl(0.040, 0.048, 0.18, 6), scaleMat, 0, -0.05, 0, 0, 0, 0, legGrp);
+    // Foot
+    add(box(0.14, 0.05, 0.10), scaleMat, def.rz > 0 ? -0.04 : 0.04, -0.14, 0.02, 0, 0, 0, legGrp);
+  }
+
+  return { alligatorTailPivot: tailPivot, alligatorJawPivot: jawPivot };
+}
+
+// ─── Monkey companion mesh ─────────────────────────────────────────────────────
+
+function buildMonkeyMesh(g: THREE.Group, cursed = false): {
+  monkeyTailPivot: THREE.Group;
+  monkeyArmL:      THREE.Group;
+  monkeyArmR:      THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.82, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const furColor   = cursed ? 0x0c000c : 0x7a4a1a;
+  const faceColor  = cursed ? 0x1a0010 : 0xcc9966;
+  const eyeColor   = cursed ? 0xff0000 : 0x221100;
+  const noseColor  = cursed ? 0x330011 : 0x553322;
+
+  const fur    = lam(furColor);
+  const faceMat = lam(faceColor);
+  const eyeMat  = lam(eyeColor, 0.35, 0.0, eyeColor, cursed ? 1.0 : 0.0);
+  const noseMat = lam(noseColor, 0.65);
+
+  // Perched on left shoulder (x=-0.38, y=0.84)
+  const monkeyRoot = new THREE.Group();
+  monkeyRoot.position.set(-0.42, 0.82, -0.05);
+  g.add(monkeyRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 7) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const sph = (r: number, ws = 8, hs = 6) => new THREE.SphereGeometry(r, ws, hs);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = monkeyRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Body — compact, slightly hunched
+  add(sph(0.088, 8, 6), fur, 0, 0, 0);
+  // Chest/belly slightly lighter
+  add(sph(0.072, 7, 5), faceMat, 0, -0.02, -0.05);
+
+  // Head — large round skull, slightly forward
+  const headGrp = new THREE.Group();
+  headGrp.position.set(0, 0.13, -0.04);
+  monkeyRoot.add(headGrp);
+  add(sph(0.082, 9, 7), fur, 0, 0, 0, headGrp);
+  // Face disc
+  add(sph(0.062, 8, 6), faceMat, 0, -0.01, -0.055, headGrp);
+  // Eyes — wide-set, expressive
+  add(box(0.028, 0.028, 0.018), eyeMat, -0.040, 0.014, -0.068, headGrp);
+  add(box(0.028, 0.028, 0.018), eyeMat,  0.040, 0.014, -0.068, headGrp);
+  // Nose — flat, rounded
+  add(box(0.030, 0.022, 0.020), noseMat, 0, -0.010, -0.076, headGrp);
+  // Cheek pouches
+  add(sph(0.028, 6, 5), faceMat, -0.068, -0.018, -0.040, headGrp);
+  add(sph(0.028, 6, 5), faceMat,  0.068, -0.018, -0.040, headGrp);
+  // Ears — round
+  add(sph(0.030, 6, 5), fur, -0.088, 0.022, 0, headGrp);
+  add(sph(0.030, 6, 5), fur,  0.088, 0.022, 0, headGrp);
+  add(sph(0.022, 5, 4), faceMat, -0.088, 0.022, -0.010, headGrp);
+  add(sph(0.022, 5, 4), faceMat,  0.088, 0.022, -0.010, headGrp);
+
+  // Arms — pivot at shoulders, long and slightly dangling
+  const armDefs = [
+    { name: 'monkeyArmL', x: -0.09, side: -1 },
+    { name: 'monkeyArmR', x:  0.09, side:  1 },
+  ];
+  const armGroups: Record<string, THREE.Group> = {};
+  for (const def of armDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.04, 0);
+    monkeyRoot.add(pivot);
+    add(cyl(0.022, 0.028, 0.14, 6), fur, 0, -0.07, 0, pivot);
+    // Forearm
+    const forearm = new THREE.Group();
+    forearm.position.set(0, -0.14, 0);
+    pivot.add(forearm);
+    add(cyl(0.018, 0.022, 0.12, 6), fur, 0, -0.06, 0, forearm);
+    // Hand
+    add(sph(0.026, 6, 5), faceMat, 0, -0.135, 0, forearm);
+    armGroups[def.name] = pivot;
+  }
+
+  // Feet / sitting perch
+  add(box(0.05, 0.04, 0.08), fur, -0.05, -0.10,  0.02);
+  add(box(0.05, 0.04, 0.08), fur,  0.05, -0.10,  0.02);
+
+  // Long prehensile tail — curves up and over
+  const tailPivot = new THREE.Group();
+  tailPivot.name = 'monkeyTailPivot';
+  tailPivot.position.set(0, -0.05, 0.09);
+  tailPivot.rotation.x = -0.80;
+  monkeyRoot.add(tailPivot);
+  add(cyl(0.020, 0.030, 0.26, 6), fur, 0, 0.13, 0, tailPivot);
+  const tailMid = new THREE.Group();
+  tailMid.position.set(0, 0.26, 0);
+  tailMid.rotation.x = -1.10;
+  tailPivot.add(tailMid);
+  add(cyl(0.014, 0.020, 0.22, 5), fur, 0, 0.11, 0, tailMid);
+  const tailTip = new THREE.Group();
+  tailTip.position.set(0, 0.22, 0);
+  tailTip.rotation.x = -1.20;
+  tailMid.add(tailTip);
+  add(cyl(0.010, 0.014, 0.14, 5), fur, 0, 0.07, 0, tailTip);
+
+  return {
+    monkeyTailPivot: tailPivot,
+    monkeyArmL:      armGroups['monkeyArmL'],
+    monkeyArmR:      armGroups['monkeyArmR'],
+  };
 }

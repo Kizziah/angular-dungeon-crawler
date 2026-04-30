@@ -117,6 +117,13 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private ravenWingR?: THREE.Group;
   // Serpent companion joint refs
   private snakeHeadPivot?: THREE.Group;
+  // Alligator companion joint refs
+  private alligatorTailPivot?: THREE.Group;
+  private alligatorJawPivot?:  THREE.Group;
+  // Monkey companion joint refs
+  private monkeyTailPivot?: THREE.Group;
+  private monkeyArmL?:      THREE.Group;
+  private monkeyArmR?:      THREE.Group;
 
   // Spell particle system
   private spellParticles!: SpellParticleSystem;
@@ -621,6 +628,42 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
         const bobAmp   = isMoving ? 0.12 : 0.04;
         this.snakeHeadPivot.rotation.y = Math.sin(t * 1.8) * swayAmp;
         this.snakeHeadPivot.rotation.x = Math.sin(t * 2.4) * bobAmp;
+      }
+
+      // ── Alligator companion animation ─────────────────────────────────
+      if (this.alligatorTailPivot) {
+        // Tail sweeps slowly side-to-side, more active while moving
+        const sweepSpeed = isMoving ? 4.5 : 2.2;
+        const sweepAmp   = isMoving ? 0.50 : 0.30;
+        this.alligatorTailPivot.rotation.y = Math.sin(t * sweepSpeed) * sweepAmp;
+      }
+      if (this.alligatorJawPivot) {
+        // Jaw snaps occasionally — use a slow beat envelope
+        const jawBeat = Math.max(0, Math.sin(t * 0.9) - 0.65) * (1 / 0.35);
+        this.alligatorJawPivot.rotation.x = jawBeat * 0.35;
+      }
+
+      // ── Monkey companion animation ────────────────────────────────────
+      if (this.monkeyTailPivot) {
+        // Tail curls and uncurls rhythmically
+        const curlSpeed = isMoving ? 4.0 : 2.5;
+        const curlAmp   = isMoving ? 0.45 : 0.25;
+        this.monkeyTailPivot.rotation.x += (Math.sin(t * curlSpeed) * curlAmp - this.monkeyTailPivot.rotation.x) * 0.08;
+      }
+      if (this.monkeyArmL && this.monkeyArmR) {
+        if (isMoving) {
+          // Arms bounce/swing during movement
+          const ph = t * (9.5 + runWt * 5.0);
+          const amp = 0.30 + runWt * 0.15;
+          this.monkeyArmL.rotation.x =  Math.sin(ph) * amp;
+          this.monkeyArmR.rotation.x = -Math.sin(ph) * amp;
+        } else {
+          // Idle: arms dangle with occasional scratch gesture
+          this.monkeyArmL.rotation.x *= 0.85;
+          this.monkeyArmR.rotation.x *= 0.85;
+          this.monkeyArmL.rotation.z = Math.sin(t * 1.1) * 0.12;
+          this.monkeyArmR.rotation.z = Math.sin(t * 1.3 + 1.0) * 0.10;
+        }
       }
 
       // ── Torch flicker ─────────────────────────────────────────────────

@@ -363,4 +363,6 @@ export const ITEMS: ItemDef[] = [
   { id: 'tabby-cat',       name: 'Tabby Cat',       unidentifiedName: 'Stray Cat',    type: 'Pet', stats: { agiBonus: 2  }, cursed: false, value: 0, usable: false, floorMin: 1,  floorMax: 99 },
   { id: 'raven',           name: 'Raven',           unidentifiedName: 'Dark Bird',    type: 'Pet', stats: { intBonus: 2  }, cursed: false, value: 0, usable: false, floorMin: 3,  floorMax: 99 },
   { id: 'coiled-serpent',  name: 'Coiled Serpent',  unidentifiedName: 'Coiled Snake', type: 'Pet', stats: { luckBonus: 3 }, cursed: false, value: 0, usable: false, floorMin: 5,  floorMax: 99 },
+  { id: 'alligator',       name: 'Alligator',       unidentifiedName: 'Large Lizard', type: 'Pet', stats: { strBonus: 2  }, cursed: false, value: 0, usable: false, floorMin: 4,  floorMax: 99 },
+  { id: 'monkey',          name: 'Monkey',          unidentifiedName: 'Small Primate',type: 'Pet', stats: { agiBonus: 3  }, cursed: false, value: 0, usable: false, floorMin: 2,  floorMax: 99 },
 ];
