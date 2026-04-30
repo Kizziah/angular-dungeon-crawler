@@ -30,6 +30,20 @@ export class InventoryComponent implements OnInit, OnChanges {
   message = '';
   returnTo = '/guild';
 
+  /** Groups identical items (same definitionId + identified + cursed) for stacked display. */
+  get stackedInventory(): { item: Item; quantity: number }[] {
+    const stacks = new Map<string, { item: Item; quantity: number }>();
+    for (const item of this.character?.inventory ?? []) {
+      const key = `${item.definitionId}|${item.identified}|${item.cursed}`;
+      if (stacks.has(key)) {
+        stacks.get(key)!.quantity += item.quantity;
+      } else {
+        stacks.set(key, { item, quantity: item.quantity });
+      }
+    }
+    return Array.from(stacks.values());
+  }
+
   equipmentSlots: (keyof Equipment)[] = ['weapon', 'shield', 'helmet', 'bodyArmor', 'gloves', 'boots', 'ring', 'amulet'];
 
   get isEmbedded(): boolean { return this.embeddedCharId !== null; }

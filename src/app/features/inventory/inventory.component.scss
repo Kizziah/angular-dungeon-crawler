@@ -111,6 +111,7 @@
       &.cursed { .item-name { color: var(--dos-red); } }
 
       .item-name { flex: 1; }
+      .item-qty { font-size: 11px; margin-left: 4px; }
       .item-type { color: var(--dos-green-dim); font-size: 11px; min-width: 70px; }
       .item-actions {
         display: flex;
