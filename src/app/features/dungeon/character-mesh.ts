@@ -69,12 +69,23 @@ export interface CharacterJoints {
   shoulderR:  THREE.Group;
   elbowL:     THREE.Group;
   elbowR:     THREE.Group;
-  // Dog companion joints (present only when a pet is equipped)
+  // Dog companion joints
   dogFrontLegL?: THREE.Group;
   dogFrontLegR?: THREE.Group;
   dogBackLegL?:  THREE.Group;
   dogBackLegR?:  THREE.Group;
   dogTailPivot?: THREE.Group;
+  // Cat companion joints
+  catFrontLegL?: THREE.Group;
+  catFrontLegR?: THREE.Group;
+  catBackLegL?:  THREE.Group;
+  catBackLegR?:  THREE.Group;
+  catTailPivot?: THREE.Group;
+  // Raven companion joints
+  ravenWingL?: THREE.Group;
+  ravenWingR?: THREE.Group;
+  // Serpent companion joints
+  snakeHeadPivot?: THREE.Group;
 }
 
 // ─── Geometry builder ─────────────────────────────────────────────────────────
@@ -285,13 +296,25 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
     if (child instanceof THREE.Mesh) child.castShadow = true;
   });
 
-  // ── PET DOG (left side companion) ────────────────────────────────────
-  if (eq?.pet?.definitionId === 'loyal-dog') {
-    const dog = buildDogMesh(g, eq.pet.cursed);
-    return { hipPivot, legPivotL, legPivotR, kneePivotL, kneePivotR, shoulderL, shoulderR, elbowL, elbowR, ...dog };
+  // ── PET DISPATCH ─────────────────────────────────────────────────────
+  const petId = eq?.pet?.definitionId;
+  const petCursed = eq?.pet?.cursed ?? false;
+  const base = { hipPivot, legPivotL, legPivotR, kneePivotL, kneePivotR, shoulderL, shoulderR, elbowL, elbowR };
+
+  if (petId === 'loyal-dog') {
+    return { ...base, ...buildDogMesh(g, petCursed) };
+  }
+  if (petId === 'tabby-cat') {
+    return { ...base, ...buildCatMesh(g, petCursed) };
+  }
+  if (petId === 'raven') {
+    return { ...base, ...buildRavenMesh(g, petCursed) };
+  }
+  if (petId === 'coiled-serpent') {
+    return { ...base, ...buildSnakeMesh(g, petCursed) };
   }
 
-  return { hipPivot, legPivotL, legPivotR, kneePivotL, kneePivotR, shoulderL, shoulderR, elbowL, elbowR };
+  return base;
 }
 
 // ─── Dog companion mesh ───────────────────────────────────────────────────────
@@ -396,4 +419,293 @@ function buildDogMesh(g: THREE.Group, cursed = false): {
     dogBackLegR:  legGroups['dogBackLegR'],
     dogTailPivot: tailPivot,
   };
+}
+
+// ─── Cat companion mesh ────────────────────────────────────────────────────────
+
+function buildCatMesh(g: THREE.Group, cursed = false): {
+  catFrontLegL: THREE.Group; catFrontLegR: THREE.Group;
+  catBackLegL:  THREE.Group; catBackLegR:  THREE.Group;
+  catTailPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.85, metal = 0.0): THREE.MeshStandardMaterial =>
+    new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+
+  const furColor  = cursed ? 0x0a0008 : 0xcc7722;
+  const bellyColor = cursed ? 0x140012 : 0xe8aa55;
+  const eyeColor  = cursed ? 0xff0000 : 0x44cc44;
+
+  const fur   = lam(furColor);
+  const belly = lam(bellyColor);
+  const eyeMat = new THREE.MeshStandardMaterial({
+    color: eyeColor, roughness: 0.4,
+    emissive: new THREE.Color(cursed ? 0xff0000 : 0x44cc44),
+    emissiveIntensity: cursed ? 1.0 : 0.25,
+  });
+  const noseMat = lam(cursed ? 0x330011 : 0xffaacc, 0.6);
+
+  const catRoot = new THREE.Group();
+  // Right side of character, slightly behind
+  catRoot.position.set(0.88, 0, 0.15);
+  g.add(catRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 7) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = catRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Body — slender, elongated
+  add(box(0.38, 0.16, 0.50), fur, 0, 0.28, 0);
+  // Belly patch
+  add(box(0.26, 0.10, 0.40), belly, 0, 0.27, 0.04);
+
+  // Neck — graceful curve up/forward
+  const neckGrp = new THREE.Group();
+  neckGrp.position.set(0, 0.34, -0.20);
+  neckGrp.rotation.x = 0.50;
+  catRoot.add(neckGrp);
+  add(new THREE.CylinderGeometry(0.055, 0.065, 0.16, 7), fur, 0, 0.06, 0, neckGrp);
+
+  // Head — rounder than dog
+  const headGrp = new THREE.Group();
+  headGrp.position.set(0, 0.45, -0.26);
+  catRoot.add(headGrp);
+  add(box(0.24, 0.22, 0.22), fur, 0, 0, 0, headGrp);
+  // Muzzle — small, slightly protruding
+  add(box(0.12, 0.09, 0.10), belly, 0, -0.04, -0.14, headGrp);
+  // Nose
+  add(box(0.06, 0.04, 0.03), noseMat, 0, 0.005, -0.185, headGrp);
+  // Eyes — slightly tilted / almond
+  add(box(0.05, 0.038, 0.025), eyeMat, -0.065, 0.04, -0.115, headGrp);
+  add(box(0.05, 0.038, 0.025), eyeMat,  0.065, 0.04, -0.115, headGrp);
+  // Pointed ears
+  const earGeo = new THREE.ConeGeometry(0.055, 0.13, 4);
+  const earL = new THREE.Mesh(earGeo, fur); earL.position.set(-0.085, 0.14, -0.02); earL.castShadow = true; headGrp.add(earL);
+  const earR = new THREE.Mesh(earGeo, fur); earR.position.set( 0.085, 0.14, -0.02); earR.castShadow = true; headGrp.add(earR);
+
+  // Long curved tail (2-segment for curve effect)
+  const tailPivot = new THREE.Group();
+  tailPivot.position.set(0, 0.32, 0.26);
+  tailPivot.rotation.x = -0.70;
+  catRoot.add(tailPivot);
+  add(cyl(0.022, 0.034, 0.30, 6), fur, 0, 0.15, 0, tailPivot);
+  // Tip segment curving inward
+  const tailTip = new THREE.Group();
+  tailTip.position.set(0, 0.30, 0);
+  tailTip.rotation.x = -0.90;
+  tailPivot.add(tailTip);
+  add(cyl(0.014, 0.020, 0.20, 5), fur, 0, 0.10, 0, tailTip);
+
+  // Legs — four slender pivots
+  const legDefs: Array<{ name: string; x: number; z: number }> = [
+    { name: 'catFrontLegL', x: -0.12, z: -0.16 },
+    { name: 'catFrontLegR', x:  0.12, z: -0.16 },
+    { name: 'catBackLegL',  x: -0.12, z:  0.16 },
+    { name: 'catBackLegR',  x:  0.12, z:  0.16 },
+  ];
+  const legGroups: Record<string, THREE.Group> = {};
+  for (const def of legDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.28, def.z);
+    catRoot.add(pivot);
+    add(cyl(0.034, 0.026, 0.18, 6), fur, 0, -0.09, 0, pivot);
+    const knee = new THREE.Group();
+    knee.position.set(0, -0.18, 0);
+    pivot.add(knee);
+    add(cyl(0.026, 0.020, 0.16, 6), fur, 0, -0.08, 0, knee);
+    // Paw — small oval
+    add(box(0.08, 0.04, 0.10), fur, 0, -0.175, 0.014, knee);
+    legGroups[def.name] = pivot;
+  }
+
+  return {
+    catFrontLegL: legGroups['catFrontLegL'],
+    catFrontLegR: legGroups['catFrontLegR'],
+    catBackLegL:  legGroups['catBackLegL'],
+    catBackLegR:  legGroups['catBackLegR'],
+    catTailPivot: tailPivot,
+  };
+}
+
+// ─── Raven companion mesh ──────────────────────────────────────────────────────
+
+function buildRavenMesh(g: THREE.Group, cursed = false): {
+  ravenWingL: THREE.Group;
+  ravenWingR: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.60, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const featherColor = cursed ? 0x0d0014 : 0x111118;
+  const eyeColor     = cursed ? 0xff0000 : 0xffcc00;
+  const beakColor    = cursed ? 0x550000 : 0xddaa00;
+
+  const feather = lam(featherColor, 0.65, 0.15);
+  const eyeMat  = lam(eyeColor, 0.3, 0.1, eyeColor, cursed ? 1.2 : 0.6);
+  const beakMat = lam(beakColor, 0.55, 0.2);
+
+  // Perched on the right shoulder (shoulder at y=0.79, x=0.27 in character space)
+  const ravenRoot = new THREE.Group();
+  ravenRoot.position.set(0.38, 0.84, -0.08);
+  g.add(ravenRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 6) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = ravenRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Body — compact oval
+  add(new THREE.SphereGeometry(0.095, 8, 6), feather, 0, 0, 0);
+  // Chest slightly puffed
+  add(new THREE.SphereGeometry(0.080, 7, 5), feather, 0, -0.02, -0.06);
+
+  // Head
+  const headGrp = new THREE.Group();
+  headGrp.position.set(0, 0.11, -0.06);
+  ravenRoot.add(headGrp);
+  add(new THREE.SphereGeometry(0.068, 8, 6), feather, 0, 0, 0, headGrp);
+  // Eyes
+  add(box(0.026, 0.026, 0.018), eyeMat, -0.038, 0.012, -0.052, headGrp);
+  add(box(0.026, 0.026, 0.018), eyeMat,  0.038, 0.012, -0.052, headGrp);
+  // Beak (upper + lower)
+  add(new THREE.ConeGeometry(0.022, 0.095, 5), beakMat, 0, -0.008, -0.115, headGrp).rotation.x = Math.PI / 2;
+  add(new THREE.ConeGeometry(0.016, 0.065, 5), beakMat, 0, -0.028, -0.11,  headGrp).rotation.x = -Math.PI / 2;
+
+  // Tail feathers — flat fan, angled back
+  const tailGrp = new THREE.Group();
+  tailGrp.position.set(0, -0.05, 0.09);
+  tailGrp.rotation.x = 0.40;
+  ravenRoot.add(tailGrp);
+  add(box(0.13, 0.04, 0.14), feather, 0, 0, 0, tailGrp);
+
+  // Feet — gripping the shoulder
+  add(cyl(0.012, 0.010, 0.07, 5), lam(beakColor, 0.6), -0.03, -0.10,  0.015);
+  add(cyl(0.012, 0.010, 0.07, 5), lam(beakColor, 0.6),  0.03, -0.10,  0.015);
+  add(cyl(0.010, 0.008, 0.06, 5), lam(beakColor, 0.6),  0,    -0.10, -0.025);
+
+  // Wings — pivot at top-sides of body, folded by default
+  const wingDefs = [
+    { name: 'ravenWingL', x: -0.09, side: -1 },
+    { name: 'ravenWingR', x:  0.09, side:  1 },
+  ];
+  const wingGroups: Record<string, THREE.Group> = {};
+  for (const def of wingDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.02, 0);
+    ravenRoot.add(pivot);
+    // Primary feather panel — folded down by default
+    const panel = new THREE.Mesh(box(0.13, 0.04, 0.14), feather);
+    panel.position.set(def.side * 0.065, -0.05, 0);
+    panel.rotation.z = def.side * 0.22; // slight droop
+    panel.castShadow = true;
+    pivot.add(panel);
+    // Secondary feather tip
+    const tip = new THREE.Mesh(box(0.09, 0.025, 0.10), feather);
+    tip.position.set(def.side * 0.065, -0.10, 0.02);
+    tip.rotation.z = def.side * 0.38;
+    tip.castShadow = true;
+    pivot.add(tip);
+    wingGroups[def.name] = pivot;
+  }
+
+  return {
+    ravenWingL: wingGroups['ravenWingL'],
+    ravenWingR: wingGroups['ravenWingR'],
+  };
+}
+
+// ─── Coiled Serpent companion mesh ────────────────────────────────────────────
+
+function buildSnakeMesh(g: THREE.Group, cursed = false): {
+  snakeHeadPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.70, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const scaleColor  = cursed ? 0x220008 : 0x2a5c1e;
+  const bellyColor  = cursed ? 0x3a0012 : 0x7ab832;
+  const eyeColor    = cursed ? 0x00ff44 : 0xddcc00;
+  const tongueColor = cursed ? 0xff0044 : 0xcc1133;
+
+  const scaleMat  = lam(scaleColor, 0.55, 0.10);
+  const bellyMat  = lam(bellyColor, 0.65, 0.05);
+  const eyeMat    = lam(eyeColor, 0.30, 0.1, eyeColor, cursed ? 1.2 : 0.5);
+  const tongueMat = lam(tongueColor, 0.60);
+
+  const snakeRoot = new THREE.Group();
+  // Right side, slightly in front — coiled on the floor
+  snakeRoot.position.set(0.72, 0, 0.05);
+  g.add(snakeRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 8) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, rx = 0, ry = 0, rz = 0, parent: THREE.Object3D = snakeRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.rotation.set(rx, ry, rz);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Coiled body — series of arced segments forming a flat coil
+  const coilSegments: Array<{ x: number; z: number; ry: number; r: number }> = [
+    { x:  0.00, z:  0.00, ry: 0.00,  r: 0.048 },
+    { x: -0.10, z: -0.05, ry: 0.55,  r: 0.044 },
+    { x: -0.16, z:  0.02, ry: 1.10,  r: 0.040 },
+    { x: -0.12, z:  0.12, ry: 1.70,  r: 0.036 },
+    { x:  0.00, z:  0.16, ry: 2.25,  r: 0.032 },
+    { x:  0.12, z:  0.12, ry: 2.80,  r: 0.028 },
+    { x:  0.16, z:  0.02, ry: 3.35,  r: 0.024 },
+    { x:  0.10, z: -0.06, ry: 3.90,  r: 0.020 },
+  ];
+  for (const seg of coilSegments) {
+    add(cyl(seg.r, seg.r * 1.08, 0.10, 7), scaleMat, seg.x, 0.05, seg.z, Math.PI / 2, seg.ry, 0);
+    // Belly strip along bottom
+    add(box(seg.r * 1.2, 0.06, 0.08), bellyMat, seg.x, 0.03, seg.z);
+  }
+
+  // Raised neck leading up to head
+  const neckGrp = new THREE.Group();
+  neckGrp.position.set(0.08, 0.05, -0.10);
+  neckGrp.rotation.x = -0.60;
+  snakeRoot.add(neckGrp);
+  add(cyl(0.030, 0.040, 0.22, 7), scaleMat, 0, 0.11, 0, 0, 0, 0, neckGrp);
+
+  // Head pivot — so the head can sway
+  const headPivot = new THREE.Group();
+  headPivot.position.set(0, 0.24, 0);
+  neckGrp.add(headPivot);
+
+  // Head shape — flattened elongated box, slightly triangular
+  add(box(0.072, 0.038, 0.11), scaleMat, 0,  0, 0, 0, 0, 0, headPivot);
+  add(box(0.055, 0.028, 0.07), bellyMat,  0, -0.008, -0.07, 0, 0, 0, headPivot);
+  // Jaw scales
+  add(box(0.065, 0.018, 0.09), bellyMat, 0, -0.020, 0.00, 0, 0, 0, headPivot);
+  // Eyes
+  add(box(0.018, 0.018, 0.012), eyeMat, -0.028, 0.010, -0.036, 0, 0, 0, headPivot);
+  add(box(0.018, 0.018, 0.012), eyeMat,  0.028, 0.010, -0.036, 0, 0, 0, headPivot);
+  // Forked tongue
+  add(box(0.005, 0.003, 0.030), tongueMat, -0.010, -0.018, -0.085, 0, 0,  0.18, headPivot);
+  add(box(0.005, 0.003, 0.030), tongueMat,  0.010, -0.018, -0.085, 0, 0, -0.18, headPivot);
+
+  return { snakeHeadPivot: headPivot };
 }

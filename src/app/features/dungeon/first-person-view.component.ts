@@ -106,6 +106,17 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private dogBackLegL?:  THREE.Group;
   private dogBackLegR?:  THREE.Group;
   private dogTailPivot?: THREE.Group;
+  // Cat companion joint refs
+  private catFrontLegL?: THREE.Group;
+  private catFrontLegR?: THREE.Group;
+  private catBackLegL?:  THREE.Group;
+  private catBackLegR?:  THREE.Group;
+  private catTailPivot?: THREE.Group;
+  // Raven companion joint refs
+  private ravenWingL?: THREE.Group;
+  private ravenWingR?: THREE.Group;
+  // Serpent companion joint refs
+  private snakeHeadPivot?: THREE.Group;
 
   // Spell particle system
   private spellParticles!: SpellParticleSystem;
@@ -567,6 +578,49 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
           this.dogBackLegL.rotation.x  *= 0.82;
           this.dogBackLegR.rotation.x  *= 0.82;
         }
+      }
+
+      // ── Cat companion animation ───────────────────────────────────────
+      if (this.catTailPivot) {
+        // Tail sweeps elegantly side to side, faster when idle (curious)
+        const wagSpeed = isMoving ? 3.5 : 5.5;
+        const wagAmp   = isMoving ? 0.35 : 0.60;
+        this.catTailPivot.rotation.z = Math.sin(t * wagSpeed) * wagAmp;
+      }
+      if (this.catFrontLegL && this.catFrontLegR && this.catBackLegL && this.catBackLegR) {
+        if (isMoving) {
+          const freq = 10.0 + runWt * 7.0;
+          const amp  = 0.38 + runWt * 0.20;
+          const ph   = t * freq;
+          this.catFrontLegL.rotation.x =  Math.sin(ph) * amp;
+          this.catFrontLegR.rotation.x = -Math.sin(ph) * amp;
+          this.catBackLegL.rotation.x  = -Math.sin(ph) * amp;
+          this.catBackLegR.rotation.x  =  Math.sin(ph) * amp;
+        } else {
+          this.catFrontLegL.rotation.x *= 0.80;
+          this.catFrontLegR.rotation.x *= 0.80;
+          this.catBackLegL.rotation.x  *= 0.80;
+          this.catBackLegR.rotation.x  *= 0.80;
+        }
+      }
+
+      // ── Raven companion animation ─────────────────────────────────────
+      if (this.ravenWingL && this.ravenWingR) {
+        // Wings flap occasionally: use a slow sine that dips below threshold to trigger a beat
+        const flapCycle = Math.sin(t * 1.2) * Math.sin(t * 0.7);
+        const flapAmp   = isMoving ? 0.55 : 0.25;
+        const flapAngle = flapCycle * flapAmp;
+        this.ravenWingL.rotation.z =  flapAngle;
+        this.ravenWingR.rotation.z = -flapAngle;
+      }
+
+      // ── Serpent companion animation ───────────────────────────────────
+      if (this.snakeHeadPivot) {
+        // Head sways slowly side-to-side, bobs slightly when moving
+        const swayAmp  = isMoving ? 0.18 : 0.28;
+        const bobAmp   = isMoving ? 0.12 : 0.04;
+        this.snakeHeadPivot.rotation.y = Math.sin(t * 1.8) * swayAmp;
+        this.snakeHeadPivot.rotation.x = Math.sin(t * 2.4) * bobAmp;
       }
 
       // ── Torch flicker ─────────────────────────────────────────────────
