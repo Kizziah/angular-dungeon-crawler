@@ -56,6 +56,7 @@ const inventoryWeaponIds = [
 const inventoryExtras = [
   'potion-heal-large', 'potion-mana', 'scroll-identify', 'scroll-town-portal',
   'tabby-cat', 'raven', 'coiled-serpent', 'alligator', 'monkey',
+  'brown-bear', 'panda-bear', 'boar', 'elephant',
 ];
 
 const inventory: Item[] = [

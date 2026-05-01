@@ -365,4 +365,8 @@ export const ITEMS: ItemDef[] = [
   { id: 'coiled-serpent',  name: 'Coiled Serpent',  unidentifiedName: 'Coiled Snake', type: 'Pet', stats: { luckBonus: 3 }, cursed: false, value: 0, usable: false, floorMin: 5,  floorMax: 99 },
   { id: 'alligator',       name: 'Alligator',       unidentifiedName: 'Large Lizard', type: 'Pet', stats: { strBonus: 2  }, cursed: false, value: 0, usable: false, floorMin: 4,  floorMax: 99 },
   { id: 'monkey',          name: 'Monkey',          unidentifiedName: 'Small Primate',type: 'Pet', stats: { agiBonus: 3  }, cursed: false, value: 0, usable: false, floorMin: 2,  floorMax: 99 },
+  { id: 'brown-bear',      name: 'Brown Bear',      unidentifiedName: 'Large Bear',   type: 'Pet', stats: { strBonus: 3, vitBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 5, floorMax: 99 },
+  { id: 'panda-bear',      name: 'Panda Bear',      unidentifiedName: 'Striped Bear', type: 'Pet', stats: { vitBonus: 2, luckBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 4, floorMax: 99 },
+  { id: 'boar',            name: 'Boar',            unidentifiedName: 'Wild Pig',     type: 'Pet', stats: { strBonus: 2, agiBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 2, floorMax: 99 },
+  { id: 'elephant',        name: 'Elephant',        unidentifiedName: 'Large Beast',  type: 'Pet', stats: { strBonus: 3, vitBonus: 3 }, cursed: false, value: 0, usable: false, floorMin: 6, floorMax: 99 },
 ];

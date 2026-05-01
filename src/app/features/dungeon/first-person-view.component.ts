@@ -124,6 +124,24 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private monkeyTailPivot?: THREE.Group;
   private monkeyArmL?:      THREE.Group;
   private monkeyArmR?:      THREE.Group;
+  // Brown Bear companion joint refs
+  private bearFrontLegL?: THREE.Group;
+  private bearFrontLegR?: THREE.Group;
+  private bearBackLegL?:  THREE.Group;
+  private bearBackLegR?:  THREE.Group;
+  private bearHeadPivot?: THREE.Group;
+  // Panda Bear companion joint refs
+  private pandaFrontLegL?: THREE.Group;
+  private pandaFrontLegR?: THREE.Group;
+  private pandaBackLegL?:  THREE.Group;
+  private pandaBackLegR?:  THREE.Group;
+  private pandaHeadPivot?: THREE.Group;
+  // Boar companion joint refs
+  private boarHeadPivot?: THREE.Group;
+  // Elephant companion joint refs
+  private elephantTrunkPivot?: THREE.Group;
+  private elephantEarL?:       THREE.Group;
+  private elephantEarR?:       THREE.Group;
 
   // Spell particle system
   private spellParticles!: SpellParticleSystem;
@@ -664,6 +682,76 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
           this.monkeyArmL.rotation.z = Math.sin(t * 1.1) * 0.12;
           this.monkeyArmR.rotation.z = Math.sin(t * 1.3 + 1.0) * 0.10;
         }
+      }
+
+      // ── Brown Bear companion animation ────────────────────────────────
+      if (this.bearHeadPivot) {
+        this.bearHeadPivot.rotation.y = Math.sin(t * 1.6) * (isMoving ? 0.12 : 0.20);
+        this.bearHeadPivot.rotation.x = isMoving ? Math.sin(t * 8.0) * 0.08 : 0;
+      }
+      if (this.bearFrontLegL && this.bearFrontLegR && this.bearBackLegL && this.bearBackLegR) {
+        if (isMoving) {
+          const freq = 7.5 + runWt * 5.0;
+          const amp  = 0.38 + runWt * 0.18;
+          const ph   = t * freq;
+          this.bearFrontLegL.rotation.x =  Math.sin(ph) * amp;
+          this.bearFrontLegR.rotation.x = -Math.sin(ph) * amp;
+          this.bearBackLegL.rotation.x  = -Math.sin(ph) * amp;
+          this.bearBackLegR.rotation.x  =  Math.sin(ph) * amp;
+        } else {
+          this.bearFrontLegL.rotation.x *= 0.80;
+          this.bearFrontLegR.rotation.x *= 0.80;
+          this.bearBackLegL.rotation.x  *= 0.80;
+          this.bearBackLegR.rotation.x  *= 0.80;
+        }
+      }
+
+      // ── Panda Bear companion animation ────────────────────────────────
+      if (this.pandaHeadPivot) {
+        // Panda nods and sways contentedly
+        this.pandaHeadPivot.rotation.y = Math.sin(t * 1.2) * (isMoving ? 0.10 : 0.18);
+        this.pandaHeadPivot.rotation.x = Math.sin(t * 0.9 + 0.5) * 0.08;
+      }
+      if (this.pandaFrontLegL && this.pandaFrontLegR && this.pandaBackLegL && this.pandaBackLegR) {
+        if (isMoving) {
+          const freq = 6.5 + runWt * 4.0;
+          const amp  = 0.32 + runWt * 0.15;
+          const ph   = t * freq;
+          this.pandaFrontLegL.rotation.x =  Math.sin(ph) * amp;
+          this.pandaFrontLegR.rotation.x = -Math.sin(ph) * amp;
+          this.pandaBackLegL.rotation.x  = -Math.sin(ph) * amp;
+          this.pandaBackLegR.rotation.x  =  Math.sin(ph) * amp;
+        } else {
+          this.pandaFrontLegL.rotation.x *= 0.78;
+          this.pandaFrontLegR.rotation.x *= 0.78;
+          this.pandaBackLegL.rotation.x  *= 0.78;
+          this.pandaBackLegR.rotation.x  *= 0.78;
+        }
+      }
+
+      // ── Boar companion animation ──────────────────────────────────────
+      if (this.boarHeadPivot) {
+        if (isMoving) {
+          // Charge-trot: head pumps forward and back
+          this.boarHeadPivot.rotation.x = 0.30 + Math.sin(t * (10.0 + runWt * 6.0)) * 0.14;
+        } else {
+          // Idle: aggressive side-to-side head shake
+          this.boarHeadPivot.rotation.x = 0.30;
+          this.boarHeadPivot.rotation.y = Math.sin(t * 2.8) * 0.22;
+        }
+      }
+
+      // ── Elephant companion animation ──────────────────────────────────
+      if (this.elephantTrunkPivot) {
+        // Trunk sways slowly left/right and curls
+        this.elephantTrunkPivot.rotation.y = Math.sin(t * 1.4) * 0.30;
+        this.elephantTrunkPivot.rotation.x = Math.sin(t * 0.9 + 0.8) * 0.12;
+      }
+      if (this.elephantEarL && this.elephantEarR) {
+        // Ears flap gently, slightly out of phase
+        const earAmp = isMoving ? 0.22 : 0.12;
+        this.elephantEarL.rotation.y =  Math.sin(t * 2.2)        * earAmp;
+        this.elephantEarR.rotation.y = -Math.sin(t * 2.2 + 0.55) * earAmp;
       }
 
       // ── Torch flicker ─────────────────────────────────────────────────

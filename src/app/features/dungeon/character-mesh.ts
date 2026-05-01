@@ -93,6 +93,24 @@ export interface CharacterJoints {
   monkeyTailPivot?: THREE.Group;
   monkeyArmL?:      THREE.Group;
   monkeyArmR?:      THREE.Group;
+  // Brown Bear companion joints
+  bearFrontLegL?: THREE.Group;
+  bearFrontLegR?: THREE.Group;
+  bearBackLegL?:  THREE.Group;
+  bearBackLegR?:  THREE.Group;
+  bearHeadPivot?: THREE.Group;
+  // Panda Bear companion joints
+  pandaFrontLegL?: THREE.Group;
+  pandaFrontLegR?: THREE.Group;
+  pandaBackLegL?:  THREE.Group;
+  pandaBackLegR?:  THREE.Group;
+  pandaHeadPivot?: THREE.Group;
+  // Boar companion joints
+  boarHeadPivot?: THREE.Group;
+  // Elephant companion joints
+  elephantTrunkPivot?: THREE.Group;
+  elephantEarL?:       THREE.Group;
+  elephantEarR?:       THREE.Group;
 }
 
 // ─── Geometry builder ─────────────────────────────────────────────────────────
@@ -325,6 +343,18 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   }
   if (petId === 'monkey') {
     return { ...base, ...buildMonkeyMesh(g, petCursed) };
+  }
+  if (petId === 'brown-bear') {
+    return { ...base, ...buildBrownBearMesh(g, petCursed) };
+  }
+  if (petId === 'panda-bear') {
+    return { ...base, ...buildPandaBearMesh(g, petCursed) };
+  }
+  if (petId === 'boar') {
+    return { ...base, ...buildBoarMesh(g, petCursed) };
+  }
+  if (petId === 'elephant') {
+    return { ...base, ...buildElephantMesh(g, petCursed) };
   }
 
   return base;
@@ -946,4 +976,373 @@ function buildMonkeyMesh(g: THREE.Group, cursed = false): {
     monkeyArmL:      armGroups['monkeyArmL'],
     monkeyArmR:      armGroups['monkeyArmR'],
   };
+}
+
+// ─── Brown Bear companion mesh ─────────────────────────────────────────────────
+
+function buildBrownBearMesh(g: THREE.Group, cursed = false): {
+  bearFrontLegL: THREE.Group; bearFrontLegR: THREE.Group;
+  bearBackLegL:  THREE.Group; bearBackLegR:  THREE.Group;
+  bearHeadPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.85, metal = 0.0): THREE.MeshStandardMaterial =>
+    new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+
+  const furColor    = cursed ? 0x100008 : 0x7a4218;
+  const muzzleColor = cursed ? 0x1a000e : 0xc08040;
+  const eyeColor    = cursed ? 0xff0000 : 0x221100;
+  const noseColor   = cursed ? 0x330011 : 0x111111;
+
+  const fur    = lam(furColor);
+  const muzzle = lam(muzzleColor);
+  const eyeMat = new THREE.MeshStandardMaterial({
+    color: eyeColor, roughness: 0.4,
+    emissive: new THREE.Color(cursed ? 0xff0000 : 0), emissiveIntensity: cursed ? 0.9 : 0,
+  });
+  const noseMat = lam(noseColor, 0.60);
+
+  const bearRoot = new THREE.Group();
+  bearRoot.position.set(-0.95, 0, 0.10);
+  g.add(bearRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 8) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const sph = (r: number, ws = 8, hs = 6) => new THREE.SphereGeometry(r, ws, hs);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = bearRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m;
+  };
+
+  // Body — large rounded barrel
+  add(sph(0.30, 9, 7), fur, 0, 0.32, 0);
+  add(box(0.52, 0.24, 0.52), fur, 0, 0.30, 0);
+
+  // Neck
+  add(cyl(0.12, 0.14, 0.14, 8), fur, 0, 0.56, -0.14);
+
+  // Head pivot (for nodding/swaying)
+  const headPivot = new THREE.Group();
+  headPivot.position.set(0, 0.64, -0.22);
+  bearRoot.add(headPivot);
+  add(sph(0.20, 9, 7), fur, 0, 0, 0, headPivot);
+  add(sph(0.13, 8, 6), muzzle, 0, -0.055, -0.155, headPivot);
+  add(box(0.07, 0.05, 0.04), noseMat, 0, -0.005, -0.215, headPivot);
+  add(box(0.042, 0.042, 0.025), eyeMat, -0.090, 0.050, -0.175, headPivot);
+  add(box(0.042, 0.042, 0.025), eyeMat,  0.090, 0.050, -0.175, headPivot);
+  // Round ears
+  add(sph(0.060, 7, 5), fur, -0.165, 0.155,  0.010, headPivot);
+  add(sph(0.060, 7, 5), fur,  0.165, 0.155,  0.010, headPivot);
+
+  // Four thick legs
+  const legDefs = [
+    { name: 'bearFrontLegL', x: -0.18, z: -0.16 },
+    { name: 'bearFrontLegR', x:  0.18, z: -0.16 },
+    { name: 'bearBackLegL',  x: -0.18, z:  0.16 },
+    { name: 'bearBackLegR',  x:  0.18, z:  0.16 },
+  ];
+  const legGroups: Record<string, THREE.Group> = {};
+  for (const def of legDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.30, def.z);
+    bearRoot.add(pivot);
+    add(cyl(0.072, 0.062, 0.24, 7), fur, 0, -0.12, 0, pivot);
+    const lower = new THREE.Group(); lower.position.set(0, -0.24, 0); pivot.add(lower);
+    add(cyl(0.058, 0.048, 0.20, 7), fur, 0, -0.10, 0, lower);
+    add(box(0.16, 0.07, 0.20), fur, 0, -0.215, 0.025, lower);
+    legGroups[def.name] = pivot;
+  }
+
+  return {
+    bearFrontLegL: legGroups['bearFrontLegL'], bearFrontLegR: legGroups['bearFrontLegR'],
+    bearBackLegL:  legGroups['bearBackLegL'],  bearBackLegR:  legGroups['bearBackLegR'],
+    bearHeadPivot: headPivot,
+  };
+}
+
+// ─── Panda Bear companion mesh ─────────────────────────────────────────────────
+
+function buildPandaBearMesh(g: THREE.Group, cursed = false): {
+  pandaFrontLegL: THREE.Group; pandaFrontLegR: THREE.Group;
+  pandaBackLegL:  THREE.Group; pandaBackLegR:  THREE.Group;
+  pandaHeadPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.85, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const white    = cursed ? 0x220022 : 0xf0f0f0;
+  const black    = cursed ? 0x550055 : 0x111111;
+  const eyeColor = cursed ? 0xff00ff : 0x111111;
+  const noseMat  = lam(black, 0.55);
+
+  const whiteMat = lam(white);
+  const blackMat = lam(black);
+  const eyeMat   = new THREE.MeshStandardMaterial({
+    color: eyeColor, roughness: 0.4,
+    emissive: new THREE.Color(cursed ? 0xff00ff : 0), emissiveIntensity: cursed ? 1.0 : 0,
+  });
+
+  const pandaRoot = new THREE.Group();
+  pandaRoot.position.set(0.95, 0, 0.10);
+  g.add(pandaRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 8) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const sph = (r: number, ws = 8, hs = 6) => new THREE.SphereGeometry(r, ws, hs);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = pandaRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m;
+  };
+
+  // Body — chunky white
+  add(sph(0.28, 9, 7), whiteMat, 0, 0.30, 0);
+  add(box(0.50, 0.22, 0.50), whiteMat, 0, 0.28, 0);
+  // Black shoulder patches
+  add(box(0.16, 0.18, 0.22), blackMat, -0.22, 0.38, 0);
+  add(box(0.16, 0.18, 0.22), blackMat,  0.22, 0.38, 0);
+
+  // Neck
+  add(cyl(0.11, 0.13, 0.13, 8), whiteMat, 0, 0.54, -0.13);
+
+  // Head pivot
+  const headPivot = new THREE.Group();
+  headPivot.position.set(0, 0.62, -0.20);
+  pandaRoot.add(headPivot);
+  add(sph(0.19, 9, 7), whiteMat, 0, 0, 0, headPivot);
+  // Eye patches (black ovals)
+  add(box(0.09, 0.075, 0.03), blackMat, -0.090, 0.040, -0.170, headPivot);
+  add(box(0.09, 0.075, 0.03), blackMat,  0.090, 0.040, -0.170, headPivot);
+  // Eyes within patches
+  add(box(0.038, 0.038, 0.022), eyeMat, -0.090, 0.040, -0.185, headPivot);
+  add(box(0.038, 0.038, 0.022), eyeMat,  0.090, 0.040, -0.185, headPivot);
+  // Muzzle
+  add(sph(0.11, 8, 6), whiteMat, 0, -0.060, -0.150, headPivot);
+  add(box(0.062, 0.045, 0.035), noseMat, 0, -0.010, -0.210, headPivot);
+  // Black round ears
+  add(sph(0.060, 7, 5), blackMat, -0.155, 0.155,  0, headPivot);
+  add(sph(0.060, 7, 5), blackMat,  0.155, 0.155,  0, headPivot);
+
+  // Four thick legs — black
+  const legDefs = [
+    { name: 'pandaFrontLegL', x: -0.17, z: -0.15 },
+    { name: 'pandaFrontLegR', x:  0.17, z: -0.15 },
+    { name: 'pandaBackLegL',  x: -0.17, z:  0.15 },
+    { name: 'pandaBackLegR',  x:  0.17, z:  0.15 },
+  ];
+  const legGroups: Record<string, THREE.Group> = {};
+  for (const def of legDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.28, def.z);
+    pandaRoot.add(pivot);
+    add(cyl(0.070, 0.060, 0.23, 7), blackMat, 0, -0.115, 0, pivot);
+    const lower = new THREE.Group(); lower.position.set(0, -0.23, 0); pivot.add(lower);
+    add(cyl(0.056, 0.046, 0.19, 7), blackMat, 0, -0.095, 0, lower);
+    add(box(0.15, 0.07, 0.19), blackMat, 0, -0.205, 0.022, lower);
+    legGroups[def.name] = pivot;
+  }
+
+  return {
+    pandaFrontLegL: legGroups['pandaFrontLegL'], pandaFrontLegR: legGroups['pandaFrontLegR'],
+    pandaBackLegL:  legGroups['pandaBackLegL'],  pandaBackLegR:  legGroups['pandaBackLegR'],
+    pandaHeadPivot: headPivot,
+  };
+}
+
+// ─── Boar companion mesh ───────────────────────────────────────────────────────
+
+function buildBoarMesh(g: THREE.Group, cursed = false): {
+  boarHeadPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.80, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const bristleColor = cursed ? 0x0a000a : 0x4a3828;
+  const bellyColor   = cursed ? 0x160014 : 0x7a6050;
+  const eyeColor     = cursed ? 0xff2200 : 0xdd4400;
+  const tuskColor    = cursed ? 0xccaaaa : 0xeeeecc;
+
+  const bristle = lam(bristleColor);
+  const belly   = lam(bellyColor);
+  const eyeMat  = lam(eyeColor, 0.35, 0.1, eyeColor, cursed ? 1.1 : 0.35);
+  const tuskMat = lam(tuskColor, 0.45, 0.1);
+  const hoof    = lam(0x222222, 0.55);
+
+  const boarRoot = new THREE.Group();
+  boarRoot.position.set(-0.78, 0, -0.14);
+  g.add(boarRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 7) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, rx = 0, ry = 0, rz = 0, parent: THREE.Object3D = boarRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; parent.add(m); return m;
+  };
+
+  // Body — compact, muscular, slightly hunched
+  add(box(0.40, 0.28, 0.58), bristle, 0, 0.20, 0);
+  add(box(0.28, 0.16, 0.50), belly,   0, 0.10, 0.02);
+  // Dorsal bristle ridge
+  for (let i = 0; i < 6; i++) {
+    add(new THREE.ConeGeometry(0.020, 0.065, 4), bristle, 0, 0.38, -0.20 + i * 0.09);
+  }
+  // Curly tail
+  const tailGrp = new THREE.Group();
+  tailGrp.position.set(0, 0.25, 0.30); tailGrp.rotation.x = -0.60;
+  boarRoot.add(tailGrp);
+  add(cyl(0.016, 0.022, 0.08, 5), bristle, 0, 0.04, 0, 0, 0, 0, tailGrp);
+  add(cyl(0.012, 0.016, 0.06, 5), bristle, 0.02, 0.10, 0.02, 0, 0, 0.60, tailGrp);
+
+  // Neck & head pivot (lowers head into charging stance)
+  const headPivot = new THREE.Group();
+  headPivot.position.set(0, 0.24, -0.30);
+  headPivot.rotation.x = 0.30; // naturally angled down
+  boarRoot.add(headPivot);
+  // Head — large, wide
+  add(box(0.34, 0.28, 0.30), bristle, 0, 0, 0, 0, 0, 0, headPivot);
+  // Snout disc
+  add(cyl(0.10, 0.11, 0.08, 8), belly, 0, -0.04, -0.18, Math.PI / 2, 0, 0, headPivot);
+  // Nostrils
+  add(box(0.04, 0.04, 0.025), bristle, -0.04, -0.035, -0.225, 0, 0, 0, headPivot);
+  add(box(0.04, 0.04, 0.025), bristle,  0.04, -0.035, -0.225, 0, 0, 0, headPivot);
+  // Eyes — small, angry
+  add(box(0.040, 0.032, 0.022), eyeMat, -0.13, 0.055, -0.145, 0, 0, 0, headPivot);
+  add(box(0.040, 0.032, 0.022), eyeMat,  0.13, 0.055, -0.145, 0, 0, 0, headPivot);
+  // Tusks — curved upward
+  const tuskL = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.026, 0.18, 6), tuskMat);
+  tuskL.position.set(-0.10, -0.085, -0.185); tuskL.rotation.set(Math.PI / 2, 0, -0.45); tuskL.castShadow = true; headPivot.add(tuskL);
+  const tuskR = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.026, 0.18, 6), tuskMat);
+  tuskR.position.set( 0.10, -0.085, -0.185); tuskR.rotation.set(Math.PI / 2, 0,  0.45); tuskR.castShadow = true; headPivot.add(tuskR);
+  // Ears — small, upright
+  add(box(0.060, 0.10, 0.030), bristle, -0.155, 0.155, -0.04, 0, 0, 0, headPivot);
+  add(box(0.060, 0.10, 0.030), bristle,  0.155, 0.155, -0.04, 0, 0, 0, headPivot);
+
+  // Four sturdy legs
+  for (const def of [
+    { x: -0.14, z: -0.18 }, { x: 0.14, z: -0.18 },
+    { x: -0.14, z:  0.18 }, { x: 0.14, z:  0.18 },
+  ]) {
+    const legGrp = new THREE.Group(); legGrp.position.set(def.x, 0.18, def.z); boarRoot.add(legGrp);
+    add(cyl(0.055, 0.045, 0.20, 6), bristle, 0, -0.10, 0, 0, 0, 0, legGrp);
+    add(cyl(0.040, 0.032, 0.16, 6), bristle, 0, -0.28, 0, 0, 0, 0, legGrp);
+    add(box(0.08, 0.06, 0.10), hoof, 0, -0.385, 0.018, 0, 0, 0, legGrp);
+  }
+
+  return { boarHeadPivot: headPivot };
+}
+
+// ─── Elephant companion mesh ───────────────────────────────────────────────────
+
+function buildElephantMesh(g: THREE.Group, cursed = false): {
+  elephantTrunkPivot: THREE.Group;
+  elephantEarL:       THREE.Group;
+  elephantEarR:       THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.80, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const skinColor = cursed ? 0x0e0018 : 0x888888;
+  const skinDark  = cursed ? 0x080010 : 0x6a6a6a;
+  const eyeColor  = cursed ? 0xff0000 : 0x221100;
+  const tuskColor = cursed ? 0xddaaaa : 0xeeeecc;
+
+  const skin     = lam(skinColor);
+  const skinD    = lam(skinDark);
+  const eyeMat   = lam(eyeColor, 0.35, 0.0, eyeColor, cursed ? 1.0 : 0.0);
+  const tuskMat  = lam(tuskColor, 0.50, 0.1);
+
+  const elRoot = new THREE.Group();
+  elRoot.position.set(0.78, 0, -0.05);
+  g.add(elRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 9) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const sph = (r: number, ws = 9, hs = 7) => new THREE.SphereGeometry(r, ws, hs);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, rx = 0, ry = 0, rz = 0, parent: THREE.Object3D = elRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; parent.add(m); return m;
+  };
+
+  // Body — large rounded barrel
+  add(sph(0.36, 10, 8), skin, 0, 0.42, 0);
+  add(box(0.60, 0.34, 0.68), skin, 0, 0.40, 0);
+  // Rump bump
+  add(sph(0.22, 8, 6), skinD, 0, 0.52, 0.30);
+
+  // Short thick neck
+  add(cyl(0.16, 0.18, 0.14, 9), skin, 0, 0.72, -0.22);
+
+  // Head
+  const headGrp = new THREE.Group();
+  headGrp.position.set(0, 0.76, -0.36);
+  elRoot.add(headGrp);
+  add(sph(0.22, 9, 7), skin, 0, 0, 0, 0, 0, 0, headGrp);
+  // Eyes — small, high on head
+  add(box(0.040, 0.040, 0.025), eyeMat, -0.165, 0.060, -0.170, 0, 0, 0, headGrp);
+  add(box(0.040, 0.040, 0.025), eyeMat,  0.165, 0.060, -0.170, 0, 0, 0, headGrp);
+  // Tusks — arcing outward and forward
+  const tuskL = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.030, 0.26, 7), tuskMat);
+  tuskL.position.set(-0.115, -0.055, -0.185); tuskL.rotation.set(Math.PI / 2, 0, -0.35); tuskL.castShadow = true; headGrp.add(tuskL);
+  const tuskR = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.030, 0.26, 7), tuskMat);
+  tuskR.position.set( 0.115, -0.055, -0.185); tuskR.rotation.set(Math.PI / 2, 0,  0.35); tuskR.castShadow = true; headGrp.add(tuskR);
+
+  // Large floppy ears — pivot for flap animation
+  const earPivotL = new THREE.Group();
+  earPivotL.name = 'elephantEarL';
+  earPivotL.position.set(-0.22, 0, 0);
+  headGrp.add(earPivotL);
+  add(box(0.18, 0.26, 0.040), skin, -0.09, -0.02, 0, 0, 0, 0, earPivotL);
+  add(box(0.14, 0.20, 0.030), skinD, -0.09, -0.02, 0.022, 0, 0, 0, earPivotL);
+
+  const earPivotR = new THREE.Group();
+  earPivotR.name = 'elephantEarR';
+  earPivotR.position.set(0.22, 0, 0);
+  headGrp.add(earPivotR);
+  add(box(0.18, 0.26, 0.040), skin, 0.09, -0.02, 0, 0, 0, 0, earPivotR);
+  add(box(0.14, 0.20, 0.030), skinD, 0.09, -0.02, 0.022, 0, 0, 0, earPivotR);
+
+  // Trunk pivot — hangs from below the head, sways
+  const trunkPivot = new THREE.Group();
+  trunkPivot.name = 'elephantTrunkPivot';
+  trunkPivot.position.set(0, -0.10, -0.20);
+  headGrp.add(trunkPivot);
+  add(cyl(0.052, 0.072, 0.26, 8), skin, 0, -0.13, 0, 0, 0, 0, trunkPivot);
+  // Trunk mid-curl
+  const trunkMid = new THREE.Group();
+  trunkMid.position.set(0, -0.26, 0);
+  trunkMid.rotation.x = 0.55;
+  trunkPivot.add(trunkMid);
+  add(cyl(0.038, 0.050, 0.20, 8), skin, 0, -0.10, 0, 0, 0, 0, trunkMid);
+  // Trunk tip
+  const trunkTip = new THREE.Group();
+  trunkTip.position.set(0, -0.20, 0);
+  trunkTip.rotation.x = 0.80;
+  trunkMid.add(trunkTip);
+  add(cyl(0.026, 0.036, 0.14, 7), skin, 0, -0.07, 0, 0, 0, 0, trunkTip);
+  add(cyl(0.036, 0.028, 0.03, 7), skinD, 0, -0.145, 0, 0, 0, 0, trunkTip);
+
+  // Four thick pillar legs
+  for (const def of [
+    { x: -0.20, z: -0.20 }, { x:  0.20, z: -0.20 },
+    { x: -0.20, z:  0.20 }, { x:  0.20, z:  0.20 },
+  ]) {
+    const legGrp = new THREE.Group(); legGrp.position.set(def.x, 0.38, def.z); elRoot.add(legGrp);
+    add(cyl(0.095, 0.080, 0.36, 8), skin, 0, -0.18, 0, 0, 0, 0, legGrp);
+    add(cyl(0.080, 0.070, 0.28, 8), skinD, 0, -0.50, 0, 0, 0, 0, legGrp);
+    add(box(0.22, 0.10, 0.22), skinD, 0, -0.69, 0.014, 0, 0, 0, legGrp);
+  }
+
+  // Small tail
+  const tailGrp = new THREE.Group();
+  tailGrp.position.set(0, 0.52, 0.38); tailGrp.rotation.x = -0.40;
+  elRoot.add(tailGrp);
+  add(cyl(0.014, 0.024, 0.20, 6), skin, 0, -0.10, 0, 0, 0, 0, tailGrp);
+  add(box(0.055, 0.085, 0.025), skinD, 0, -0.225, 0, 0, 0, 0, tailGrp);
+
+  return { elephantTrunkPivot: trunkPivot, elephantEarL: earPivotL, elephantEarR: earPivotR };
 }
