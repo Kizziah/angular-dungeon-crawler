@@ -142,6 +142,18 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private elephantTrunkPivot?: THREE.Group;
   private elephantEarL?:       THREE.Group;
   private elephantEarR?:       THREE.Group;
+  // Horse mount joint refs
+  private horseFrontLegL?: THREE.Group;
+  private horseFrontLegR?: THREE.Group;
+  private horseBackLegL?:  THREE.Group;
+  private horseBackLegR?:  THREE.Group;
+  private horseTailPivot?: THREE.Group;
+  private horseHeadPivot?: THREE.Group;
+  // Giant Frog mount joint refs
+  private frogFrontLegL?: THREE.Group;
+  private frogFrontLegR?: THREE.Group;
+  private frogBackLegL?:  THREE.Group;
+  private frogBackLegR?:  THREE.Group;
 
   // Spell particle system
   private spellParticles!: SpellParticleSystem;
@@ -370,6 +382,11 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     while (this.playerGroup.children.length) {
       this.playerGroup.remove(this.playerGroup.children[0]);
     }
+    // Clear optional joint refs so stale mounts/pets don't animate after unequip
+    this.horseFrontLegL = this.horseFrontLegR = this.horseBackLegL = this.horseBackLegR = undefined;
+    this.horseTailPivot = this.horseHeadPivot = undefined;
+    this.frogFrontLegL = this.frogFrontLegR = this.frogBackLegL = this.frogBackLegR = undefined;
+    this.elephantTrunkPivot = this.elephantEarL = this.elephantEarR = undefined;
     Object.assign(this, buildCharacterGeometry(this.playerGroup, this.character?.equipment ?? null));
     this.setupAnimationMixer(this.playerGroup);
   }
@@ -503,6 +520,21 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
 
         this.wasMoving = isMoving;
         this.mixer.update(delta);
+
+        // ── Riding pose override (applied after mixer) ─────────────────────────
+        const isMounted = !!this.character?.equipment?.mount;
+        if (isMounted && this.legPivotL && this.legPivotR && this.kneePivotL && this.kneePivotR) {
+          this.legPivotL.rotation.x = 0;
+          this.legPivotR.rotation.x = 0;
+          this.legPivotL.rotation.z = +0.65;
+          this.legPivotR.rotation.z = -0.65;
+          this.kneePivotL.rotation.x = +0.85;
+          this.kneePivotR.rotation.x = +0.85;
+          if (this.hipPivot) this.hipPivot.rotation.z = 0;
+        } else if (!isMounted && this.legPivotL && this.legPivotR) {
+          this.legPivotL.rotation.z *= 0.85;
+          this.legPivotR.rotation.z *= 0.85;
+        }
       }
 
       // ── Attack animation overlay (applied after mixer, overrides arm joints) ──
@@ -752,6 +784,43 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
         const earAmp = isMoving ? 0.22 : 0.12;
         this.elephantEarL.rotation.y =  Math.sin(t * 2.2)        * earAmp;
         this.elephantEarR.rotation.y = -Math.sin(t * 2.2 + 0.55) * earAmp;
+      }
+
+      // ── Horse mount animation ──────────────────────────────────────────
+      if (this.horseTailPivot) {
+        this.horseTailPivot.rotation.z = Math.sin(t * 2.5) * 0.30;
+      }
+      if (this.horseHeadPivot) {
+        this.horseHeadPivot.rotation.x = isMoving
+          ? Math.sin(t * (8.5 + runWt * 5.5)) * 0.10
+          : Math.sin(t * 1.4) * 0.06;
+      }
+      if (this.horseFrontLegL && this.horseFrontLegR && this.horseBackLegL && this.horseBackLegR) {
+        if (isMoving) {
+          const freq = 8.0 + runWt * 5.0;
+          const amp  = 0.40 + runWt * 0.20;
+          const ph   = t * freq;
+          this.horseFrontLegL.rotation.x =  Math.sin(ph) * amp;
+          this.horseFrontLegR.rotation.x = -Math.sin(ph) * amp;
+          this.horseBackLegL.rotation.x  = -Math.sin(ph) * amp;
+          this.horseBackLegR.rotation.x  =  Math.sin(ph) * amp;
+        } else {
+          this.horseFrontLegL.rotation.x *= 0.80;
+          this.horseFrontLegR.rotation.x *= 0.80;
+          this.horseBackLegL.rotation.x  *= 0.80;
+          this.horseBackLegR.rotation.x  *= 0.80;
+        }
+      }
+
+      // ── Giant Frog mount animation ─────────────────────────────────────
+      if (this.frogFrontLegL && this.frogFrontLegR && this.frogBackLegL && this.frogBackLegR) {
+        const frogFreq = isMoving ? 5.5 + runWt * 3.0 : 1.8;
+        const frogAmp  = isMoving ? 0.30 + runWt * 0.15 : 0.08;
+        const frogPh   = t * frogFreq;
+        this.frogFrontLegL.rotation.x =  Math.sin(frogPh) * frogAmp;
+        this.frogFrontLegR.rotation.x = -Math.sin(frogPh) * frogAmp;
+        this.frogBackLegL.rotation.x  = -Math.sin(frogPh) * (frogAmp * 1.3);
+        this.frogBackLegR.rotation.x  =  Math.sin(frogPh) * (frogAmp * 1.3);
       }
 
       // ── Torch flicker ─────────────────────────────────────────────────

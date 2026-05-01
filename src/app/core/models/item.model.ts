@@ -1,4 +1,4 @@
-export type ItemType = 'Weapon' | 'Shield' | 'Helmet' | 'BodyArmor' | 'Gloves' | 'Boots' | 'Ring' | 'Amulet' | 'Potion' | 'Scroll' | 'Wand' | 'Food' | 'Gold' | 'Pet';
+export type ItemType = 'Weapon' | 'Shield' | 'Helmet' | 'BodyArmor' | 'Gloves' | 'Boots' | 'Ring' | 'Amulet' | 'Potion' | 'Scroll' | 'Wand' | 'Food' | 'Gold' | 'Pet' | 'Mount';
 
 export interface ItemStats {
   attack?: number;

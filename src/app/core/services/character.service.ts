@@ -31,7 +31,7 @@ export class CharacterService {
       ac: this.calcBaseAC(cls),
       gold: 100,
       status: 'Healthy',
-      equipment: { weapon: null, shield: null, helmet: null, bodyArmor: null, gloves: null, boots: null, ring: null, amulet: null, pet: null },
+      equipment: { weapon: null, shield: null, helmet: null, bodyArmor: null, gloves: null, boots: null, ring: null, amulet: null, pet: null, mount: null },
       inventory: [],
       spells: this.getStartingSpells(cls),
       inParty: false,
@@ -191,7 +191,8 @@ export class CharacterService {
       'Boots': 'boots',
       'Ring': 'ring',
       'Amulet': 'amulet',
-      'Pet': 'pet'
+      'Pet': 'pet',
+      'Mount': 'mount'
     };
     return map[itemType] || null;
   }

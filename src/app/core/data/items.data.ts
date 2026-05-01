@@ -369,4 +369,7 @@ export const ITEMS: ItemDef[] = [
   { id: 'panda-bear',      name: 'Panda Bear',      unidentifiedName: 'Striped Bear', type: 'Pet', stats: { vitBonus: 2, luckBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 4, floorMax: 99 },
   { id: 'boar',            name: 'Boar',            unidentifiedName: 'Wild Pig',     type: 'Pet', stats: { strBonus: 2, agiBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 2, floorMax: 99 },
   { id: 'elephant',        name: 'Elephant',        unidentifiedName: 'Large Beast',  type: 'Pet', stats: { strBonus: 3, vitBonus: 3 }, cursed: false, value: 0, usable: false, floorMin: 6, floorMax: 99 },
+  // === MOUNTS ===
+  { id: 'horse',       name: 'Horse',       unidentifiedName: 'Large Horse',  type: 'Mount', stats: { strBonus: 2, agiBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 1, floorMax: 99 },
+  { id: 'giant-frog',  name: 'Giant Frog',  unidentifiedName: 'Giant Frog',   type: 'Mount', stats: { agiBonus: 2, luckBonus: 1 }, cursed: false, value: 0, usable: false, floorMin: 3, floorMax: 99 },
 ];

@@ -52,7 +52,7 @@ export function equipSig(eq: Equipment | null): string {
           eq.helmet?.definitionId, eq.bodyArmor?.definitionId,
           eq.gloves?.definitionId, eq.boots?.definitionId,
           eq.ring?.definitionId,   eq.amulet?.definitionId,
-          eq.pet?.definitionId]
+          eq.pet?.definitionId,    eq.mount?.definitionId]
     .join('|');
 }
 
@@ -111,6 +111,18 @@ export interface CharacterJoints {
   elephantTrunkPivot?: THREE.Group;
   elephantEarL?:       THREE.Group;
   elephantEarR?:       THREE.Group;
+  // Horse mount joints
+  horseFrontLegL?: THREE.Group;
+  horseFrontLegR?: THREE.Group;
+  horseBackLegL?:  THREE.Group;
+  horseBackLegR?:  THREE.Group;
+  horseTailPivot?: THREE.Group;
+  horseHeadPivot?: THREE.Group;
+  // Giant Frog mount joints
+  frogFrontLegL?: THREE.Group;
+  frogFrontLegR?: THREE.Group;
+  frogBackLegL?:  THREE.Group;
+  frogBackLegR?:  THREE.Group;
 }
 
 // ─── Geometry builder ─────────────────────────────────────────────────────────
@@ -328,43 +340,37 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
     if (child instanceof THREE.Mesh) child.castShadow = true;
   });
 
-  // ── PET DISPATCH ─────────────────────────────────────────────────────
-  const petId = eq?.pet?.definitionId;
-  const petCursed = eq?.pet?.cursed ?? false;
+  // ── PET & MOUNT DISPATCH ─────────────────────────────────────────────
   const base = { hipPivot, legPivotL, legPivotR, kneePivotL, kneePivotR, shoulderL, shoulderR, elbowL, elbowR };
 
-  if (petId === 'loyal-dog') {
-    return { ...base, ...buildDogMesh(g, petCursed) };
-  }
-  if (petId === 'tabby-cat') {
-    return { ...base, ...buildCatMesh(g, petCursed) };
-  }
-  if (petId === 'raven') {
-    return { ...base, ...buildRavenMesh(g, petCursed) };
-  }
-  if (petId === 'coiled-serpent') {
-    return { ...base, ...buildSnakeMesh(g, petCursed) };
-  }
-  if (petId === 'alligator') {
-    return { ...base, ...buildAlligatorMesh(g, petCursed) };
-  }
-  if (petId === 'monkey') {
-    return { ...base, ...buildMonkeyMesh(g, petCursed) };
-  }
-  if (petId === 'brown-bear') {
-    return { ...base, ...buildBrownBearMesh(g, petCursed) };
-  }
-  if (petId === 'panda-bear') {
-    return { ...base, ...buildPandaBearMesh(g, petCursed) };
-  }
-  if (petId === 'boar') {
-    return { ...base, ...buildBoarMesh(g, petCursed) };
-  }
-  if (petId === 'elephant') {
-    return { ...base, ...buildElephantMesh(g, petCursed) };
+  // Mount: must resolve first so body Y offset is set before returning
+  const mountId     = eq?.mount?.definitionId;
+  const mountCursed = eq?.mount?.cursed ?? false;
+  let mountJoints: Partial<CharacterJoints> = {};
+  if (mountId === 'horse') {
+    body.position.y = 1.25;
+    mountJoints = buildHorseMesh(g, mountCursed);
+  } else if (mountId === 'giant-frog') {
+    body.position.y = 0.85;
+    mountJoints = buildGiantFrogMesh(g, mountCursed);
   }
 
-  return base;
+  // Pet
+  const petId     = eq?.pet?.definitionId;
+  const petCursed = eq?.pet?.cursed ?? false;
+  let petJoints: Partial<CharacterJoints> = {};
+  if (petId === 'loyal-dog')      petJoints = buildDogMesh(g, petCursed);
+  else if (petId === 'tabby-cat') petJoints = buildCatMesh(g, petCursed);
+  else if (petId === 'raven')     petJoints = buildRavenMesh(g, petCursed);
+  else if (petId === 'coiled-serpent') petJoints = buildSnakeMesh(g, petCursed);
+  else if (petId === 'alligator') petJoints = buildAlligatorMesh(g, petCursed);
+  else if (petId === 'monkey')    petJoints = buildMonkeyMesh(g, petCursed);
+  else if (petId === 'brown-bear') petJoints = buildBrownBearMesh(g, petCursed);
+  else if (petId === 'panda-bear') petJoints = buildPandaBearMesh(g, petCursed);
+  else if (petId === 'boar')      petJoints = buildBoarMesh(g, petCursed);
+  else if (petId === 'elephant')  petJoints = buildElephantMesh(g, petCursed);
+
+  return { ...base, ...petJoints, ...mountJoints };
 }
 
 // ─── Dog companion mesh ───────────────────────────────────────────────────────
@@ -1352,4 +1358,266 @@ function buildElephantMesh(g: THREE.Group, cursed = false): {
   add(box(0.055, 0.085, 0.025), skinD, 0, -0.225, 0, 0, 0, 0, tailGrp);
 
   return { elephantTrunkPivot: trunkPivot, elephantEarL: earPivotL, elephantEarR: earPivotR };
+}
+
+// ─── Horse mount mesh ─────────────────────────────────────────────────────────
+
+function buildHorseMesh(g: THREE.Group, cursed = false): {
+  horseFrontLegL: THREE.Group; horseFrontLegR: THREE.Group;
+  horseBackLegL:  THREE.Group; horseBackLegR:  THREE.Group;
+  horseTailPivot: THREE.Group; horseHeadPivot: THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.82, metal = 0.0): THREE.MeshStandardMaterial =>
+    new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+
+  const coatColor   = cursed ? 0x110011 : 0x6b3a1f;
+  const maneColor   = cursed ? 0x220022 : 0x3a1a08;
+  const hoofColor   = cursed ? 0x0d0008 : 0x2a1a10;
+  const saddleColor = cursed ? 0x1a0018 : 0x4a2a10;
+  const eyeColor    = cursed ? 0xff0000 : 0x111100;
+
+  const coat   = lam(coatColor);
+  const mane   = lam(maneColor, 0.92);
+  const hoof   = lam(hoofColor, 0.70, 0.15);
+  const saddle = lam(saddleColor, 0.80);
+  const eyeMat = new THREE.MeshStandardMaterial({
+    color: eyeColor, roughness: 0.50,
+    emissive: new THREE.Color(cursed ? 0xff0000 : 0), emissiveIntensity: cursed ? 1.0 : 0,
+  });
+
+  const horseRoot = new THREE.Group();
+  // Centered under the player — horse faces -Z (same as player forward)
+  horseRoot.position.set(0, 0, 0);
+  g.add(horseRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 8) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = horseRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Body — wide barrel, back is flat for rider
+  add(box(0.52, 0.36, 1.10), coat, 0, 1.00, 0);
+  // Belly (slightly lighter underside)
+  add(box(0.44, 0.12, 1.00), lam(cursed ? 0x150015 : 0x7a4a2a, 0.85), 0, 0.86, 0);
+
+  // Rump (rounded back end)
+  add(box(0.48, 0.30, 0.20), coat, 0, 0.98, 0.52);
+
+  // Saddle — sits on top of body where player rides
+  add(box(0.36, 0.06, 0.44), saddle, 0, 1.215, -0.04);
+  // Saddle flaps (hang down sides)
+  add(box(0.04, 0.22, 0.38), saddle, -0.28, 1.06, -0.04);
+  add(box(0.04, 0.22, 0.38), saddle,  0.28, 1.06, -0.04);
+
+  // Neck group — tilted forward and up
+  const neckGrp = new THREE.Group();
+  neckGrp.position.set(0, 1.14, -0.52);
+  neckGrp.rotation.x = -0.50;
+  horseRoot.add(neckGrp);
+  add(cyl(0.095, 0.115, 0.44, 8), coat, 0, 0.22, 0, neckGrp);
+  // Mane along neck
+  add(box(0.06, 0.38, 0.10), mane, 0, 0.22, -0.08, neckGrp);
+
+  // Head pivot — attached to top of neck
+  const headPivot = new THREE.Group();
+  headPivot.name = 'horseHeadPivot';
+  headPivot.position.set(0, 0.44, 0);
+  neckGrp.add(headPivot);
+
+  // Head box
+  add(box(0.26, 0.28, 0.50), coat, 0, 0.14, -0.08, headPivot);
+  // Muzzle / snout
+  add(box(0.20, 0.18, 0.28), lam(cursed ? 0x0d0008 : 0x7a4a2a, 0.84), 0, 0.02, -0.34, headPivot);
+  // Nostrils
+  add(box(0.05, 0.04, 0.02), lam(0x1a0a00, 0.70), -0.06, 0.00, -0.47, headPivot);
+  add(box(0.05, 0.04, 0.02), lam(0x1a0a00, 0.70),  0.06, 0.00, -0.47, headPivot);
+  // Eyes
+  add(box(0.05, 0.05, 0.03), eyeMat, -0.135, 0.16, -0.16, headPivot);
+  add(box(0.05, 0.05, 0.03), eyeMat,  0.135, 0.16, -0.16, headPivot);
+  // Ears
+  add(new THREE.ConeGeometry(0.045, 0.12, 4), coat, -0.085, 0.295, 0.02, headPivot);
+  add(new THREE.ConeGeometry(0.045, 0.12, 4), coat,  0.085, 0.295, 0.02, headPivot);
+  // Forelock (tuft between ears)
+  add(box(0.08, 0.10, 0.05), mane, 0, 0.295, -0.03, headPivot);
+
+  // Tail pivot — at the rump, sweeps side to side
+  const tailPivot = new THREE.Group();
+  tailPivot.name = 'horseTailPivot';
+  tailPivot.position.set(0, 1.08, 0.60);
+  tailPivot.rotation.x = 0.42;
+  horseRoot.add(tailPivot);
+  add(cyl(0.04, 0.06, 0.30, 6), coat, 0, -0.15, 0, tailPivot);
+  // Tail hair — flat cascading slabs
+  add(box(0.12, 0.40, 0.04), mane, 0, -0.45, 0.02, tailPivot);
+  add(box(0.10, 0.30, 0.04), mane, 0.02, -0.55, 0.04, tailPivot);
+
+  // Legs — four animatable pivot groups
+  const legDefs: Array<{ name: string; x: number; z: number }> = [
+    { name: 'horseFrontLegL', x: -0.185, z: -0.34 },
+    { name: 'horseFrontLegR', x:  0.185, z: -0.34 },
+    { name: 'horseBackLegL',  x: -0.185, z:  0.32 },
+    { name: 'horseBackLegR',  x:  0.185, z:  0.32 },
+  ];
+  const legGroups: Record<string, THREE.Group> = {};
+  for (const def of legDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.x, 0.82, def.z);
+    horseRoot.add(pivot);
+    // Upper leg
+    add(cyl(0.072, 0.088, 0.42, 7), coat, 0, -0.21, 0, pivot);
+    // Knee
+    const knee = new THREE.Group();
+    knee.position.set(0, -0.42, 0);
+    pivot.add(knee);
+    // Lower leg
+    add(cyl(0.058, 0.068, 0.40, 7), coat, 0, -0.20, 0, knee);
+    // Hoof
+    add(box(0.14, 0.08, 0.18), hoof, 0, -0.44, 0.02, knee);
+    legGroups[def.name] = pivot;
+  }
+
+  return {
+    horseFrontLegL: legGroups['horseFrontLegL'],
+    horseFrontLegR: legGroups['horseFrontLegR'],
+    horseBackLegL:  legGroups['horseBackLegL'],
+    horseBackLegR:  legGroups['horseBackLegR'],
+    horseTailPivot: tailPivot,
+    horseHeadPivot: headPivot,
+  };
+}
+
+// ─── Giant Frog mount mesh ────────────────────────────────────────────────────
+
+function buildGiantFrogMesh(g: THREE.Group, cursed = false): {
+  frogFrontLegL: THREE.Group; frogFrontLegR: THREE.Group;
+  frogBackLegL:  THREE.Group; frogBackLegR:  THREE.Group;
+} {
+  const lam = (hex: number, rough = 0.80, metal = 0.0, em = 0, emI = 0): THREE.MeshStandardMaterial => {
+    const m = new THREE.MeshStandardMaterial({ color: hex, roughness: rough, metalness: metal });
+    if (em) { m.emissive.setHex(em); m.emissiveIntensity = emI; }
+    return m;
+  };
+
+  const skinColor  = cursed ? 0x0a1a04 : 0x3a7a22;
+  const bellyColor = cursed ? 0x141a06 : 0x88bb44;
+  const spotColor  = cursed ? 0x040e02 : 0x2a5a18;
+  const eyeColor   = cursed ? 0xff2200 : 0xddcc00;
+  const pupilColor = cursed ? 0x660000 : 0x111100;
+
+  const skin  = lam(skinColor);
+  const belly = lam(bellyColor, 0.75);
+  const spot  = lam(spotColor, 0.88);
+  const eyeMat = new THREE.MeshStandardMaterial({
+    color: eyeColor, roughness: 0.30,
+    emissive: new THREE.Color(cursed ? 0xff2200 : 0xddcc00), emissiveIntensity: cursed ? 1.0 : 0.30,
+  });
+  const pupilMat = lam(pupilColor, 0.40);
+
+  const frogRoot = new THREE.Group();
+  // Centered under the player — frog faces -Z
+  frogRoot.position.set(0, 0, 0);
+  g.add(frogRoot);
+
+  const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
+  const cyl = (rT: number, rB: number, h: number, s = 8) => new THREE.CylinderGeometry(rT, rB, h, s);
+  const sph = (r: number, ws = 8, hs = 6) => new THREE.SphereGeometry(r, ws, hs);
+  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = frogRoot): THREE.Mesh => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Body — wide squat shape
+  add(box(0.72, 0.36, 0.64), skin, 0, 0.58, 0);
+  // Belly (flat underside)
+  add(box(0.64, 0.12, 0.56), belly, 0, 0.44, 0);
+  // Back humps / texture spots
+  add(box(0.20, 0.06, 0.18), spot, -0.16, 0.77, -0.06);
+  add(box(0.18, 0.05, 0.16), spot,  0.16, 0.77, -0.06);
+  add(box(0.16, 0.05, 0.14), spot,   0.0, 0.78,  0.10);
+
+  // Head — wide and flat, blends into body
+  add(box(0.70, 0.22, 0.32), skin, 0, 0.68, -0.38);
+  // Mouth slit
+  add(box(0.58, 0.04, 0.04), lam(cursed ? 0x0d0008 : 0x1a0a04, 0.70), 0, 0.58, -0.52);
+  // Chin
+  add(box(0.56, 0.10, 0.16), belly, 0, 0.58, -0.48);
+
+  // Bulging eyes — on top of head (iconic frog feature)
+  for (const sx of [-1, 1]) {
+    const eyeGrp = new THREE.Group();
+    eyeGrp.position.set(sx * 0.22, 0.82, -0.38);
+    frogRoot.add(eyeGrp);
+    // Eye globe
+    const eyeM = new THREE.Mesh(sph(0.115, 10, 8), eyeMat);
+    eyeM.castShadow = true;
+    eyeGrp.add(eyeM);
+    // Pupil (vertical slit)
+    add(box(0.04, 0.10, 0.055), pupilMat, 0, 0, 0.095, eyeGrp);
+    // Eyelid ridge
+    add(box(0.24, 0.04, 0.08), skin, 0, 0.08, -0.06, eyeGrp);
+  }
+
+  // Front legs — short, angled outward at sides
+  const frontLegDefs: Array<{ name: string; sx: number }> = [
+    { name: 'frogFrontLegL', sx: -1 },
+    { name: 'frogFrontLegR', sx:  1 },
+  ];
+  const legGroups: Record<string, THREE.Group> = {};
+  for (const def of frontLegDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.sx * 0.36, 0.56, -0.26);
+    pivot.rotation.z = def.sx * 0.55;  // splayed outward
+    frogRoot.add(pivot);
+    add(cyl(0.060, 0.075, 0.32, 7), skin, 0, -0.16, 0, pivot);
+    // Forearm bent forward/down
+    const fore = new THREE.Group();
+    fore.position.set(0, -0.32, 0);
+    fore.rotation.x = 0.45;
+    pivot.add(fore);
+    add(cyl(0.048, 0.058, 0.28, 7), skin, 0, -0.14, 0, fore);
+    // Webbed foot (flat box)
+    add(box(0.18, 0.04, 0.24), belly, 0, -0.30, 0.08, fore);
+    legGroups[def.name] = pivot;
+  }
+
+  // Back legs — large muscular haunches, bent and ready to leap
+  const backLegDefs: Array<{ name: string; sx: number }> = [
+    { name: 'frogBackLegL', sx: -1 },
+    { name: 'frogBackLegR', sx:  1 },
+  ];
+  for (const def of backLegDefs) {
+    const pivot = new THREE.Group();
+    pivot.name = def.name;
+    pivot.position.set(def.sx * 0.30, 0.56, 0.30);
+    pivot.rotation.z = def.sx * 0.35;
+    frogRoot.add(pivot);
+    // Upper thigh — large and powerful
+    add(cyl(0.085, 0.105, 0.38, 7), skin, 0, -0.19, 0, pivot);
+    // Lower leg — angled down
+    const lower = new THREE.Group();
+    lower.position.set(0, -0.38, 0);
+    lower.rotation.x = 0.55;
+    pivot.add(lower);
+    add(cyl(0.065, 0.080, 0.34, 7), skin, 0, -0.17, 0, lower);
+    // Webbed foot
+    add(box(0.20, 0.05, 0.30), belly, 0, -0.37, 0.10, lower);
+    legGroups[def.name] = pivot;
+  }
+
+  return {
+    frogFrontLegL: legGroups['frogFrontLegL'],
+    frogFrontLegR: legGroups['frogFrontLegR'],
+    frogBackLegL:  legGroups['frogBackLegL'],
+    frogBackLegR:  legGroups['frogBackLegR'],
+  };
 }

@@ -24,6 +24,7 @@ export interface Equipment {
   ring: Item | null;
   amulet: Item | null;
   pet: Item | null;
+  mount: Item | null;
 }
 
 export interface Character {

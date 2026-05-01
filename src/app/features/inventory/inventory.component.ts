@@ -44,7 +44,7 @@ export class InventoryComponent implements OnInit, OnChanges {
     return Array.from(stacks.values());
   }
 
-  equipmentSlots: (keyof Equipment)[] = ['weapon', 'shield', 'helmet', 'bodyArmor', 'gloves', 'boots', 'ring', 'amulet', 'pet'];
+  equipmentSlots: (keyof Equipment)[] = ['weapon', 'shield', 'helmet', 'bodyArmor', 'gloves', 'boots', 'ring', 'amulet', 'pet', 'mount'];
 
   get isEmbedded(): boolean { return this.embeddedCharId !== null; }
 
@@ -127,7 +127,7 @@ export class InventoryComponent implements OnInit, OnChanges {
     const labels: Record<string, string> = {
       weapon: 'Weapon', shield: 'Shield', helmet: 'Helmet',
       bodyArmor: 'Armor', gloves: 'Gloves', boots: 'Boots',
-      ring: 'Ring', amulet: 'Amulet', pet: 'Pet'
+      ring: 'Ring', amulet: 'Amulet', pet: 'Pet', mount: 'Mount'
     };
     return labels[slot] || slot;
   }

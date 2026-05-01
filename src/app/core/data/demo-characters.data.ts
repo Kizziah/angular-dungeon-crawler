@@ -39,6 +39,7 @@ const equipment = {
   ring:      item('ring-luck'),
   amulet:    item('amulet-vitality'),
   pet:       item('loyal-dog'),
+  mount:     item('horse'),
 };
 
 // ── Inventory: one of every weapon type not already in the weapon slot ─────────
@@ -57,6 +58,7 @@ const inventoryExtras = [
   'potion-heal-large', 'potion-mana', 'scroll-identify', 'scroll-town-portal',
   'tabby-cat', 'raven', 'coiled-serpent', 'alligator', 'monkey',
   'brown-bear', 'panda-bear', 'boar', 'elephant',
+  'giant-frog',
 ];
 
 const inventory: Item[] = [
