@@ -135,6 +135,13 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   const box = (w: number, h: number, d: number) =>
     new THREE.BoxGeometry(w, h, d);
 
+  // Humanoid body wrapper — rotated 180° so the character faces the same -Z
+  // direction as all pet companions (back toward camera, forward = movement direction).
+  // Pets are added directly to `g` (unrotated) below.
+  const body = new THREE.Group();
+  body.rotation.y = Math.PI;
+  g.add(body);
+
   // ── Armor / skin tones ───────────────────────────────────────────────
   const aTier   = armorTier(eq?.bodyArmor?.definitionId);
   const aColor  = eq?.bodyArmor?.cursed ? 0x220022 : ARMOR_COLORS[aTier];
@@ -172,7 +179,7 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   const hipPivot = new THREE.Group();
   hipPivot.name = 'hipPivot';
   hipPivot.position.set(0, 0.52, 0);
-  g.add(hipPivot);
+  body.add(hipPivot);
   hipPivot.add(wmesh(box(0.32, 0.10, 0.22), bodyMat, 0, 0, 0));
 
   // ── LEGS ─────────────────────────────────────────────────────────────
@@ -211,14 +218,14 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   }
 
   // ── TORSO ────────────────────────────────────────────────────────────
-  g.add(wmesh(box(0.38, 0.08, 0.23), beltMat, 0, 0.52, 0));
-  g.add(wmesh(box(0.08, 0.06, 0.25), buckMat, 0, 0.52, 0));
-  g.add(wmesh(box(0.36, 0.14, 0.23), bodyMat, 0, 0.61, 0));
-  g.add(wmesh(box(0.48, 0.18, 0.26), bodyMat, 0, 0.73, 0));
+  body.add(wmesh(box(0.38, 0.08, 0.23), beltMat, 0, 0.52, 0));
+  body.add(wmesh(box(0.08, 0.06, 0.25), buckMat, 0, 0.52, 0));
+  body.add(wmesh(box(0.36, 0.14, 0.23), bodyMat, 0, 0.61, 0));
+  body.add(wmesh(box(0.48, 0.18, 0.26), bodyMat, 0, 0.73, 0));
   if (aTier === 'plate') {
     const pCol = eq?.bodyArmor?.cursed ? 0x330033 : 0x9aaac0;
-    g.add(wmesh(box(0.28, 0.16, 0.28), lam(pCol, 0.20, 0.85), 0, 0.73, 0));
-    g.add(wmesh(box(0.22, 0.10, 0.25), lam(pCol, 0.20, 0.85), 0, 0.61, 0));
+    body.add(wmesh(box(0.28, 0.16, 0.28), lam(pCol, 0.20, 0.85), 0, 0.73, 0));
+    body.add(wmesh(box(0.22, 0.10, 0.25), lam(pCol, 0.20, 0.85), 0, 0.61, 0));
   }
 
   // ── PAULDRONS ────────────────────────────────────────────────────────
@@ -228,18 +235,18 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
                : aTier === 'plate'      ? 0x9aaac0
                : aColor;
     for (const sx of [-1, 1]) {
-      g.add(wmesh(box(pSz, 0.10, pSz * 0.85), lam(pCol, aRough, aMetal), sx * 0.28, 0.80, 0));
+      body.add(wmesh(box(pSz, 0.10, pSz * 0.85), lam(pCol, aRough, aMetal), sx * 0.28, 0.80, 0));
     }
   }
 
   // ── NECK ─────────────────────────────────────────────────────────────
-  g.add(wmesh(cyl(0.06, 0.055, 0.07, 6),
+  body.add(wmesh(cyl(0.06, 0.055, 0.07, 6),
     lam(hTier === 'none' ? skin : aColor, hTier === 'none' ? 0.82 : aRough, hTier === 'none' ? 0.0 : aMetal), 0, 0.85, 0));
 
   // ── HEAD ─────────────────────────────────────────────────────────────
   const headGrp = new THREE.Group();
   headGrp.position.set(0, 0.96, 0);
-  g.add(headGrp);
+  body.add(headGrp);
 
   headGrp.add(wmesh(box(0.30, 0.28, 0.27), helmMat, 0, 0, 0));
 
@@ -272,7 +279,7 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
     const shoulder = new THREE.Group();
     shoulder.name = side === -1 ? 'shoulderL' : 'shoulderR';
     shoulder.position.set(side * 0.27, 0.79, 0);
-    g.add(shoulder);
+    body.add(shoulder);
     if (side === -1) shoulderL = shoulder;
     else             shoulderR = shoulder;
 
@@ -317,7 +324,7 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
     elbowL.add(sm);
   }
 
-  g.traverse(child => {
+  body.traverse(child => {
     if (child instanceof THREE.Mesh) child.castShadow = true;
   });
 
