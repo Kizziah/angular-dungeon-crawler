@@ -348,10 +348,10 @@ export function buildCharacterGeometry(g: THREE.Group, eq: Equipment | null): Ch
   const mountCursed = eq?.mount?.cursed ?? false;
   let mountJoints: Partial<CharacterJoints> = {};
   if (mountId === 'horse') {
-    body.position.y = 1.25;
+    body.position.y = 0.75;
     mountJoints = buildHorseMesh(g, mountCursed);
   } else if (mountId === 'giant-frog') {
-    body.position.y = 0.85;
+    body.position.y = 0.35;
     mountJoints = buildGiantFrogMesh(g, mountCursed);
   }
 
