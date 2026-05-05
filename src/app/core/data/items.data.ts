@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { ItemType, ItemStats } from '../models/item.model';
 import { wmesh, lam, bladeMat } from '../../features/dungeon/mesh-utils';
+import { SwordOfFire } from './sword-of-fire';
+import { BladeOfIce } from './blade-of-ice';
 
 export interface ItemDef {
   id: string;
@@ -256,12 +258,12 @@ export const ITEMS: ItemDef[] = [
   {
     id: 'sword-of-fire', name: 'Sword of Fire', unidentifiedName: 'Flaming Blade', type: 'Weapon',
     stats: { attack: 2, damage: '1d8' }, cursed: false, value: 3000, usable: false, floorMin: 20, floorMax: 99,
-    makeMesh: () => makeSwordMesh({ fire: true }),
+    makeMesh: () => new SwordOfFire(),
   },
   {
     id: 'blade-of-ice', name: 'Blade of Ice', unidentifiedName: 'Frost Blade', type: 'Weapon',
     stats: { attack: 2, damage: '1d8' }, cursed: false, value: 3000, usable: false, floorMin: 20, floorMax: 99,
-    makeMesh: () => makeSwordMesh({ ice: true }),
+    makeMesh: () => new BladeOfIce(),
   },
   {
     id: 'holy-avenger', name: 'Holy Avenger', unidentifiedName: 'Radiant Sword', type: 'Weapon',

@@ -169,11 +169,19 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   private orbitActive    = false;
   private orbitLastX     = 0;
   private orbitLastY     = 0;
+
+  // Camera zoom state (FOV-based; default 75°, range 20°–100°)
+  private readonly FOV_DEFAULT = 75;
+  private readonly FOV_MIN     = 20;
+  private readonly FOV_MAX     = 100;
+  private camFov = 75;
+
   // Bound handlers stored so they can be removed in ngOnDestroy
   private readonly _onPointerDown = (e: PointerEvent) => this.onOrbitPointerDown(e);
   private readonly _onPointerMove = (e: PointerEvent) => this.onOrbitPointerMove(e);
   private readonly _onPointerUp   = (e: PointerEvent) => this.onOrbitPointerUp(e);
   private readonly _onDblClick    = () => this.resetOrbit();
+  private readonly _onWheel       = (e: WheelEvent)   => this.onZoomWheel(e);
 
   constructor(private ngZone: NgZone) {}
 
@@ -193,6 +201,7 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     canvas.addEventListener('pointerup',   this._onPointerUp);
     canvas.addEventListener('pointerleave', this._onPointerUp);
     canvas.addEventListener('dblclick',    this._onDblClick);
+    canvas.addEventListener('wheel',       this._onWheel, { passive: false });
     canvas.style.cursor = 'grab';
   }
 
@@ -242,6 +251,7 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
       canvas.removeEventListener('pointerup',   this._onPointerUp);
       canvas.removeEventListener('pointerleave', this._onPointerUp);
       canvas.removeEventListener('dblclick',    this._onDblClick);
+      canvas.removeEventListener('wheel',       this._onWheel);
     }
 
     for (let i = (this.enemyGroup?.children.length ?? 0) - 1; i >= 0; i--) {
@@ -263,6 +273,8 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
     if (e.key === 'z' || e.key === 'Z') {
       this.pendingAttack = true;
     }
+    if (e.key === '+' || e.key === '=') { this.applyZoom(-5); }
+    if (e.key === '-' || e.key === '_') { this.applyZoom(+5); }
   }
 
   // ─── Mouse-orbit handlers ─────────────────────────────────────────────────
@@ -301,6 +313,20 @@ export class FirstPersonViewComponent implements AfterViewInit, OnChanges, OnDes
   resetOrbit(): void {
     this.camYawOffset   = 0;
     this.camPitchOffset = 0;
+    this.applyZoom(0, true);
+  }
+
+  private onZoomWheel(e: WheelEvent): void {
+    e.preventDefault();
+    this.applyZoom(e.deltaY * 0.05);
+  }
+
+  private applyZoom(delta: number, reset = false): void {
+    this.camFov = reset
+      ? this.FOV_DEFAULT
+      : Math.max(this.FOV_MIN, Math.min(this.FOV_MAX, this.camFov + delta));
+    this.camera.fov = this.camFov;
+    this.camera.updateProjectionMatrix();
   }
 
   // ─── Three.js setup ───────────────────────────────────────────────────────
