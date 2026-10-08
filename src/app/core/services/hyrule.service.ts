@@ -100,6 +100,7 @@ export class HyruleService {
       map,
       playerX: HYRULE_START_X,
       playerY: HYRULE_START_Y,
+      direction: 'N',
       inShip: false,
       shipX: null,
       shipY: null,

@@ -22,10 +22,10 @@ $text: #cccccc;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 700px;
+  max-width: 960px;
   padding: 6px 12px;
   border-bottom: 1px solid $border;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 
   .title {
     font-size: 1rem;
@@ -39,62 +39,23 @@ $text: #cccccc;
   }
 }
 
-.overworld-viewport {
-  display: inline-block;
+app-overworld-3d-view {
+  display: block;
   border: 2px solid $border;
-  line-height: 1;
-  user-select: none;
-}
-
-.tile-row {
-  display: flex;
-}
-
-.tile {
-  display: inline-block;
-  width: 1.35ch;
-  height: 1.5em;
-  line-height: 1.5em;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: bold;
-  font-family: 'Courier New', Courier, monospace;
-  white-space: pre;
-  cursor: default;
-}
-
-@keyframes player-pulse {
-  0%, 100% { text-shadow: 0 0 4px #ffdd00, 0 0 8px #ffaa00; }
-  50%       { text-shadow: 0 0 8px #ffffff, 0 0 16px #ffdd00, 0 0 24px #ff8800; }
-}
-
-.player-tile {
-  color: #ffee44 !important;
-  background-color: transparent !important;
-  font-size: 1.25rem !important;
-  animation: player-pulse 1.4s ease-in-out infinite;
-  z-index: 1;
-  position: relative;
+  line-height: 0;
 }
 
 .status-bar {
-  margin-top: 10px;
+  margin-top: 8px;
   height: 1.6em;
   font-size: 0.85rem;
   color: #aaaaaa;
   text-align: center;
   width: 100%;
-  max-width: 700px;
+  max-width: 960px;
 
-  .status-msg {
-    color: #ffdd88;
-  }
-
-  .controls {
-    color: #666666;
-  }
-
+  .status-msg  { color: #ffdd88; }
+  .controls    { color: #666666; }
   .town-hint   { color: #ffcc00; font-weight: bold; }
-  .dungeon-hint { color: #ff4444; font-weight: bold; }
   .ship-hint   { color: #00ddff; font-weight: bold; }
 }

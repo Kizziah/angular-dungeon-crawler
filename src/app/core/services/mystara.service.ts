@@ -193,6 +193,7 @@ export class MystaraService {
       map: this.map,
       playerX: MYSTARA_START_X,
       playerY: MYSTARA_START_Y,
+      direction: 'N',
       inShip: false,
       shipX: null,
       shipY: null,

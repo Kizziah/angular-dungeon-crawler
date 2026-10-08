@@ -30,6 +30,7 @@ export interface OverworldState {
   map: OverworldCell[][];
   playerX: number;
   playerY: number;
+  direction: 'N' | 'S' | 'E' | 'W';
   inShip: boolean;
   shipX: number | null;  // where the ship was left (if player disembarked)
   shipY: number | null;

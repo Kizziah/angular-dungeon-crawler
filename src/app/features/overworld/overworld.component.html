@@ -6,16 +6,13 @@
     </span>
   </div>
 
-  <div class="overworld-viewport" *ngIf="viewport()">
-    <div class="tile-row" *ngFor="let row of viewport()!.cells; let vy = index">
-      <span
-        class="tile"
-        [class.player-tile]="vx === playerVPX() && vy === playerVPY()"
-        *ngFor="let cell of row; let vx = index"
-        [ngStyle]="cellStyle(cell, vx, vy)"
-      >{{ cellChar(cell, vx, vy) }}</span>
-    </div>
-  </div>
+  <app-overworld-3d-view
+    *ngIf="viewport()"
+    [cells]="viewport()!.cells"
+    [inShip]="inShip()"
+    [direction]="direction()"
+    [character]="activeCharacter()">
+  </app-overworld-3d-view>
 
   <div class="status-bar">
     <span class="status-msg" *ngIf="statusMsg()">{{ statusMsg() }}</span>

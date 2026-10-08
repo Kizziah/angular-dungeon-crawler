@@ -168,6 +168,7 @@ export class AlefgardService {
       map: this.map,
       playerX: ALEFGARD_START_X,
       playerY: ALEFGARD_START_Y,
+      direction: 'N',
       inShip: false,
       shipX: null,
       shipY: null,

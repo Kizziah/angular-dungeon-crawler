@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GameStateService } from '../../core/services/game-state.service';
 import { OverworldService } from '../../core/services/overworld.service';
-import { TILE_RENDER, OverworldCell } from '../../core/models/overworld.model';
+import { OverworldViewComponent } from './overworld-3d-view.component';
 
 const VP_W = 21;
 const VP_H = 15;
@@ -11,7 +11,7 @@ const VP_H = 15;
 @Component({
   selector: 'app-overworld',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, OverworldViewComponent],
   templateUrl: './overworld.component.html',
   styleUrls: ['./overworld.component.scss']
 })
@@ -23,52 +23,75 @@ export class OverworldComponent implements OnInit, OnDestroy {
   statusMsg = signal('');
   private statusTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  readonly VP_W = VP_W;
-  readonly VP_H = VP_H;
-  readonly TILE_RENDER = TILE_RENDER;
-
   get state() { return this.gameState.overworldState(); }
-
-  inShip = computed(() => this.gameState.overworldState()?.inShip ?? false);
-
+  inShip  = computed(() => this.gameState.overworldState()?.inShip ?? false);
+  direction = computed(() => this.gameState.overworldState()?.direction ?? 'N');
+  activeCharacter = computed(() => this.gameState.activeParty()[0] ?? null);
   viewport = computed(() => {
     const s = this.gameState.overworldState();
-    if (!s) return null;
-    return this.overworldService.getViewport(s, VP_W, VP_H);
+    return s ? this.overworldService.getViewport(s, VP_W, VP_H) : null;
   });
-
-  playerVPX = computed(() => Math.floor(VP_W / 2));
-  playerVPY = computed(() => Math.floor(VP_H / 2));
 
   ngOnInit(): void {
     if (!this.gameState.overworldState()) {
       this.gameState.overworldState.set(this.overworldService.initOverworld());
     }
-    this.setStatus('⚔️  You step onto the overworld. Use arrows or WASD to move.');
+    this.setStatus('⚔️  You step onto the overworld. W/S = forward/back, A/D = turn.');
   }
 
   ngOnDestroy(): void {
     if (this.statusTimeout) clearTimeout(this.statusTimeout);
   }
 
+  // ── Direction tables (mirrors dungeon component) ─────────────────────────
+  private static readonly FORWARD: Record<string, [number, number]> = {
+    N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0]
+  };
+  private static readonly TURN_LEFT: Record<string, 'N' | 'S' | 'E' | 'W'> = {
+    N: 'W', W: 'S', S: 'E', E: 'N'
+  };
+  private static readonly TURN_RIGHT: Record<string, 'N' | 'S' | 'E' | 'W'> = {
+    N: 'E', E: 'S', S: 'W', W: 'N'
+  };
+
   @HostListener('window:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
     const tag = (e.target as HTMLElement)?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-    let dx = 0, dy = 0;
+    const facing = (this.gameState.overworldState()?.direction ?? 'N') as 'N' | 'S' | 'E' | 'W';
     switch (e.key) {
-      case 'ArrowUp':    case 'w': case 'W': dy = -1; break;
-      case 'ArrowDown':  case 's': case 'S': dy =  1; break;
-      case 'ArrowLeft':  case 'a': case 'A': dx = -1; break;
-      case 'ArrowRight': case 'd': case 'D': dx =  1; break;
+      case 'ArrowUp':    case 'w': case 'W': {
+        e.preventDefault();
+        const [dx, dy] = OverworldComponent.FORWARD[facing];
+        this.step(dx, dy);
+        break;
+      }
+      case 'ArrowDown':  case 's': case 'S': {
+        e.preventDefault();
+        const [dx, dy] = OverworldComponent.FORWARD[facing];
+        this.step(-dx, -dy);
+        break;
+      }
+      case 'ArrowLeft':  case 'a': case 'A':
+        e.preventDefault();
+        this.turn(OverworldComponent.TURN_LEFT[facing]);
+        break;
+      case 'ArrowRight': case 'd': case 'D':
+        e.preventDefault();
+        this.turn(OverworldComponent.TURN_RIGHT[facing]);
+        break;
       case 'Escape': this.router.navigate(['/guild']); return;
       case 'm': case 'M': this.router.navigate(['/worldmap']); return;
       default: return;
     }
+  }
 
-    e.preventDefault();
-    this.step(dx, dy);
+  private turn(newDir: 'N' | 'S' | 'E' | 'W'): void {
+    const s = this.gameState.overworldState();
+    if (!s) return;
+    s.direction = newDir;
+    this.gameState.overworldState.set({ ...s });
   }
 
   private step(dx: number, dy: number): void {
@@ -151,28 +174,5 @@ export class OverworldComponent implements OnInit, OnDestroy {
   private clearStatus(): void {
     if (this.statusTimeout) clearTimeout(this.statusTimeout);
     this.statusMsg.set('');
-  }
-
-  readonly OOB_CELL: OverworldCell = { type: 'ocean', visited: true, passable: false };
-
-  cellStyle(cell: OverworldCell | null, vpX: number, vpY: number): Record<string, string> {
-    const isPlayer = vpX === this.playerVPX() && vpY === this.playerVPY();
-    if (isPlayer) {
-      // Let CSS handle player color/glow; just set a subtle background
-      const bg = this.inShip() ? '#001a33' : '#1a1400';
-      return { 'background-color': bg };
-    }
-
-    const c = cell ?? this.OOB_CELL;
-    const r = TILE_RENDER[c.type];
-    return { color: r.color, 'background-color': r.bg ?? '#000000' };
-  }
-
-  cellChar(cell: OverworldCell | null, vpX: number, vpY: number): string {
-    if (vpX === this.playerVPX() && vpY === this.playerVPY()) {
-      return this.inShip() ? '⛵' : '☺';
-    }
-    const c = cell ?? this.OOB_CELL;
-    return TILE_RENDER[c.type].char;
   }
 }

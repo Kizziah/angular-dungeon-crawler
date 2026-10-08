@@ -71,6 +71,7 @@ export class OverworldService {
     const map = this.buildMap();
     const state: OverworldState = {
       map, playerX: OVERWORLD_START_X, playerY: OVERWORLD_START_Y,
+      direction: 'N',
       inShip: false, shipX: null, shipY: null
     };
     this.revealAround(state, OVERWORLD_START_X, OVERWORLD_START_Y);
@@ -94,6 +95,10 @@ export class OverworldService {
 
     state.playerX = nx;
     state.playerY = ny;
+    if (dx === 1)  state.direction = 'E';
+    else if (dx === -1) state.direction = 'W';
+    else if (dy === -1) state.direction = 'N';
+    else if (dy === 1)  state.direction = 'S';
     this.revealAround(state, nx, ny);
     cell.visited = true;
 
